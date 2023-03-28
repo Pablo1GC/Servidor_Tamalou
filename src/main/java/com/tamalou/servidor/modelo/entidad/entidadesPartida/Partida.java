@@ -1,4 +1,4 @@
-package com.tamalou.servidor.modelo.entidad;
+package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
 
 import java.util.List;
@@ -7,8 +7,6 @@ import java.util.List;
  * Es la clase encargada de gestionar una partida
  */
 public class Partida {
-    private static final int NUMERO_MAXIMO_RONDAS = 10;
-    private static final int PUNTOS_MAXIMOS = 100;
 
     private final int numeroMaximoRondas;
     private final int puntosMaximos;
@@ -16,7 +14,6 @@ public class Partida {
     private int rondaActual;
     private boolean terminada;
     private Jugador ganador;
-    private Mazo mazo;
 
     /**
      * Cuando se crea el objeto crea una partida basado en los parámetros que recibe
@@ -33,19 +30,16 @@ public class Partida {
     }
 
     /**
+     * Es el método que comienza la partida.
      * Comprueba si se debe jugar una ronda mas en la partida y en caso de que
      * se deba jugar, agregaria una nueva ronda a la partida
      * @return Devuelve el jugador que haya ganado la partida
      */
-    public Jugador jugar() {
-        if (terminada) {
-            System.out.println("La partida ya ha terminado.");
-            return ganador;
-        }
+    public Jugador jugarPartida() {
 
         while (!terminada) {
-            Ronda ronda = new Ronda(jugadores, mazo);
-            ronda.jugar();
+            Ronda ronda = new Ronda(jugadores);
+            ronda.jugarRonda();
             rondaActual++;
 
             if (rondaActual >= numeroMaximoRondas || hayGanador()) {
@@ -59,7 +53,7 @@ public class Partida {
     }
 
     /**
-     * Comprueba si hay algun ganador en el stack de jugadores
+     * Comprueba si hay algun ganador entre la lista de jugadores.
      * @return True en caso de que haya un jugador ganador, sobrepasando los puntos maximos
      * @return False en caso de que no haya ningun jugador que haya alcanzado los puntos maximos
      */

@@ -1,7 +1,5 @@
-package com.tamalou.servidor.modelo.entidad;
+package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -9,23 +7,55 @@ public class Ronda {
     private List<Jugador> jugadores;
     private Mazo mazo;
     private Stack<Carta> monton;
-    private int numTurnos;
+    private boolean terminarRonda;
     private int turnoActual;
 
     /**
      * Cuando se instancia un objeto se inicia una nueva ronda
      * @param jugadores
-     * @param mazo
      */
-    public Ronda(List<Jugador> jugadores, Mazo mazo) {
+    public Ronda(List<Jugador> jugadores) {
         this.jugadores = jugadores;
-        this.mazo = mazo;
+        this.mazo = new Mazo();
         this.monton = new Stack<>();
-        this.numTurnos = 5;
         this.turnoActual = 0;
+        this.terminarRonda = false;
     }
 
+    /**
+     * Es el método que comienza la ronda.
+     * Primero baraja el mazo.
+     * Entrega cuatro cartas a cada jugador.
+     * Los jugadores realizan cada turno hasta terminar la ronda.
+     */
+    public void jugarRonda() {
+        mazo.barajar();
+        for (Jugador jugador : jugadores) {
+            for (int i = 0; i < 4; i++) {
+                jugador.recibirCarta(mazo.tomarCarta());
+            }
+        }
 
+        while (!terminarRonda) {
+            // Si alguien se ha descartado de todas las cartas, termina la ronda
+            for (Jugador jugador : jugadores) {
+                // Empieza el turno del jugador
+                Boolean plantarse = jugador.jugarTurno(turnoActual);
+
+                if(plantarse = true){
+                    terminarRonda();
+                }
+
+                // Si algún jugador se queda sin cartas se acaba la ronda.
+                if (jugador.getCartas().size() == 0) {
+                    terminarRonda();
+                }
+
+            }
+            turnoActual++;
+        }
+
+    }
 
     public List<Carta> getMonton() {
         return monton;
@@ -33,6 +63,7 @@ public class Ronda {
 
     /**
      * Agrega la carta pasada por parametro monton de cartas descartadas
+     *
      * @param carta Es la carta a descartar
      */
     public void addCartaMonton(Carta carta) {
@@ -44,8 +75,9 @@ public class Ronda {
      * de la variable monton de tipo Stack que hace alusión a las cartas descartadas,
      * en caso de que sea igual la carta se descartará y en el caso contrario
      * el jugador sera penalizado con 5 puntos
+     *
      * @param jugador Es el jugador que descartará la acrta
-     * @param carta La carta a descartar
+     * @param carta   La carta a descartar
      */
     public void descartarCartaJugador(Jugador jugador, Carta carta) {
         if (carta.getValor() == monton.lastElement().getValor()) {
@@ -56,32 +88,10 @@ public class Ronda {
         }
     }
 
-    /**
-     *
-     */
-    public void jugar() {
-
-
-        // Si alguien se ha descartado de todas las cartas, termina la ronda
-        for (Jugador jugador : jugadores) {
-            if (jugador.getCartas().size() == 0) {
-                terminarRonda();
-                return;
-            }
-        }
-
-        // Si nadie se ha descartado de todas las cartas, se permite a cualquier jugador plantarse
-        System.out.println("Cualquier jugador puede plantarse durante su turno...");
-        for (Jugador jugador : jugadores) {
-            jugador.sePlanta();
-        }
-
-    }
 
     public void terminarRonda() {
-
+        terminarRonda = true;
     }
-
 
 
     public Mazo getMazo() {

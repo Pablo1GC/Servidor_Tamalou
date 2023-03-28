@@ -1,4 +1,4 @@
-package com.tamalou.servidor.modelo.entidad;
+package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
 import java.util.Collections;
 import java.util.Stack;

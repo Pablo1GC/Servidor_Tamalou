@@ -1,5 +1,8 @@
-package com.tamalou.servidor.modelo.entidad;
+package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
+/**
+ * Es la clase que representa una carta
+ */
 public class Carta {
     private int valor;
     private String palo;
