@@ -23,6 +23,39 @@ public class Friendship {
     @Column(name = "status")
     private FriendshipStatus status;
 
+
     // Getters and setters, constructors, etc.
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public User getSender() {
+        return sender;
+    }
+
+    public void setSender(User sender) {
+        this.sender = sender;
+    }
+
+    public User getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(User receiver) {
+        this.receiver = receiver;
+    }
+
+    public FriendshipStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(FriendshipStatus status) {
+        this.status = status;
+    }
 }
 
