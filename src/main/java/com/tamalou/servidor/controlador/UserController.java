@@ -1,5 +1,6 @@
 package com.tamalou.servidor.controlador;
 
+import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Friendship;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
 import com.tamalou.servidor.modelo.persistencia.UserRepository;
@@ -9,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -67,6 +69,21 @@ public class UserController {
         } else {
             return new ResponseEntity<>(user, HttpStatus.CONFLICT);
         }
+    }
+
+    @GetMapping(path = "/{uid}/friends", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<User>> getFriendsByUserId(@PathVariable String uid) {
+        List<Friendship> friendships = friendshipRepository.findBySenderUid(uid);
+        List<User> friends = new ArrayList<>();
+        for (Friendship friendship : friendships) {
+            User friend = friendship.getReceiver();
+            if (friend.getUid().equals(uid)) {
+                friend = friendship.getSender();
+            }
+            friend.setEmail(null);
+            friends.add(friend);
+        }
+        return ResponseEntity.ok(friends);
     }
 
 }

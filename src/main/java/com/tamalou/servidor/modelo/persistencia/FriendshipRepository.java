@@ -42,4 +42,15 @@ public class FriendshipRepository {
                 .getResultList();
     }
 
+    public List<Friendship> findBySenderUid(String senderUid) {
+        return entityManager.createQuery("SELECT f FROM Friendship f WHERE f.sender.uid = :senderUid", Friendship.class)
+                .setParameter("senderUid", senderUid)
+                .getResultList();
+    }
+
+    public List<Friendship> findByReceiverUid(String receiverUid) {
+        return entityManager.createQuery("SELECT f FROM Friendship f WHERE f.receiver.uid = :receiverUid", Friendship.class)
+                .setParameter("receiverUid", receiverUid)
+                .getResultList();
+    }
 }
