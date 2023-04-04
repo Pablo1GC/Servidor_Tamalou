@@ -8,7 +8,7 @@ public class User {
 
     @Id
     @Column(name = "uid")
-    private String id;
+    private String uid;
 
     @Column(name = "email")
     private String email;
@@ -20,12 +20,12 @@ public class User {
     @Column(name = "image")
     private byte[] image;
 
-    public String getId() {
-        return id;
+    public String getUid() {
+        return uid;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setUid(String id) {
+        this.uid = id;
     }
 
     public String getEmail() {

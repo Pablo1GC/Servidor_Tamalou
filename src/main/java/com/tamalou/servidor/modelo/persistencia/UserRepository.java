@@ -1,9 +1,9 @@
 package com.tamalou.servidor.modelo.persistencia;
 
+import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import org.apache.catalina.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
