@@ -21,12 +21,12 @@ public class FriendshipController {
         this.friendshipRepository = friendshipRepository;
     }
 
-    @GetMapping(value = "/friendship", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping( produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Friendship>> getAllFriendships() {
         return new ResponseEntity<>(friendshipRepository.findAll(), HttpStatus.FOUND);
     }
 
-    @GetMapping(path = "/friendship/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Friendship> getFriendshipById(@PathVariable Long id) {
         Friendship friendship = friendshipRepository.findById(id);
         if (friendship != null) {
@@ -38,7 +38,6 @@ public class FriendshipController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Friendship> createFriendship(@RequestBody Friendship friendship) {
         try {
             friendshipRepository.save(friendship);
@@ -50,7 +49,7 @@ public class FriendshipController {
         }
     }
 
-    @PutMapping(path = "/friendship/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> updateFriendship(@PathVariable Long id, @RequestBody Friendship friendship) {
         Friendship existingFriendship = friendshipRepository.findById(id);
         if (existingFriendship != null) {
@@ -62,7 +61,7 @@ public class FriendshipController {
         }
     }
 
-    @DeleteMapping(path = "/friendship/{id}")
+    @DeleteMapping(path = "/{id}")
     public ResponseEntity<Friendship> deleteFriendship(@PathVariable Long id) {
         Friendship friendship = friendshipRepository.findById(id);
         if (friendship != null) {
