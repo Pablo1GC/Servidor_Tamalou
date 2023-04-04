@@ -42,7 +42,7 @@ public class UserController {
             userRepository.save(user);
             return new ResponseEntity<>(user, HttpStatus.CREATED);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         }
@@ -83,7 +83,7 @@ public class UserController {
             friend.setEmail(null);
             friends.add(friend);
         }
-        return ResponseEntity.ok(friends);
+        return new ResponseEntity<>(friends, HttpStatus.OK);
     }
 
 }
