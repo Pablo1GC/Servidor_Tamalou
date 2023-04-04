@@ -36,4 +36,10 @@ public class FriendshipRepository {
         entityManager.remove(entityManager.contains(friendship) ? friendship : entityManager.merge(friendship));
     }
 
+    public List<Friendship> findByUserId(Long userId) {
+        return entityManager.createQuery("SELECT f FROM Friendship f WHERE f.sender = :userId", Friendship.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
+
 }

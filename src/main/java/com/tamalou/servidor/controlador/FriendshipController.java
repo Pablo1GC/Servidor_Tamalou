@@ -26,6 +26,16 @@ public class FriendshipController {
         return new ResponseEntity<>(friendshipRepository.findAll(), HttpStatus.FOUND);
     }
 
+    @GetMapping(path = "/{userId}/friendships", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Friendship>> getFriendshipsByUserId(@PathVariable Long userId) {
+        List<Friendship> friendships = friendshipRepository.findByUserId(userId);
+        if (friendships.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.FOUND);
+        }
+        return new ResponseEntity<>(friendships, HttpStatus.FOUND);
+    }
+
+
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Friendship> getFriendshipById(@PathVariable Long id) {
         Friendship friendship = friendshipRepository.findById(id);
