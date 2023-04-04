@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.print.attribute.standard.Media;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class CustomRestController {
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
-    @GetMapping(value = "/users")
+    @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Usuario>> addUser() {
         List<Usuario> users = new ArrayList<>();
         users.add(new Usuario());
