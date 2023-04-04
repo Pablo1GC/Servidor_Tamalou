@@ -1,7 +1,15 @@
 package com.tamalou.servidor.modelo.entidad.entidadesUsuario;
 
 import jakarta.persistence.*;
-
+/**
+ * Represents a friendship entity in the application.
+ *
+ * This class is an entity mapped to the "friendship" table in the database.
+ * It represents the friendship between two users of the app, where one user
+ * sends a friend request and the other user can accept, reject, or the request
+ * can be pending. It contains information about the unique identifier of the
+ * friendship, the sender and receiver users, and the status of the friendship.
+ */
 @Entity
 @Table(name = "friendship")
 public class Friendship {

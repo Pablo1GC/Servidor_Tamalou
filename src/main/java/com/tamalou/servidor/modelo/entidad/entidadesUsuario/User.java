@@ -1,7 +1,13 @@
 package com.tamalou.servidor.modelo.entidad.entidadesUsuario;
 
 import jakarta.persistence.*;
-
+/**
+ * Represents a user entity in the application.
+ *
+ * This class is an entity mapped to the "user" table in the database.
+ * It contains information about a user, such as their unique identifier,
+ * email, username, and profile image.
+ */
 @Entity
 @Table(name = "user")
 public class User {

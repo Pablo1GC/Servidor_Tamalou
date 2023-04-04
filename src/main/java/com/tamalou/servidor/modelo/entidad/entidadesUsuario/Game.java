@@ -1,7 +1,13 @@
 package com.tamalou.servidor.modelo.entidad.entidadesUsuario;
 
 import jakarta.persistence.*;
-
+/**
+ * Represents a game entity in the application.
+ *
+ * This class is an entity mapped to the "game" table in the database.
+ * It contains information about a game, such as its unique identifier,
+ * number of rounds, and associated players.
+ */
 @Entity
 @Table(name = "game")
 public class Game {
