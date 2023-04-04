@@ -1,6 +1,6 @@
 package com.tamalou.servidor.controlador;
 
-import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Usuario;
+import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.print.attribute.standard.Media;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,15 +16,15 @@ import java.util.List;
 public class CustomRestController {
 
     @PostMapping(value = "/users", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Usuario> addUser(@RequestBody Usuario user) {
+    public ResponseEntity<User> addUser(@RequestBody User user) {
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Usuario>> addUser() {
-        List<Usuario> users = new ArrayList<>();
-        users.add(new Usuario());
-        users.add(new Usuario());
+    public ResponseEntity<List<User>> addUser() {
+        List<User> users = new ArrayList<>();
+        users.add(new User());
+        users.add(new User());
         users.get(0).setUsername("Franco");
         users.get(0).setUsername("Brian");
 

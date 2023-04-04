@@ -4,11 +4,11 @@
 DROP TABLE IF EXISTS game_player;
 DROP TABLE IF EXISTS friendship;
 DROP TABLE IF EXISTS game;
-DROP TABLE IF EXISTS player;
+DROP TABLE IF EXISTS user;
 
 -- Each table has its own set of columns and relationships to other tables.
 
-CREATE TABLE player (
+CREATE TABLE user (
                         email VARCHAR(255),
                         username VARCHAR(255),
                         uid VARCHAR(255) PRIMARY KEY,
@@ -22,8 +22,8 @@ CREATE TABLE friendship (
                             sender VARCHAR(255),
                             receiver VARCHAR(255),
                             status ENUM('pending', 'accepted', 'rejected') NOT NULL DEFAULT 'pending',
-                            FOREIGN KEY (sender) REFERENCES player(uid),
-                            FOREIGN KEY (receiver) REFERENCES player(uid)
+                            FOREIGN KEY (sender) REFERENCES user(uid),
+                            FOREIGN KEY (receiver) REFERENCES user(uid)
 );
 
 -- The friendship table represents a many-to-many relationship between players. It includes an ID, the unique IDs of the players sending and receiving the friend request, and the status of the request (pending, accepted, or rejected).
@@ -42,14 +42,14 @@ CREATE TABLE game_player (
                              winner BOOLEAN,
                              PRIMARY KEY (id_game, id_user),
                              FOREIGN KEY (id_game) REFERENCES game(id_game),
-                             FOREIGN KEY (id_user) REFERENCES player(uid)
+                             FOREIGN KEY (id_user) REFERENCES user(uid)
 );
 
 -- The game_player table represents a many-to-many relationship between games and players. It includes the unique IDs of the game and player, the player's score, and whether or not they were the winner.
 
 
 -- INSERT INTO player table
-INSERT INTO player (email, username, uid, image) VALUES
+INSERT INTO user (email, username, uid, image) VALUES
                                                      ('john@example.com', 'johndoe', '123456', NULL),
                                                      ('jane@example.com', 'janedoe', '789012', NULL),
                                                      ('bob@example.com', 'bobsmith', '345678', NULL),
