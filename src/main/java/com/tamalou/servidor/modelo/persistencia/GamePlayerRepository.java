@@ -79,5 +79,26 @@ public class GamePlayerRepository {
             entityManager.remove(gamePlayer);
         }
     }
+
+    /**
+     * Retrieves a list of GamePlayer objects based on the given game ID.
+     *
+     * @param gameId The ID of the game.
+     * @return A List of GamePlayer objects that match the given game ID.
+     */
+    /**
+     * Retrieves a list of GamePlayer entities from the database by the given gameId.
+     *
+     * @param gameId The gameId to be used for retrieving GamePlayer entities.
+     * @return A list of GamePlayer entities with the given gameId.
+     */
+    public List<GamePlayer> findByGameId(long gameId) {
+        String query = "SELECT gp FROM GamePlayer gp WHERE gp.id.gameId = :gameId";
+        TypedQuery<GamePlayer> queryResult = entityManager.createQuery(query, GamePlayer.class);
+        queryResult.setParameter("gameId", gameId);
+        return queryResult.getResultList();
+    }
+
+
 }
 

@@ -1,5 +1,6 @@
 package com.tamalou.servidor.controlador;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Friendship;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
@@ -12,9 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-/**
 
- The UserController class is responsible for handling HTTP requests related to users and friendships.
+/**
+ * The UserController class is responsible for handling HTTP requests related to users and friendships.
  */
 @RestController
 @RequestMapping("/users")
@@ -58,7 +59,7 @@ public class UserController {
      * @param id The ID of the user to retrieve.
      * @return A ResponseEntity containing the user or a HttpStatus NOT_FOUND if the user does not exist.
      */
-    @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<User> getUserById(@PathVariable String id) {
         User user = userRepository.findById(id);
         if (user != null) {
@@ -93,7 +94,7 @@ public class UserController {
      * @param user The updated user object.
      * @return A ResponseEntity containing the updated user or a HttpStatus NOT_FOUND if the user does not exist.
      */
-    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody User user) {
         User existingUser = userRepository.findById(id);
         if (existingUser != null) {
@@ -111,7 +112,7 @@ public class UserController {
      * @param id The ID of the User to be deleted.
      * @return ResponseEntity<User> The deleted User with HttpStatus GONE if successful, or HttpStatus CONFLICT if User not found.
      */
-    @DeleteMapping(path = "/{id}")
+    @DeleteMapping(value = "/{id}")
     public ResponseEntity<User> deleteUser(@PathVariable String id) {
         User user = userRepository.findById(id);
         if (user != null) {
@@ -128,7 +129,7 @@ public class UserController {
      * @param uid The User ID for which friends need to be retrieved.
      * @return ResponseEntity containing a list of User objects representing the friends of the User.
      */
-    @GetMapping(path = "/{uid}/friends", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{uid}/friends", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<User>> getFriendsByUserId(@PathVariable String uid) {
         List<Friendship> friendships = friendshipRepository.findBySenderUid(uid);
         List<User> friends = new ArrayList<>();
@@ -137,7 +138,6 @@ public class UserController {
             if (friend.getUid().equals(uid)) {
                 friend = friendship.getSender();
             }
-            friend.setEmail(null);
             friends.add(friend);
         }
         return new ResponseEntity<>(friends, HttpStatus.OK);

@@ -21,7 +21,7 @@ CREATE TABLE friendship (
                             id INT PRIMARY KEY AUTO_INCREMENT,
                             sender VARCHAR(255),
                             receiver VARCHAR(255),
-                            status ENUM('pending', 'accepted', 'rejected') NOT NULL DEFAULT 'pending',
+                            status ENUM('PENDING', 'ACCEPTED', 'REJECTED') NOT NULL DEFAULT 'pending',
                             FOREIGN KEY (sender) REFERENCES user(uid),
                             FOREIGN KEY (receiver) REFERENCES user(uid)
 );

@@ -104,5 +104,22 @@ public class GamePlayerController {
         }
     }
 
+    /**
+     * HTTP GET method for getting all game players by game ID.
+     *
+     * @param gameId The ID of the game.
+     * @return List of GamePlayer objects with a HttpStatus.OK status.
+     */
+    @GetMapping(path = "/{gameId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GamePlayer>> getGamePlayerByGameId(@PathVariable long gameId) {
+        List<GamePlayer> gamePlayers = gamePlayerRepository.findByGameId(gameId);
+        if (!gamePlayers.isEmpty()) {
+            return new ResponseEntity<>(gamePlayers, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+
 
 }
