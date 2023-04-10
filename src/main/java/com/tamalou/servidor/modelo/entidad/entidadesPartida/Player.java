@@ -17,6 +17,7 @@ public class Player {
 
     /**
      * Initializes the player with their name, 0 points, and initializes the array of cards they would have in their hand
+     *
      * @param name
      */
     public Player(String name) {
@@ -24,110 +25,75 @@ public class Player {
         this.points = 0;
         this.cards = new ArrayList<>();
         this.endTurn = false;
-
     }
 
     /**
-     * This is the method that starts the player's turn.
-     * @param actualTurn
+     * Allows the player to swap one of his cards with another card of the game.
+     *
+     * @param card
      * @return
      */
-    public Boolean playTurn(int actualTurn) {
-        // Aquí el jugador elige qué hacer en su turno
-        while (!endTurn) {
-            if (actualTurn > 5) {
-                System.out.println("Do you want to end your turn? [Yes/No]");
-                String endTurn = Utilidades.leerCadena();
-                if (endTurn.equals("Yes")) {
-                    return true;
-                }
-
-            }
-
-        }
-        return false;
+    public Card swapCards(Card card) {
+        int cardIndex = selectCard();
+        Card myCard = cards.get(cardIndex);
+        cards.set(cardIndex, card);
+        return myCard;
     }
-
 
     /**
      * Selects the card with which the player will interact
+     *
      * @return Returns the index of the card selected by the player
      */
     public int selectCard() {
-        int cardIndex = Utilidades.leerEntero("¿Qué carta desea seleccionar?");
-        return cardIndex;
+        return Utilidades.leerEntero("Which card you want to choose?");
     }
 
     /**
-     *  Allows the player to see a card
-     *  @param cardIndex is the index of the card we want to see
+     * Allows the player to see a card
+     *
+     * @param cardIndex is the index of the card we want to see
      */
     public void seeCard(int cardIndex) {
-        // Implementar return
-        Card card = cards.get(cardIndex);
-        System.out.println("La carta es " + card);
+        System.out.println(cards.get(cardIndex));
     }
 
     /**
-     *  It is responsible for exchanging two cards with another player
-     *  @param oponent is the player with whom you want to exchange the cards
-     *  @param ownIndexCard is the index of the card that will be exchanged with the opponent passed by parameter
-     *  @param exchangedIndexCard is the index of the opponent's card that the player will receive
+     * It is responsible for exchanging two cards with another player
+     *
+     * @param oponent            is the player with whom you want to exchange the cards
+     * @param ownIndexCard       is the index of the card that will be exchanged with the opponent passed by parameter
+     * @param exchangedIndexCard is the index of the opponent's card that the player will receive
      */
-    public void switchCard(Player oponent, int ownIndexCard, int exchangedIndexCard) {
+    public void switchCardWithOponent(Player oponent, int ownIndexCard, int exchangedIndexCard) {
         cards.set(ownIndexCard, oponent.cards.get(exchangedIndexCard));
         oponent.cards.set(exchangedIndexCard, cards.get(ownIndexCard));
     }
 
     /**
-     *  Is responsible for executing the power of a card depending on its value
-     *  @param card that must be checked for its value to execute the associated power
+     * Gives the option to the player to stand and end the round.
+     *
+     * @return Returns true if the option is "Yes", false if is "No"
      */
-    public void usePower(Card card, Player oponent) {
-        // QUITAR EL SEGUNDO PARAMETRO Y HACER UN METODO PARA SELECCIONAR EL OPONENTE
-        switch (card.getValue()) {
-            case 11: //  (J)
-                seeCard(selectCard());
-                break;
-            case 12: //  (Q)
-                int ownIndexCardQ = selectCard();
-                int exchangedIndexCardQ = oponent.selectCard();
-                switchCard(oponent, ownIndexCardQ, exchangedIndexCardQ);
-                break;
-            case 13: //  (K)
-                int ownIndexCardK = selectCard();
-                int exchangedIndexCardK = oponent.selectCard();
-                seeCard(ownIndexCardK);
-                oponent.seeCard(exchangedIndexCardK);
-                int opcion = Utilidades.leerEntero("¿Deseas intercambiar la carta? (1: Sí, 2: No)");
-                if (opcion == 1) {
-                    switchCard(oponent, ownIndexCardK, exchangedIndexCardK);
-                }
-                break;
-        }
-    }
-
-    /**
-     * @param value
-     * @return
-     */
-    public boolean discardCard(int value) {
-        for (Card card : cards) {
-            if (card.getValue() == value) {
-                return true;
-            }
+    public boolean standRound() {
+        System.out.println("Do you want to stand? [Yes/No]");
+        String endTurn = Utilidades.leerCadena();
+        if (endTurn.equals("Yes")) {
+            return true;
         }
         return false;
     }
 
     /**
-     * @return
+     * Gets a player card
+     *
+     * @return the selected card
      */
-    public boolean endTurn() {
-        return true;
+    public Card getCard() {
+        return cards.get(selectCard());
     }
 
-
+    // Getters and Setters
     public String getName() {
         return name;
     }
