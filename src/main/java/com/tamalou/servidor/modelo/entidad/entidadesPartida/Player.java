@@ -46,7 +46,8 @@ public class Player {
      * @return Returns the index of the card selected by the player
      */
     public int selectCard() {
-        return Utilidades.leerEntero("Which card you want to choose?");
+        System.out.println("Which card you want to choose?");
+        return Utilidades.leerEntero("");
     }
 
     /**

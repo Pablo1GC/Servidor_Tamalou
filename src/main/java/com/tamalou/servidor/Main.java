@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class Main {
 
     public static void main(String[] args) {
-        SpringApplication.run(Main.class, args);
+        // SpringApplication.run(Main.class, args);
         Player player1 = new Player("Jugador1");
         Player player2 = new Player("Jugador2");
         Player player3 = new Player("Jugador3");

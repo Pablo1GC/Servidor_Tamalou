@@ -101,7 +101,7 @@ public class Round {
         switch (option = Utilidades.leerEntero("")) {
             case 1:
                 Card card = deck.takeCard();
-                card.toString();
+                System.out.println(card.toString());
 
                 //Select an option2
                 System.out.println("What do you want to do with the card?");
