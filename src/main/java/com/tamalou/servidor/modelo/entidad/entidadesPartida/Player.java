@@ -31,7 +31,6 @@ public class Player {
      * Allows the player to swap one of his cards with another card of the game.
      *
      * @param card
-     * @return
      */
     public Card swapCards(Card card) {
         int cardIndex = selectCard();
@@ -67,13 +66,13 @@ public class Player {
     /**
      * It is responsible for exchanging two cards with another player
      *
-     * @param oponent            is the player with whom you want to exchange the cards
+     * @param opponent            is the player with whom you want to exchange the cards
      * @param ownIndexCard       is the index of the card that will be exchanged with the opponent passed by parameter
      * @param exchangedIndexCard is the index of the opponent's card that the player will receive
      */
-    public void switchCardWithOponent(Player oponent, int ownIndexCard, int exchangedIndexCard) {
-        cards.set(ownIndexCard, oponent.cards.get(exchangedIndexCard));
-        oponent.cards.set(exchangedIndexCard, cards.get(ownIndexCard));
+    public void switchCardWithOponent(Player opponent, int ownIndexCard, int exchangedIndexCard) {
+        cards.set(ownIndexCard, opponent.cards.get(exchangedIndexCard));
+        opponent.cards.set(exchangedIndexCard, cards.get(ownIndexCard));
     }
 
     /**
@@ -87,10 +86,7 @@ public class Player {
             System.out.println("Do you want to stand? [Yes/No]");
             endTurn = Utilidades.leerCadena();
         } while (!endTurn.equals("Yes") && !endTurn.equals("No"));
-        if (endTurn.equals("Yes")) {
-            return true;
-        }
-        return false;
+        return endTurn.equals("Yes");
     }
 
     /**

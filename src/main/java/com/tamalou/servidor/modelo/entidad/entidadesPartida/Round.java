@@ -6,21 +6,21 @@ import java.util.List;
 import java.util.Stack;
 
 public class Round {
-    private List<Player> players;
-    private Deck deck;
-    private Stack<Card> maze;
+    private final List<Player> players;
+    private final Deck deck;
+    private final Stack<Card> discardedCardsDeck;
     private boolean endRound;
     private int actualTurn;
 
     /**
      * When an object is instantiated, a new round is started.
      *
-     * @param players
+     * @param players List of players in the round
      */
     public Round(List<Player> players) {
         this.players = players;
         this.deck = new Deck();
-        this.maze = new Stack<>();
+        this.discardedCardsDeck = new Stack<>();
         this.actualTurn = 6;
         this.endRound = false;
 
@@ -47,10 +47,10 @@ public class Round {
             for (Player player : players) {
                 // The player's turn begins
                 if (deck.checkEmptyDeck()) {
-                    mazeToDeck();
+                    returnDiscardedCardsToDeck();
                 }
 
-                //The last card in the Maze is always show
+                //The last card in the Maze is always shown
                 showLastCardInMaze();
 
                 // If round is above 5, player can stand and end the round.
@@ -79,33 +79,32 @@ public class Round {
     }
 
 
-    private void mazeToDeck() {
-        deck.setCardsDeck(maze);
+    private void returnDiscardedCardsToDeck() {
+        deck.setCardsDeck(discardedCardsDeck);
         deck.shuffleDeck();
-        maze.clear();
-        maze.add(deck.takeCard());
+        discardedCardsDeck.clear();
+        discardedCardsDeck.add(deck.takeCard());
     }
 
 
     /**
-     * Shows the last card in the maze.
+     * Shows the last card in the discarded deck.
      */
     public void showLastCardInMaze() {
-        if (maze.size() == 0) {
+        if (discardedCardsDeck.size() == 0) {
             System.out.println("The maze is empty.");
         } else {
-            System.out.println(maze.lastElement());
+            System.out.println(discardedCardsDeck.lastElement());
         }
     }
 
     /**
      * Player can choose what to do in his turn.
-     *
-     * @param player
+     * @param player Player choosing the option
      */
     public void chooseOptionToPlay(Player player) {
         int option;
-        if (maze.isEmpty()) {
+        if (discardedCardsDeck.isEmpty()) {
             option = 1;
         } else {
             do {
@@ -117,12 +116,11 @@ public class Round {
             } while (option < 1 || option > 3);
         }
         switch (option) {
-            case 1:
+            case 1 -> {
                 Card card = deck.takeCard();
                 System.out.println(card.toString());
                 int option2;
                 int aux = 2;
-
                 do {
                     //Select an option2
                     System.out.println("What do you want to do with the card?");
@@ -137,21 +135,21 @@ public class Round {
 
                 // Execute option2
                 if (option2 == 1) {
-                    maze.add(card);
+                    discardedCardsDeck.add(card);
                 } else if (option2 == 2) {
                     Card cardOfPlayer = player.swapCards(card);
-                    maze.add(cardOfPlayer);
-                } else if (option2 == 3) {
+                    discardedCardsDeck.add(cardOfPlayer);
+                } else {
                     if (card.getValue() == 11) {
                         player.seeCard(player.selectCard());
                     } else if (card.getValue() == 12) {
-                        Player oponent = selectOponent(player);
+                        Player oponent = selectOpponent(player);
                         int ownIndexCard = player.selectCard();
                         int exchangedIndexCard = oponent.selectCard();
                         player.switchCardWithOponent(oponent, ownIndexCard, exchangedIndexCard);
 
                     } else if (card.getValue() == 13) {
-                        Player oponent = selectOponent(player);
+                        Player oponent = selectOpponent(player);
                         int ownIndexCard = player.selectCard();
                         int exchangedIndexCard = oponent.selectCard();
                         player.seeCard(ownIndexCard);
@@ -163,27 +161,23 @@ public class Round {
                         }
                     }
                 }
-                break;
-
-            case 2:
-                discardPlayerCard(player, player.getCard());
-                break;
-
-            case 3:
-                Card cardOfPlayer = player.swapCards(maze.pop());
-                maze.add(cardOfPlayer);
-
+            }
+            case 2 -> discardPlayerCard(player, player.getCard());
+            case 3 -> {
+                Card cardOfPlayer = player.swapCards(discardedCardsDeck.pop());
+                discardedCardsDeck.add(cardOfPlayer);
+            }
         }
 
     }
 
     /**
-     * Allows a player to select an oponent to interact with
+     * Allows a player to select an opponent to interact with
      *
      * @param player who is playing the turn
-     * @return The player choosen as an oponent
+     * @return The player chosen as an opponent
      */
-    public Player selectOponent(Player player) {
+    public Player selectOpponent(Player player) {
         boolean continueGame = false;
         Player oponent = null;
         do {
@@ -213,9 +207,9 @@ public class Round {
      * @param card   The card to discard
      */
     public void discardPlayerCard(Player player, Card card) {
-        if (card.getValue() == maze.lastElement().getValue()) {
+        if (card.getValue() == discardedCardsDeck.lastElement().getValue()) {
             player.getCards().remove(card);
-            maze.add(card);
+            discardedCardsDeck.add(card);
         } else {
             System.out.println("The card does not have the same value, you are penalized with 5 points.");
             player.setPoints(player.getPoints() + 5);
@@ -228,8 +222,8 @@ public class Round {
         return deck;
     }
 
-    public List<Card> getMaze() {
-        return maze;
+    public List<Card> getDiscardedCardsDeck() {
+        return discardedCardsDeck;
     }
 
 
