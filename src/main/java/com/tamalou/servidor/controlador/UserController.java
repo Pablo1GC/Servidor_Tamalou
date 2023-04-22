@@ -1,6 +1,5 @@
 package com.tamalou.servidor.controlador;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Friendship;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
@@ -32,38 +31,28 @@ public class UserController {
     @Autowired
     private FriendshipRepository friendshipRepository;
 
-    /**
-     * HTTP GET method for retrieving a list of all users or users by username.
-     *
-     * @param username (optional) The username to search for.
-     * @return A ResponseEntity containing the list of users or a HttpStatus NOT_FOUND if no users are found.
-     */
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<User>> getAllUsers(@RequestParam(value = "username", required = false) String username) {
-        List<User> users;
-        if (username != null) {
-            users = userRepository.findByUsernameContainingIgnoreCase(username);
-        } else {
-            users = userRepository.findAll();
-        }
-        if (!users.isEmpty()) {
-            return new ResponseEntity<>(users, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
 
     /**
      * HTTP GET method for retrieving a user by ID.
      *
      * @param id The ID of the user to retrieve.
+     * @param token The access token from the fetching user.
      * @return A ResponseEntity containing the user or a HttpStatus NOT_FOUND if the user does not exist.
      */
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<User> getUserById(@PathVariable String id) {
+    public ResponseEntity<User> getUserById(@PathVariable String id,
+                                            @RequestParam(value = "token", required = false) String token) {
         User user = userRepository.findById(id);
         if (user != null) {
-            return new ResponseEntity<>(user, HttpStatus.FOUND);
+
+            // Do not provide too much information if the user
+            // fetching the info doesn't validate its identity.
+            if(token == null ) { // TODO: Validate token
+                user.setEmail(null);
+            }
+
+
+            return new ResponseEntity<>(user, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

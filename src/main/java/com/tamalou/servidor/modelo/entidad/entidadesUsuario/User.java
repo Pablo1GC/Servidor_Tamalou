@@ -1,5 +1,7 @@
 package com.tamalou.servidor.modelo.entidad.entidadesUsuario;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 /**
  * Represents a user entity in the application.
@@ -8,6 +10,7 @@ import jakarta.persistence.*;
  * It contains information about a user, such as their unique identifier,
  * email, username, and profile image.
  */
+@JsonIgnoreProperties({"hibernateLazyInitializer"}) // TODO: Fix image property. This is a workaround to make the server bring a user.
 @Entity
 @Table(name = "user")
 public class User {

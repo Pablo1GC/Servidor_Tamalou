@@ -2,6 +2,7 @@ package com.tamalou.servidor.controlador;
 
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Friendship;
 import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
+import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,16 +32,6 @@ public class FriendshipController {
     }
 
     /**
-     * HTTP GET method for retrieving all Friendships.
-     *
-     * @return A ResponseEntity containing a List of Friendship objects if found, or HttpStatus.NOT_FOUND if not found.
-     */
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Friendship>> getAllFriendships() {
-        return new ResponseEntity<>(friendshipRepository.findAll(), HttpStatus.FOUND);
-    }
-
-    /**
      * HTTP GET method for retrieving a Friendship by ID.
      *
      * @param id The ID of the Friendship to retrieve.
@@ -51,6 +42,27 @@ public class FriendshipController {
         Friendship friendship = friendshipRepository.findById(id);
         if (friendship != null) {
             return new ResponseEntity<>(friendship, HttpStatus.FOUND);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /**
+     * HTTP GET method for retrieving a Friendship by id of both parties.
+     *
+     * @param id1 The ID of the first user.
+     * @param id2 The ID of the second user.
+     * @return A ResponseEntity containing a Friendship object if found, or HttpStatus.NOT_FOUND if not found.
+     */
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Friendship> getFriendshipByUserId(@RequestParam(value = "userId1") Long id1,
+                                                            @RequestParam(value = "userId2") Long id2) {
+        System.out.println("adjoadjowj");
+        Friendship friendship = friendshipRepository.findByUsersId(id1, id2);
+
+        System.out.println(id1 + " " + id2);
+        if (friendship != null) {
+            return new ResponseEntity<>(friendship, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
