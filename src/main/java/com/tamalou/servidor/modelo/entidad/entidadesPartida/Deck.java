@@ -4,15 +4,14 @@ import java.util.Collections;
 import java.util.Stack;
 
 /**
-
- This is the deck of cards used for playing in games
+ * This is the deck of cards used for playing in games
  */
 public class Deck {
     private Stack<Card> cardsDeck;
 
     /**
-     When the deck is created, an array of cards is created and
-     assigned a value and a suit
+     * When the deck is created, an array of cards is created and
+     * assigned a value and a suit
      */
     public Deck() {
         cardsDeck = new Stack<>();
@@ -25,19 +24,35 @@ public class Deck {
             }
         }
     }
-    /**
 
-     Takes care of randomly shuffling the cards in the deck
+    /**
+     * Takes care of randomly shuffling the cards in the deck
      */
     public void shuffleDeck() {
         Collections.shuffle(cardsDeck);
     }
-    /**
 
-     Takes care of dealing the top card from the deck
-     @return Returns the top card from the deck
+    /**
+     * Takes care of dealing the top card from the deck
+     *
+     * @return Returns the top card from the deck
      */
     public Card takeCard() {
         return cardsDeck.pop();
+    }
+
+    public boolean checkEmptyDeck() {
+        if (cardsDeck.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
+    public Stack<Card> getCardsDeck() {
+        return cardsDeck;
+    }
+
+    public void setCardsDeck(Stack<Card> cardsDeck) {
+        this.cardsDeck = cardsDeck;
     }
 }

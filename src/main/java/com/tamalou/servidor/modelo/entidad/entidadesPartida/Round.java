@@ -21,7 +21,7 @@ public class Round {
         this.players = players;
         this.deck = new Deck();
         this.maze = new Stack<>();
-        this.actualTurn = 0;
+        this.actualTurn = 6;
         this.endRound = false;
 
         playRound();
@@ -46,6 +46,9 @@ public class Round {
             // If someone has discarded all their cards, the round ends.
             for (Player player : players) {
                 // The player's turn begins
+                if (deck.checkEmptyDeck()) {
+                    mazeToDeck();
+                }
 
                 //The last card in the Maze is always show
                 showLastCardInMaze();
@@ -55,6 +58,7 @@ public class Round {
                     boolean stand = player.standRound();
                     if (stand) {
                         endRound = true;
+                        break;
                     }
                 }
 
@@ -74,6 +78,15 @@ public class Round {
 
     }
 
+
+    private void mazeToDeck() {
+        deck.setCardsDeck(maze);
+        deck.shuffleDeck();
+        maze.clear();
+        maze.add(deck.takeCard());
+    }
+
+
     /**
      * Shows the last card in the maze.
      */
@@ -91,26 +104,36 @@ public class Round {
      * @param player
      */
     public void chooseOptionToPlay(Player player) {
-        System.out.println("What do you want to do?");
-        System.out.println("[1] Take a card of the deck.");
-        System.out.println("[2] Discard one of your cards.");
-        System.out.println("[3] Switch the card of the maze with one of your cards.");
-
         int option;
-
-        switch (option = Utilidades.leerEntero("")) {
+        if (maze.isEmpty()) {
+            option = 1;
+        } else {
+            do {
+                System.out.println("What do you want to do?");
+                System.out.println("[1] Take a card of the deck.");
+                System.out.println("[2] Discard one of your cards.");
+                System.out.println("[3] Switch the card of the maze with one of your cards.");
+                option = Utilidades.leerEntero("");
+            } while (option < 1 || option > 3);
+        }
+        switch (option) {
             case 1:
                 Card card = deck.takeCard();
                 System.out.println(card.toString());
+                int option2;
+                int aux = 2;
 
-                //Select an option2
-                System.out.println("What do you want to do with the card?");
-                System.out.println("[1] Discard the card.");
-                System.out.println("[2] Change it for one of your cards.");
-                if (card.getValue() > 10) {
-                    System.out.println("[3] Use the power of the card.");
-                }
-                int option2 = Utilidades.leerEntero("");
+                do {
+                    //Select an option2
+                    System.out.println("What do you want to do with the card?");
+                    System.out.println("[1] Discard the card.");
+                    System.out.println("[2] Change it for one of your cards.");
+                    if (card.getValue() > 10) {
+                        System.out.println("[3] Use the power of the card.");
+                        aux = 3;
+                    }
+                    option2 = Utilidades.leerEntero("");
+                } while (option2 < 1 || option2 > aux);
 
                 // Execute option2
                 if (option2 == 1) {
@@ -118,17 +141,17 @@ public class Round {
                 } else if (option2 == 2) {
                     Card cardOfPlayer = player.swapCards(card);
                     maze.add(cardOfPlayer);
-                } else if (option == 3) {
+                } else if (option2 == 3) {
                     if (card.getValue() == 11) {
                         player.seeCard(player.selectCard());
                     } else if (card.getValue() == 12) {
-                        Player oponent = selectOponent();
+                        Player oponent = selectOponent(player);
                         int ownIndexCard = player.selectCard();
                         int exchangedIndexCard = oponent.selectCard();
                         player.switchCardWithOponent(oponent, ownIndexCard, exchangedIndexCard);
 
                     } else if (card.getValue() == 13) {
-                        Player oponent = selectOponent();
+                        Player oponent = selectOponent(player);
                         int ownIndexCard = player.selectCard();
                         int exchangedIndexCard = oponent.selectCard();
                         player.seeCard(ownIndexCard);
@@ -157,10 +180,27 @@ public class Round {
     /**
      * Allows a player to select an oponent to interact with
      *
+     * @param player who is playing the turn
      * @return The player choosen as an oponent
      */
-    public Player selectOponent() {
-        return players.get(Utilidades.leerEntero("Which player you want to choose for switching cards?"));
+    public Player selectOponent(Player player) {
+        boolean continueGame = false;
+        Player oponent = null;
+        do {
+            System.out.println("Which player you want to choose for switching cards?");
+            try {
+                oponent = players.get(Utilidades.leerEntero(""));
+            } catch (Exception e) {
+                System.out.println("You can´t choose that player!");
+            }
+            if (oponent == player) {
+                System.out.println("You can´t choose yourself!");
+            }
+            if (oponent != null && oponent != player) {
+                continueGame = true;
+            }
+        } while (!continueGame);
+        return oponent;
     }
 
 

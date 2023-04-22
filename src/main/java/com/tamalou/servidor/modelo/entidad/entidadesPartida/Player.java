@@ -46,8 +46,13 @@ public class Player {
      * @return Returns the index of the card selected by the player
      */
     public int selectCard() {
-        System.out.println("Which card you want to choose?");
-        return Utilidades.leerEntero("");
+        int numberOfCards = getCards().size();
+        int indexSelected;
+        do {
+            System.out.println(name + " has " + numberOfCards + ", Which card you want to choose?");
+            indexSelected = Utilidades.leerEntero("") - 1;
+        } while (indexSelected < 0 || indexSelected > numberOfCards - 1);
+        return indexSelected;
     }
 
     /**
@@ -77,8 +82,11 @@ public class Player {
      * @return Returns true if the option is "Yes", false if is "No"
      */
     public boolean standRound() {
-        System.out.println("Do you want to stand? [Yes/No]");
-        String endTurn = Utilidades.leerCadena();
+        String endTurn;
+        do {
+            System.out.println("Do you want to stand? [Yes/No]");
+            endTurn = Utilidades.leerCadena();
+        } while (!endTurn.equals("Yes") && !endTurn.equals("No"));
         if (endTurn.equals("Yes")) {
             return true;
         }
