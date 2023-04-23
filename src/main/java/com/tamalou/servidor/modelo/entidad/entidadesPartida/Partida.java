@@ -6,27 +6,26 @@ import java.util.List;
 /**
  * Es la clase encargada de gestionar una partida
  */
-public class Partida {
+public class Partida extends Thread{
 
-    private final int numeroMaximoRondas;
-    private final int puntosMaximos;
-    private final List<Player> jugadores;
+    public final int MAX_PLAYERS = 4;
+    private boolean privateGame;
+    private String gameName;
+
+    private int numeroMaximoRondas;
+    private List<Player> playersList;
     private int rondaActual;
     private boolean terminada;
     private Player ganador;
 
     /**
      * Cuando se crea el objeto crea una partida basado en los parámetros que recibe
-     * @param numeroMaximoRondas Hace referencia al numero maximo de rondas que tendrá la partida
-     * @param puntosMaximos      Hace referencia al numero maximo de rondas que tendrá la partida para definir el ganador
-     * @param jugadores          Son los jugadores que jugarán la partida
      */
-    public Partida(int numeroMaximoRondas, int puntosMaximos, List<Player> jugadores) {
+    public Partida(boolean isPrivate, String gameName) {
         this.numeroMaximoRondas = numeroMaximoRondas;
-        this.puntosMaximos = puntosMaximos;
-        this.jugadores = jugadores;
         this.rondaActual = 0;
         this.terminada = false;
+        this.privateGame = isPrivate;
     }
 
     /**
@@ -38,11 +37,11 @@ public class Partida {
     public Player jugarPartida() {
 
         while (!terminada) {
-            Round round = new Round(jugadores);
+            Round round = new Round(playersList);
             round.playRound();
             rondaActual++;
 
-            if (rondaActual >= numeroMaximoRondas || hayGanador()) {
+            if (rondaActual >= numeroMaximoRondas) {
                 terminada = true;
             }
         }
@@ -53,10 +52,10 @@ public class Partida {
     }
 
     /**
-     * Comprueba si hay algun ganador entre la lista de jugadores.
+     * (Próxima versión) Comprueba si hay algun ganador entre la lista de jugadores.
      * @return True en caso de que haya un jugador ganador, sobrepasando los puntos maximos
      * @return False en caso de que no haya ningun jugador que haya alcanzado los puntos maximos
-     */
+
     private boolean hayGanador() {
         for (Player player : jugadores) {
             if (player.getPoints() >= puntosMaximos) {
@@ -65,6 +64,7 @@ public class Partida {
         }
         return false;
     }
+     */
 
     /**
      * Determina que jugador de la partida ha sido ganador basandose en el que ha tenido menos
@@ -72,13 +72,37 @@ public class Partida {
      * @return devuelve el jugador ganador
      */
     private Player determinarGanador() {
-        Player ganador = jugadores.get(0);
-        for (int i = 1; i < jugadores.size(); i++) {
-            Player player = jugadores.get(i);
+        Player ganador = playersList.get(0);
+        for (int i = 1; i < playersList.size(); i++) {
+            Player player = playersList.get(i);
             if (player.getPoints() < ganador.getPoints()) {
                 ganador = player;
             }
         }
         return ganador;
+    }
+
+    public boolean isPrivado() {
+        return privateGame;
+    }
+
+    public List<Player> getPlayersList() {
+        return playersList;
+    }
+
+    public void setPlayersList(List<Player> playersList) {
+        this.playersList = playersList;
+    }
+
+    public void addPlayer(Player player) {
+        playersList.add(player);
+    }
+
+    public String getGameName() {
+        return gameName;
+    }
+
+    public void setGameName(String gameName) {
+        this.gameName = gameName;
     }
 }

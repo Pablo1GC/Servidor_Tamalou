@@ -2,25 +2,35 @@ package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
 import com.tamalou.servidor.modelo.entidad.entidadesExtra.Utilidades;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * This is the class that refers to a player in a game
  */
 public class Player {
-    private String name;
+    public String name;
     private int points;
     private List<Card> cards;
     private boolean endTurn;
+    public Socket socket;
+    public Scanner reader;
+    public PrintStream writter;
 
 
     /**
      * Initializes the player with their name, 0 points, and initializes the array of cards they would have in their hand
      *
-     * @param name
+     * @param
      */
-    public Player(String name) {
+    public Player(Socket socket) throws IOException {
+        this.socket = socket;
+        this.reader = new Scanner(socket.getInputStream());
+        this.writter = new PrintStream(socket.getOutputStream());
         this.name = name;
         this.points = 0;
         this.cards = new ArrayList<>();
