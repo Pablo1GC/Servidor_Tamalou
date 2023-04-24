@@ -12,7 +12,7 @@ CREATE TABLE user (
                         email VARCHAR(255),
                         username VARCHAR(255),
                         uid VARCHAR(255) PRIMARY KEY,
-                        image BLOB
+                        image MEDIUMBLOB
 );
 
 -- The player table stores information about each player, including their email, username, unique ID, and image.
@@ -50,7 +50,7 @@ CREATE TABLE game_player (
 
 -- INSERT INTO player table
 INSERT INTO user (email, username, uid, image) VALUES
-                                                     ('john@example.com', 'johndoe', '123456', NULL),
+                                                     ('francoernestocollins@gmail.com', 'johndoe', '0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', NULL),
                                                      ('jane@example.com', 'janedoe', '789012', NULL),
                                                      ('bob@example.com', 'bobsmith', '345678', NULL),
                                                      ('alice@example.com', 'alicewonderland', '901234', NULL),
@@ -58,8 +58,8 @@ INSERT INTO user (email, username, uid, image) VALUES
 
 -- INSERT INTO friendship table
 INSERT INTO friendship (sender, receiver, status) VALUES
-                                                      ('123456', '789012', 'accepted'),
-                                                      ('789012', '123456', 'accepted'),
+                                                      ('0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', '789012', 'accepted'),
+                                                      ('789012', '0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', 'accepted'),
                                                       ('345678', '901234', 'pending'),
                                                       ('901234', '567890', 'rejected'),
                                                       ('567890', '901234', 'accepted');
@@ -74,13 +74,13 @@ INSERT INTO game (num_rounds) VALUES
 
 -- INSERT INTO game_player table
 INSERT INTO game_player (id_game, id_user, score, winner) VALUES
-                                                              (1, '123456', 100, true),
+                                                              (1, '0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', 100, true),
                                                               (1, '789012', 80, false),
                                                               (2, '345678', 50, false),
                                                               (2, '567890', 60, true),
-                                                              (3, '123456', 150, true),
+                                                              (3, '0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', 150, true),
                                                               (3, '567890', 120, false),
                                                               (4, '901234', 80, true),
-                                                              (4, '123456', 70, false),
+                                                              (4, '0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', 70, false),
                                                               (5, '345678', 110, false),
                                                               (5, '567890', 140, true);
