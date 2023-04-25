@@ -1,4 +1,4 @@
-package com.tamalou.servidor.servidor;
+package com.tamalou.servidor.socket;
 
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Partida;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
@@ -58,13 +58,13 @@ public class TournamentManager {
         // El banco de caracteres
         String banco = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         // La cadena en donde iremos agregando un carácter aleatorio
-        String cadena = "";
+        StringBuilder cadena = new StringBuilder();
         for (int x = 0; x < longitud; x++) {
             int indiceAleatorio = numeroAleatorioEnRango(0, banco.length() - 1);
             char caracterAleatorio = banco.charAt(indiceAleatorio);
-            cadena += caracterAleatorio;
+            cadena.append(caracterAleatorio);
         }
-        return cadena;
+        return cadena.toString();
     }
 
     private int numeroAleatorioEnRango(int minimo, int maximo) {

@@ -1,8 +1,9 @@
 package com.tamalou.servidor;
 
-import com.tamalou.servidor.servidor.ClientConnection;
-import com.tamalou.servidor.servidor.SignalManager;
-import com.tamalou.servidor.servidor.TournamentManager;
+import com.tamalou.servidor.socket.ClientConnection;
+import com.tamalou.servidor.socket.SignalManager;
+import com.tamalou.servidor.socket.TournamentManager;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
@@ -12,17 +13,19 @@ import java.net.Socket;
 
 @SpringBootApplication
 public class Main {
-    public static final int PUERTO = 8080;
+    public static final int PUERTO = 9191;
 
     public static void main(String[] args) {
+
+        // Spring
+        SpringApplication.run(Main.class, args);
 
         TournamentManager manejadorTorneos = new TournamentManager();
         SignalManager signalManager = new SignalManager(manejadorTorneos);
         ClientConnection clientConnection = new ClientConnection(manejadorTorneos, signalManager);
         Socket socketAlCliente = null;
         InetSocketAddress direccion = new InetSocketAddress(PUERTO);
-        try {
-            ServerSocket serverSocket = new ServerSocket();
+        try (ServerSocket serverSocket = new ServerSocket()){
             serverSocket.bind(direccion);
             do {
                 socketAlCliente = serverSocket.accept();
@@ -35,24 +38,5 @@ public class Main {
             System.err.println("SERVIDOR: Error -> " + e);
             e.printStackTrace();
         }
-
-
-        /**
-        // SpringApplication.run(Main.class, args);
-        Player player1 = new Player("Jugador1");
-        Player player2 = new Player("Jugador2");
-        Player player3 = new Player("Jugador3");
-        Player player4 = new Player("Jugador4");
-
-        ArrayList listaJugadores = new ArrayList();
-        listaJugadores.add(player1);
-        listaJugadores.add(player2);
-        listaJugadores.add(player3);
-        listaJugadores.add(player4);
-
-        Partida partida1 = new Partida(10, 100, listaJugadores);
-
-        partida1.jugarPartida(); */
     }
-
 }

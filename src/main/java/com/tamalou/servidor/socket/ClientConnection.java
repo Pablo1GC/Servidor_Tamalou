@@ -1,4 +1,4 @@
-package com.tamalou.servidor.servidor;
+package com.tamalou.servidor.socket;
 
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 

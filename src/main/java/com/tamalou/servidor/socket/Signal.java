@@ -1,4 +1,4 @@
-package com.tamalou.servidor.servidor;
+package com.tamalou.servidor.socket;
 
 public class Signal {
 
