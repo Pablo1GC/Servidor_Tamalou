@@ -18,7 +18,7 @@ public class Main {
     public static void main(String[] args) {
 
         // Spring
-        SpringApplication.run(Main.class, args);
+        //SpringApplication.run(Main.class, args);
 
         TournamentManager manejadorTorneos = new TournamentManager();
         SignalManager signalManager = new SignalManager(manejadorTorneos);

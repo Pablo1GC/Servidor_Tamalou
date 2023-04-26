@@ -1,4 +1,4 @@
-package com.tamalou.servidor.modelo.entidad.entidadesPartida;
+package com.tamalou.servidor.modelo.entidad.entidadesPartidaConsola;
 
 import com.tamalou.servidor.modelo.entidad.entidadesExtra.Utilidades;
 
@@ -43,7 +43,7 @@ public class Player {
      * @param card
      */
     public Card swapCards(Card card) {
-        int cardIndex = PlayerselectCard();
+        int cardIndex = selectCard();
         Card myCard = cards.get(cardIndex);
         cards.set(cardIndex, card);
         return myCard;
@@ -54,7 +54,7 @@ public class Player {
      *
      * @return Returns the index of the card selected by the player
      */
-    public int PlayerselectCard() {
+    public int selectCard() {
         int numberOfCards = getCards().size();
         int indexSelected;
         do {
@@ -105,7 +105,7 @@ public class Player {
      * @return the selected card
      */
     public Card getCard() {
-        return cards.get(PlayerselectCard());
+        return cards.get(selectCard());
     }
 
     // Getters and Setters

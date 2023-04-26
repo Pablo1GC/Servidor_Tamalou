@@ -1,4 +1,4 @@
-package com.tamalou.servidor.modelo.entidad.entidadesPartida;
+package com.tamalou.servidor.modelo.entidad.entidadesPartidaConsola;
 
 import com.tamalou.servidor.modelo.entidad.entidadesExtra.Utilidades;
 
@@ -47,7 +47,7 @@ public class Round {
             for (Player player : players) {
                 // The player's turn begins
                 if (deck.checkEmptyDeck()) {
-                    returnDiscartedCardsToDeck();
+                    returnDiscardedCardsToDeck();
                 }
 
                 //The last card in the Maze is always shown
@@ -79,7 +79,7 @@ public class Round {
     }
 
 
-    private void returnDiscartedCardsToDeck() {
+    private void returnDiscardedCardsToDeck() {
         deck.setCardsDeck(discardedCardsDeck);
         deck.shuffleDeck();
         discardedCardsDeck.clear();
@@ -141,17 +141,17 @@ public class Round {
                     discardedCardsDeck.add(cardOfPlayer);
                 } else {
                     if (card.getValue() == 11) {
-                        player.seeCard(player.PlayerselectCard());
+                        player.seeCard(player.selectCard());
                     } else if (card.getValue() == 12) {
                         Player oponent = selectOpponent(player);
-                        int ownIndexCard = player.PlayerselectCard();
-                        int exchangedIndexCard = oponent.PlayerselectCard();
+                        int ownIndexCard = player.selectCard();
+                        int exchangedIndexCard = oponent.selectCard();
                         player.switchCardWithOponent(oponent, ownIndexCard, exchangedIndexCard);
 
                     } else if (card.getValue() == 13) {
                         Player oponent = selectOpponent(player);
-                        int ownIndexCard = player.PlayerselectCard();
-                        int exchangedIndexCard = oponent.PlayerselectCard();
+                        int ownIndexCard = player.selectCard();
+                        int exchangedIndexCard = oponent.selectCard();
                         player.seeCard(ownIndexCard);
                         oponent.seeCard(exchangedIndexCard);
 
@@ -196,7 +196,6 @@ public class Round {
         } while (!continueGame);
         return oponent;
     }
-
 
 
     /**

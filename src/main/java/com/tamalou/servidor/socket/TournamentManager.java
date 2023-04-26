@@ -32,6 +32,11 @@ public class TournamentManager {
         return torneoHashMap.get(clave);
     }
 
+
+    /**
+     *  ¿Por qué synchronized?
+     * @return
+     */
     public synchronized HashMap<String, Partida> mostrarTorneos() {
         HashMap<String, Partida> torneosPublicos = new HashMap<>();
         torneoHashMap.forEach((key, value) -> {

@@ -1,16 +1,12 @@
-package com.tamalou.servidor.modelo.entidad.entidadesPartida;
+package com.tamalou.servidor.modelo.entidad.entidadesPartidaConsola;
 
 public class Card {
     private int value;
     private String suit;
-    private int CARD_SIGNAL;
-    private int SUIT_SIGNAL;
-
 
     public Card(int value, String suit) {
         this.value = value;
         this.suit = suit;
-
     }
 
     public int getValue() {
