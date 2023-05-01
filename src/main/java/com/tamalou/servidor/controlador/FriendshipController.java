@@ -55,12 +55,9 @@ public class FriendshipController {
      * @return A ResponseEntity containing a Friendship object if found, or HttpStatus.NOT_FOUND if not found.
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Friendship> getFriendshipByUserId(@RequestParam(value = "userId1") Long id1,
-                                                            @RequestParam(value = "userId2") Long id2) {
-        System.out.println("adjoadjowj");
+    public ResponseEntity<Friendship> getFriendshipByUserId(@RequestParam(value = "userId1") String id1,
+                                                            @RequestParam(value = "userId2") String id2) {
         Friendship friendship = friendshipRepository.findByUsersId(id1, id2);
-
-        System.out.println(id1 + " " + id2);
         if (friendship != null) {
             return new ResponseEntity<>(friendship, HttpStatus.OK);
         } else {
@@ -114,7 +111,7 @@ public class FriendshipController {
         Friendship friendship = friendshipRepository.findById(id);
         if (friendship != null) {
             friendshipRepository.delete(friendship);
-            return new ResponseEntity<>(friendship, HttpStatus.GONE);
+            return new ResponseEntity<>(friendship, HttpStatus.ACCEPTED);
         } else {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }

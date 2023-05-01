@@ -88,13 +88,18 @@ public class FriendshipRepository {
      * @param userId2 The second user ID.
      * @return A friendship associated with the given pair of user IDs.
      */
-    public Friendship findByUsersId(Long userId1, Long userId2) {
-        return entityManager.createQuery("SELECT f FROM Friendship f WHERE " +
-                        "f.sender.uid = :userId1 AND f.receiver.uid = :userId2 OR" +
-                        "f.sender.uid = :userId2 AND f.receiver.uid = :userId1", Friendship.class)
+    public Friendship findByUsersId(String userId1, String userId2) {
+        List<Friendship> friendships =  entityManager.createQuery("SELECT f FROM Friendship f WHERE " +
+                        "(f.sender.uid = :userId1 AND f.receiver.uid = :userId2) OR " +
+                        "(f.sender.uid = :userId2 AND f.receiver.uid = :userId1)", Friendship.class)
                 .setParameter("userId1", userId1)
                 .setParameter("userId2", userId2)
-                .getSingleResult();
+                .getResultList();
+
+        if(friendships.isEmpty())
+            return null;
+
+        return friendships.get(0);
     }
 
     /**
