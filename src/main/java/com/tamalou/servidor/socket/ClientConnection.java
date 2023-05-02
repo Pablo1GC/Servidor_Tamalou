@@ -1,9 +1,12 @@
 package com.tamalou.servidor.socket;
 
+import com.google.gson.Gson;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
+import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Package;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 public class ClientConnection {
@@ -20,12 +23,13 @@ public class ClientConnection {
 
     public void conectarCliente(Socket clientSocket) {
         try {
+            Gson gson = new Gson();
             Player player = new Player(clientSocket);
 
 
-            int senalConectarse = Integer.parseInt(player.reader.nextLine());
+            int senalConectarse = gson.fromJson(player.reader.nextLine(), Package.class).signals.get(0);
             if (senalConectarse == Signal.CONECTARSE)
-                player.writter.println(Signal.CONEXION_EXITOSA);
+                player.writter.println(gson.toJson(new Package(List.of(Signal.CONEXION_EXITOSA), null)));
             else {
                 clientSocket.close();
                 return;

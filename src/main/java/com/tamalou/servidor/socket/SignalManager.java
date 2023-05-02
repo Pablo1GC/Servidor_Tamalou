@@ -5,7 +5,6 @@ import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.NoSuchElementException;
 
 public class SignalManager {
@@ -60,20 +59,22 @@ public class SignalManager {
 
 
     private boolean manejarListaTorneos(PrintStream writer){
-        HashMap<String, Partida> torneosPublicos = tournamentManager.mostrarTorneos();
-        writer.println(Signal.LISTA_TORNEOS);
-        writer.println(torneosPublicos.size());
-        torneosPublicos.forEach((key, value) -> {
-            String nombre = value.getGameName();
-            String jugadores = value.getPlayersList().size() + " /  4";
+//        HashMap<String, Partida> torneosPublicos = tournamentManager.mostrarTorneos();
+//        writer.println(Signal.LISTA_TORNEOS);
+//        writer.println(torneosPublicos.size());
+//        torneosPublicos.forEach((key, value) -> {
+//            String nombre = value.getGameName();
+//            String jugadores = value.getPlayersList().size() + " /  4";
+//
+//            writer.println(
+//                    nombre + Signal.SEPARADOR +
+//                    jugadores + Signal.SEPARADOR +
+//                    key);
+//        });
 
-            writer.println(
-                    nombre + Signal.SEPARADOR +
-                    jugadores + Signal.SEPARADOR +
-                    key);
-        });
-
+        writer.printf("{signal: %d, data: {name: Hola, players: 123, key}}", Signal.LISTA_TORNEOS);
         return true;
+
     }
 
 
