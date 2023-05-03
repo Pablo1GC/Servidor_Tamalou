@@ -1,12 +1,15 @@
 package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
+import com.google.gson.Gson;
 import com.tamalou.servidor.modelo.entidad.entidadesExtra.Utilidades;
+import com.tamalou.servidor.socket.Signal;
 
 import java.util.List;
 import java.util.Stack;
 
 public class Round {
-    private final List<Player> players;
+    private Thread roundThread;
+    private final List<Player> playersList;
     private final Deck deck;
     private final Stack<Card> discardedCardsDeck;
     private boolean endRound;
@@ -15,16 +18,14 @@ public class Round {
     /**
      * When an object is instantiated, a new round is started.
      *
-     * @param players List of players in the round
+     * @param playersList List of playerList in the round
      */
-    public Round(List<Player> players) {
-        this.players = players;
+    public Round(List<Player> playersList) {
+        this.playersList = playersList;
         this.deck = new Deck();
         this.discardedCardsDeck = new Stack<>();
-        this.actualTurn = 6;
+        this.actualTurn = 0;
         this.endRound = false;
-
-        playRound();
     }
 
     /**
@@ -35,7 +36,7 @@ public class Round {
      */
     public void playRound() {
         deck.shuffleDeck();
-        for (Player player : players) {
+        for (Player player : playersList) {
             for (int i = 0; i < 4; i++) {
                 player.takeCard(deck.takeCard());
             }
@@ -44,18 +45,19 @@ public class Round {
         while (!endRound) {
 
             // If someone has discarded all their cards, the round ends.
-            for (Player player : players) {
+            for (Player player : playersList) {
+                player.writter.println(Signal.START_TURN);
                 // The player's turn begins
                 if (deck.checkEmptyDeck()) {
                     returnDiscartedCardsToDeck();
                 }
 
                 //The last card in the Maze is always shown
-                showLastCardInMaze();
+                showLastCardInDiscartedDeck();
 
                 // If round is above 5, player can stand and end the round.
                 if (actualTurn > 5) {
-                    boolean stand = player.standRound();
+                    boolean stand = standRound(player);
                     if (stand) {
                         endRound = true;
                         break;
@@ -90,16 +92,18 @@ public class Round {
     /**
      * Shows the last card in the discarded deck.
      */
-    public void showLastCardInMaze() {
-        if (discardedCardsDeck.size() == 0) {
-            System.out.println("The maze is empty.");
-        } else {
-            System.out.println(discardedCardsDeck.lastElement());
+    public void showLastCardInDiscartedDeck() {
+        System.out.println(discardedCardsDeck.lastElement());
+        Gson codifier = new Gson();
+        for (Player p : playersList) {
+            p.writter.println(Signal.SHOW_LAST_CARD_DISCARTED_DECK);
+            p.writter.println(codifier.toJson(discardedCardsDeck.lastElement()));
         }
     }
 
     /**
      * Player can choose what to do in his turn.
+     *
      * @param player Player choosing the option
      */
     public void chooseOptionToPlay(Player player) {
@@ -118,11 +122,17 @@ public class Round {
         switch (option) {
             case 1 -> {
                 Card card = deck.takeCard();
+                Gson codifier = new Gson();
+                for (Player p : playersList) {
+                    p.writter.println(Signal.SHOW_LAST_CARD_DECK);
+                    p.writter.println(codifier.toJson(card));
+                }
                 System.out.println(card.toString());
                 int option2;
                 int aux = 2;
-                do {
-                    //Select an option2
+                //Select an option2
+
+                    /* THIS SHOULD GO IN THE CLIENT
                     System.out.println("What do you want to do with the card?");
                     System.out.println("[1] Discard the card.");
                     System.out.println("[2] Change it for one of your cards.");
@@ -130,41 +140,50 @@ public class Round {
                         System.out.println("[3] Use the power of the card.");
                         aux = 3;
                     }
-                    option2 = Utilidades.leerEntero("");
-                } while (option2 < 1 || option2 > aux);
+                     */
+
+                option2 = Integer.parseInt(player.reader.nextLine());
 
                 // Execute option2
-                if (option2 == 1) {
+                if (option2 == Signal.PLAYER_DISCARDS_CARD) {
                     discardedCardsDeck.add(card);
-                } else if (option2 == 2) {
-                    Card cardOfPlayer = player.swapCards(card);
+                    for (Player p : playersList) {
+                        if (!p.equals(player))
+                        p.writter.println(Signal.PLAYER_DISCARDS_CARD);
+                    }
+                } else if (option2 == Signal.PLAYER_SWITCH_CARD_DECK) {
+                    Card cardOfPlayer = swapCards(player, card);
                     discardedCardsDeck.add(cardOfPlayer);
-                } else {
+                } else if (option2 == Signal.PLAYER_USE_CARD_POWER) {
                     if (card.getValue() == 11) {
-                        player.seeCard(player.PlayerselectCard());
+                        Card cardAux = player.getCards().get(player.PlayerselectCard());
+                        seeCard(player, cardAux);
                     } else if (card.getValue() == 12) {
                         Player oponent = selectOpponent(player);
                         int ownIndexCard = player.PlayerselectCard();
                         int exchangedIndexCard = oponent.PlayerselectCard();
-                        player.switchCardWithOponent(oponent, ownIndexCard, exchangedIndexCard);
+                        switchCardWithOponent(player, oponent, ownIndexCard, exchangedIndexCard);
 
                     } else if (card.getValue() == 13) {
                         Player oponent = selectOpponent(player);
                         int ownIndexCard = player.PlayerselectCard();
                         int exchangedIndexCard = oponent.PlayerselectCard();
-                        player.seeCard(ownIndexCard);
-                        oponent.seeCard(exchangedIndexCard);
+                        Card cardAux = player.getCards().get(player.PlayerselectCard());
+                        seeCard(player, cardAux);
+                        // TO DO: SABER CÓMO INDICAR QUÉ JUGADOR ES EL OPONENTE
+                        cardAux = oponent.getCards().get(oponent.PlayerselectCard());
+                        seeCard(player, cardAux);
 
                         System.out.println("Do you want to switch the cards? [Yes/No]");
                         if (Utilidades.leerCadena().equals("Yes")) {
-                            player.switchCardWithOponent(oponent, ownIndexCard, exchangedIndexCard);
+                            switchCardWithOponent(player, oponent, ownIndexCard, exchangedIndexCard);
                         }
                     }
                 }
             }
             case 2 -> discardPlayerCard(player, player.getCard());
             case 3 -> {
-                Card cardOfPlayer = player.swapCards(discardedCardsDeck.pop());
+                Card cardOfPlayer = swapCards(player, discardedCardsDeck.pop());
                 discardedCardsDeck.add(cardOfPlayer);
             }
         }
@@ -183,7 +202,7 @@ public class Round {
         do {
             System.out.println("Which player you want to choose for switching cards?");
             try {
-                oponent = players.get(Utilidades.leerEntero(""));
+                oponent = playersList.get(Utilidades.leerEntero(""));
             } catch (Exception e) {
                 System.out.println("You can´t choose that player!");
             }
@@ -196,7 +215,6 @@ public class Round {
         } while (!continueGame);
         return oponent;
     }
-
 
 
     /**
@@ -217,6 +235,52 @@ public class Round {
         }
     }
 
+
+    /**
+     * Gives the option to the player to stand and end the round.
+     *
+     * @return Returns true if the option is "Yes", false if is "No"
+     */
+    public boolean standRound(Player player) {
+        player.writter.println(Signal.ASK_PLAYER_TO_STAND);
+        System.out.println("Do you want to stand? [Yes/No]");
+        // CHECK WITH @BRIAN
+        String endTurn = player.reader.nextLine();
+        return endTurn.equals(Signal.PLAYER_STANDS) ? true : false;
+    }
+
+    /**
+     * It is responsible for exchanging two cards with another player
+     *
+     * @param opponent           is the player with whom you want to exchange the cards
+     * @param ownIndexCard       is the index of the card that will be exchanged with the opponent passed by parameter
+     * @param exchangedIndexCard is the index of the opponent's card that the player will receive
+     */
+    public void switchCardWithOponent(Player player, Player opponent, int ownIndexCard, int exchangedIndexCard) {
+        player.getCards().set(ownIndexCard, opponent.getCards().get(exchangedIndexCard));
+        opponent.getCards().set(exchangedIndexCard, player.getCards().get(ownIndexCard));
+    }
+
+    /**
+     * Allows the player to see a card
+     */
+    public void seeCard(Player player, Card card) {
+        Gson codifier = new Gson();
+        player.writter.println(Signal.PLAYER_SEES_CARD);
+        player.writter.println(codifier.toJson(card));
+    }
+
+    /**
+     * Allows the player to swap one of his cards with another card of the game.
+     *
+     * @param card
+     */
+    public Card swapCards(Player player, Card card) {
+        int cardIndex = Integer.parseInt(player.reader.nextLine());
+        Card myCard = player.getCards().get(cardIndex);
+        player.getCards().set(cardIndex, card);
+        return myCard;
+    }
 
     // Getters and Setters
     public Deck getDeck() {

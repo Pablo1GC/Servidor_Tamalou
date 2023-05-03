@@ -1,50 +1,43 @@
 package com.tamalou.servidor.socket;
 
-import com.google.gson.Gson;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
-import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Package;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 public class ClientConnection {
 
-    private TournamentManager tournamentManager;
-
+    private GameManager gameManager;
     private SignalManager signalManager;
 
-    public ClientConnection(TournamentManager tournamentManager, SignalManager signalManager){
-        this.tournamentManager = tournamentManager;
+    public ClientConnection(GameManager gameManager, SignalManager signalManager){
+        this.gameManager = gameManager;
         this.signalManager = signalManager;
     }
 
-
-    public void conectarCliente(Socket clientSocket) {
+    public void connectClient(Socket clientSocket) {
         try {
-            Gson gson = new Gson();
             Player player = new Player(clientSocket);
 
-
-            int senalConectarse = gson.fromJson(player.reader.nextLine(), Package.class).signals.get(0);
-            if (senalConectarse == Signal.CONECTARSE)
-                player.writter.println(gson.toJson(new Package(List.of(Signal.CONEXION_EXITOSA), null)));
+            int connectionSignal = Integer.parseInt(player.reader.nextLine());
+            if (connectionSignal == Signal.CONECTARSE)
+                player.writter.println(Signal.CONEXION_EXITOSA);
             else {
                 clientSocket.close();
                 return;
             }
 
-            System.out.println("SERVIDOR: Jugador con IP " + player.socket.getInetAddress().getHostName() + " se ha conectado.");
+            System.out.println("SERVER: Player with IP " + player.socket.getInetAddress().getHostName() + " has connected.");
             signalManager.manage(player);
 
         } catch (IOException e) {
-            System.err.println("SERVIDOR: Error de entrada/salida");
+            System.err.println("SERVER: Input/Output Error");
             e.printStackTrace();
         } catch (NoSuchElementException e){
-            System.out.println("SERVIDOR: Cliente desconectado.");
+            System.out.println("SERVER: Client disconnected.");
         } catch (Exception e) {
-            System.err.println("SERVIDOR: Error -> " + e);
+            System.err.println("SERVER: Error -> " + e);
             e.printStackTrace();
         }
     }

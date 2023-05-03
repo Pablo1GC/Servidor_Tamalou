@@ -2,8 +2,7 @@ package com.tamalou.servidor;
 
 import com.tamalou.servidor.socket.ClientConnection;
 import com.tamalou.servidor.socket.SignalManager;
-import com.tamalou.servidor.socket.TournamentManager;
-import org.springframework.boot.SpringApplication;
+import com.tamalou.servidor.socket.GameManager;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
@@ -20,7 +19,7 @@ public class Main {
         // Spring
         //SpringApplication.run(Main.class, args);
 
-        TournamentManager manejadorTorneos = new TournamentManager();
+        GameManager manejadorTorneos = new GameManager();
         SignalManager signalManager = new SignalManager(manejadorTorneos);
         ClientConnection clientConnection = new ClientConnection(manejadorTorneos, signalManager);
         Socket socketAlCliente = null;
@@ -29,7 +28,7 @@ public class Main {
             serverSocket.bind(direccion);
             do {
                 socketAlCliente = serverSocket.accept();
-                clientConnection.conectarCliente(socketAlCliente);
+                clientConnection.connectClient(socketAlCliente);
             } while (true);
         } catch (IOException e) {
             System.err.println("SERVIDOR: Error de entrada/salida");

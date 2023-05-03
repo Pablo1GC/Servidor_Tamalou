@@ -3,8 +3,6 @@ package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 public class Card {
     private int value;
     private String suit;
-    private int CARD_SIGNAL;
-    private int SUIT_SIGNAL;
 
 
     public Card(int value, String suit) {
@@ -21,26 +19,5 @@ public class Card {
         return suit;
     }
 
-    @Override
-    public String toString() {
-        String valueName;
-        switch (value) {
-            case 1:
-                valueName = "As";
-                break;
-            case 11:
-                valueName = "J";
-                break;
-            case 12:
-                valueName = "Q";
-                break;
-            case 13:
-                valueName = "K";
-                break;
-            default:
-                valueName = Integer.toString(value);
-                break;
-        }
-        return valueName + " of " + suit;
-    }
+
 }

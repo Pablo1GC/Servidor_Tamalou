@@ -1,130 +1,120 @@
 package com.tamalou.servidor.socket;
 
-import com.tamalou.servidor.modelo.entidad.entidadesPartida.Partida;
+import com.tamalou.servidor.modelo.entidad.entidadesPartida.Game;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 
 public class SignalManager {
 
-    private ArrayList<Player> jugadoresLobby;
+    private ArrayList<Player> lobbyPlayers;
 
-    private ArrayList<Player> jugadoresEnPartida;
+    private ArrayList<Player> gamePlayers;
 
-    private TournamentManager tournamentManager;
+    private GameManager gameManager;
 
-    public SignalManager(TournamentManager manager) {
-        this.tournamentManager = manager;
+    public SignalManager(GameManager manager) {
+        this.gameManager = manager;
     }
 
 
-    /**
-     * Empieza un nuevo hilo para este player que se encarga
-     * de manejar las posibles peticiones que tenga el cliente
-     * hasta que se conecte a un torneo o se desconecte.
-     *
-     * @param player a manejar
-     */
     public void manage(Player player) {
         new Thread(() -> {
-            boolean continuar = false;
+            boolean continueManage = false;
             do {
                 try{
-                    String resultado_str = player.reader.nextLine();
-                    int senal = Signal.ERROR;
+                    String strResult = player.reader.nextLine();
+                    int signal = Signal.ERROR;
 
-                    senal = Integer.parseInt(resultado_str);
-                    System.out.println("Senal de " + player.getName() + " recibida en el servidor: " +senal);
+                    signal = Integer.parseInt(strResult);
+                    System.out.println("Signal from " + player.getName() + " received by the server: " +signal);
 
 
-                    continuar = switch (senal) {
-                        case Signal.CREAR_TORNEO_PUBLICO               -> manejarCrearTorneo(player, false);
-                        case Signal.CREAR_TORNEO_PRIVADO               -> manejarCrearTorneo(player, true);
+                    continueManage = switch (signal) {
+                        case Signal.CREAR_TORNEO_PUBLICO               -> manageCreateGame(player, false);
+                        case Signal.CREAR_TORNEO_PRIVADO               -> manageCreateGame(player, true);
                         case Signal.UNIRSE_TORNEO_PUBLICO,
-                                Signal.UNIRSE_TORNEO_PRIVADO -> manejarUnirseTorneo(player);
-                        case Signal.SOLICITAR_LISTA_TORNEOS            -> manejarListaTorneos(player.writter);
+                                Signal.UNIRSE_TORNEO_PRIVADO -> mamageJoinGame(player);
+                        case Signal.SOLICITAR_LISTA_TORNEOS            -> manageGameList(player.writter);
                         default -> false;
 
                     };
                 } catch (NoSuchElementException e){
-                    System.out.println("El player con IP " + player.socket.getInetAddress().getHostName() + " se ha desconectado.");
-                    continuar = false;
+                    System.out.println("Player with IP: " + player.socket.getInetAddress().getHostName() + " has disconnected.");
+                    continueManage = false;
                 }
 
-            } while (continuar);
+            } while (continueManage);
         }).start();
     }
 
 
-    private boolean manejarListaTorneos(PrintStream writer){
-//        HashMap<String, Partida> torneosPublicos = tournamentManager.mostrarTorneos();
-//        writer.println(Signal.LISTA_TORNEOS);
-//        writer.println(torneosPublicos.size());
-//        torneosPublicos.forEach((key, value) -> {
-//            String nombre = value.getGameName();
-//            String jugadores = value.getPlayersList().size() + " /  4";
-//
-//            writer.println(
-//                    nombre + Signal.SEPARADOR +
-//                    jugadores + Signal.SEPARADOR +
-//                    key);
-//        });
+    private boolean manageGameList(PrintStream writer){
+        HashMap<String, Game> publicGames = gameManager.showGames();
+        writer.println(Signal.LISTA_TORNEOS);
+        writer.println(publicGames.size());
+        publicGames.forEach((key, value) -> {
+            String name = value.getGameName();
+            String players = value.getPlayersList().size() + " /  4";
 
-        writer.printf("{signal: %d, data: {name: Hola, players: 123, key}}", Signal.LISTA_TORNEOS);
+            writer.println(
+                    name + Signal.SEPARADOR +
+                    players + Signal.SEPARADOR +
+                    key);
+        });
+
         return true;
-
     }
 
 
-    private boolean manejarUnirseTorneo(Player jugador) throws NoSuchElementException {
-        System.out.println("Unirse");
-        String clave = jugador.reader.nextLine();
-
-        jugador.writter.println(Signal.ENVIAR_NOMBRE);
-        jugador.name = jugador.reader.nextLine();
-
-        int resultado = tournamentManager.unirJugadorATorneo(jugador, clave);
-
-        System.out.println("Clave: " + clave);
-        System.out.println("Resultado: " + resultado);
-        jugador.writter.println(resultado);
-
-        if(resultado == Signal.UNION_EXITOSA_TORNEO){
-            jugador.writter.println(Signal.NOMBRE_TORNEO);
-            jugador.writter.println(tournamentManager.obtenerTorneo(clave).getGameName());
-
-        }
-
-        return resultado != Signal.UNION_EXITOSA_TORNEO;
-    }
-
-    /**
-     * Crea un torneo y devuelve la clave para entrar a ese torneo (Solo si el usuario manda su nombre).
-     * No unimos al jugador directamente porque no le hemos preguntado su nombre.
-     * @param player
-     * @param esPrivado Si el torneo es privado o no
-     * @return Clave para unirse al torneo.
-     */
-    private boolean manejarCrearTorneo(Player player, boolean esPrivado) throws NoSuchElementException {
-        String nombreDelTorneo = player.reader.nextLine();
-        System.out.println("Datos:" + nombreDelTorneo);
+    private boolean mamageJoinGame(Player player) throws NoSuchElementException {
+        System.out.println("Join");
+        String key = player.reader.nextLine();
 
         player.writter.println(Signal.ENVIAR_NOMBRE);
         player.name = player.reader.nextLine();
 
-        Partida partida = new Partida(esPrivado, nombreDelTorneo);
-        String clave = tournamentManager.agregarTorneo(player, partida);
-        tournamentManager.unirJugadorATorneo(player, clave);
+        int result = gameManager.joinPlayerToGame(player, key);
 
-        if(esPrivado){
+        System.out.println("Key: " + key);
+        System.out.println("Result: " + result);
+        player.writter.println(result);
+
+        if(result == Signal.UNION_EXITOSA_TORNEO){
+            player.writter.println(Signal.NOMBRE_TORNEO);
+            player.writter.println(gameManager.listGames(key).getGameName());
+
+        }
+
+        return result != Signal.UNION_EXITOSA_TORNEO;
+    }
+
+
+    private boolean manageCreateGame(Player player, boolean isPrivate) throws NoSuchElementException {
+        String gameName = player.reader.nextLine();
+        System.out.println("Info:" + gameName);
+
+        player.writter.println(Signal.ENVIAR_NOMBRE);
+        player.name = player.reader.nextLine();
+
+        Game game = new Game(isPrivate, gameName);
+        String key = gameManager.addGame(player, game);
+        gameManager.joinPlayerToGame(player, key);
+
+        if(isPrivate){
             player.writter.println(Signal.CLAVE_TORNEO);
-            player.writter.println(clave);
+            player.writter.println(key);
         }
 
         player.writter.println(Signal.CONEXION_EXITOSA_TORNEO);
 
         return false;
     }
+
+
+    
+    
 }

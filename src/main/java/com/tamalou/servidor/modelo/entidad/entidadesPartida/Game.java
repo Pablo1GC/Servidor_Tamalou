@@ -1,54 +1,68 @@
 package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
 
+import com.tamalou.servidor.socket.Signal;
+
 import java.util.List;
 
 /**
  * Es la clase encargada de gestionar una partida
  */
-public class Partida extends Thread{
+public class Game extends Thread{
+    private Thread gameThread;
 
     public final int MAX_PLAYERS = 4;
     private boolean privateGame;
     private String gameName;
 
-    private int numeroMaximoRondas;
+    private int maxRounds;
     private List<Player> playersList;
-    private int rondaActual;
-    private boolean terminada;
-    private Player ganador;
+    private int actualRound;
+    private boolean gameEnded;
+    private Player winner;
 
     /**
      * Cuando se crea el objeto crea una partida basado en los parámetros que recibe
      */
-    public Partida(boolean isPrivate, String gameName) {
-        this.numeroMaximoRondas = numeroMaximoRondas;
-        this.rondaActual = 0;
-        this.terminada = false;
+    public Game(boolean isPrivate, String gameName) {
+        gameThread = new Thread(this);
+        this.maxRounds = maxRounds;
+        this.actualRound = 0;
+        this.gameEnded = false;
         this.privateGame = isPrivate;
+        this.gameName = gameName;
     }
 
+    @Override
+    public void run(){
+        startGame();
+    }
     /**
-     * Es el método que comienza la partida.
-     * Comprueba si se debe jugar una ronda mas en la partida y en caso de que
-     * se deba jugar, agregaria una nueva ronda a la partida
-     * @return Devuelve el jugador que haya ganado la partida
+     * This method starts the game.
+     * First, sends a signal toevery player (Client).
+     *
+     *
+     *
      */
-    public Player jugarPartida() {
+    public Player startGame() {
+        for (Player p : playersList) {
+            p.writter.println(Signal.START_GAME);
+        }
 
-        while (!terminada) {
+        while (!gameEnded) {
             Round round = new Round(playersList);
             round.playRound();
-            rondaActual++;
+            actualRound++;
 
-            if (rondaActual >= numeroMaximoRondas) {
-                terminada = true;
+            if (actualRound >= maxRounds) {
+                gameEnded = true;
             }
         }
 
-        ganador = determinarGanador();
-        System.out.println("¡La partida ha terminado! El ganador es: " + ganador.getName());
-        return ganador;
+        winner = returnWinner();
+        System.out.println("¡La partida ha terminado! El ganador es: " + winner.getName());
+
+        return winner;
     }
 
     /**
@@ -71,8 +85,8 @@ public class Partida extends Thread{
      * puntaje en la partida
      * @return devuelve el jugador ganador
      */
-    private Player determinarGanador() {
-        Player ganador = playersList.get(0);
+    private Player returnWinner() {
+        Player ganador = null;
         for (int i = 1; i < playersList.size(); i++) {
             Player player = playersList.get(i);
             if (player.getPoints() < ganador.getPoints()) {
@@ -82,7 +96,7 @@ public class Partida extends Thread{
         return ganador;
     }
 
-    public boolean isPrivado() {
+    public boolean isPrivate() {
         return privateGame;
     }
 
@@ -94,8 +108,21 @@ public class Partida extends Thread{
         this.playersList = playersList;
     }
 
+    /**
+     * Adds player to the game and send a signal to the other players (Client).
+     * If the player´s list is full, the game starts.
+     * @param player
+     */
     public void addPlayer(Player player) {
         playersList.add(player);
+        for (Player p : playersList) {
+            p.writter.println(Signal.PLAYER_JOINED_GAME);
+            p.writter.println(playersList.size());
+        }
+
+        if (playersList.size() == MAX_PLAYERS){
+            startGame();
+        }
     }
 
     public String getGameName() {
