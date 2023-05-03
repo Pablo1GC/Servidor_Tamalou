@@ -3,7 +3,10 @@ package com.tamalou.servidor;
 import com.tamalou.servidor.socket.ClientConnection;
 import com.tamalou.servidor.socket.SignalManager;
 import com.tamalou.servidor.socket.GameManager;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -12,12 +15,16 @@ import java.net.Socket;
 
 @SpringBootApplication
 public class Main {
-    public static final int PUERTO = 9191;
+    private static final int PUERTO = 9191;
+
+    // private static ApplicationContext context;
 
     public static void main(String[] args) {
 
+        //context = new AnnotationConfigApplicationContext(SpringConfiguration.class);
+
         // Spring
-        //SpringApplication.run(Main.class, args);
+        SpringApplication.run(Main.class, args);
 
         GameManager manejadorTorneos = new GameManager();
         SignalManager signalManager = new SignalManager(manejadorTorneos);

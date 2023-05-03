@@ -1,12 +1,16 @@
 package com.tamalou.servidor.socket;
 
+import com.google.gson.Gson;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Game;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
+import com.tamalou.servidor.modelo.entidad.socketEntities.Match;
+import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
+import java.util.*;
 
 public class SignalManager {
 
@@ -16,8 +20,12 @@ public class SignalManager {
 
     private GameManager gameManager;
 
+    // @Autowired
+    private final Gson gson;
+
     public SignalManager(GameManager manager) {
         this.gameManager = manager;
+        this.gson = new Gson();
     }
 
 
@@ -26,16 +34,16 @@ public class SignalManager {
             boolean continueManage = false;
             do {
                 try{
-                    String strResult = player.reader.nextLine();
-                    int signal = Signal.ERROR;
+                    String line = player.reader.nextLine();
+                    Package pack = gson.fromJson(line, Package.class);
+                    int signal = pack.signal;
 
-                    signal = Integer.parseInt(strResult);
                     System.out.println("Signal from " + player.getName() + " received by the server: " +signal);
 
 
                     continueManage = switch (signal) {
-                        case Signal.CREAR_TORNEO_PUBLICO               -> manageCreateGame(player, false);
-                        case Signal.CREAR_TORNEO_PRIVADO               -> manageCreateGame(player, true);
+                        case Signal.CREAR_TORNEO_PUBLICO               -> manageCreateGame(player, line, false);
+                        case Signal.CREAR_TORNEO_PRIVADO               -> manageCreateGame(player, line, true);
                         case Signal.UNIRSE_TORNEO_PUBLICO,
                                 Signal.UNIRSE_TORNEO_PRIVADO -> mamageJoinGame(player);
                         case Signal.SOLICITAR_LISTA_TORNEOS            -> manageGameList(player.writter);
@@ -53,20 +61,26 @@ public class SignalManager {
 
 
     private boolean manageGameList(PrintStream writer){
-        HashMap<String, Game> publicGames = gameManager.showGames();
-        writer.println(Signal.LISTA_TORNEOS);
-        writer.println(publicGames.size());
-        publicGames.forEach((key, value) -> {
-            String name = value.getGameName();
-            String players = value.getPlayersList().size() + " /  4";
+        HashMap<String, Game> torneosPublicos = gameManager.showGames();
+        List<Match> matches = new LinkedList<>();
 
-            writer.println(
-                    name + Signal.SEPARADOR +
-                    players + Signal.SEPARADOR +
-                    key);
+        torneosPublicos.forEach((key, value) -> {
+            String nombre = value.getGameName();
+            int jugadores = value.getPlayersList().size();
+
+            Match match = new Match();
+            match.name = nombre;
+            match.players = jugadores;
+            match.key = key;
+
+            matches.add(match);
         });
 
+        Package<List<Match>> matchPackage = new Package<>(Signal.LISTA_TORNEOS, matches);
+        writer.println(gson.toJson(matchPackage));
+
         return true;
+
     }
 
 
@@ -93,28 +107,23 @@ public class SignalManager {
     }
 
 
-    private boolean manageCreateGame(Player player, boolean isPrivate) throws NoSuchElementException {
-        String gameName = player.reader.nextLine();
-        System.out.println("Info:" + gameName);
+    private boolean manageCreateGame(Player player, String packageLine, boolean isPrivate) throws NoSuchElementException {
 
-        player.writter.println(Signal.ENVIAR_NOMBRE);
-        player.name = player.reader.nextLine();
+        Match match = gson.fromJson(packageLine, Package.MatchPackage.class).data;
+
+        String gameName = match.name;
+        player.name = match.creatorName;
 
         Game game = new Game(isPrivate, gameName);
         String key = gameManager.addGame(player, game);
         gameManager.joinPlayerToGame(player, key);
 
         if(isPrivate){
-            player.writter.println(Signal.CLAVE_TORNEO);
-            player.writter.println(key);
+            player.writter.printf("{\"signal\": %d, \"data\": \"%s\"}\n",Signal.CLAVE_TORNEO, key);
         }
 
-        player.writter.println(Signal.CONEXION_EXITOSA_TORNEO);
+        player.writter.printf("{\"signal\": %d}\n", Signal.CONEXION_EXITOSA_TORNEO);
 
         return false;
     }
-
-
-    
-    
 }

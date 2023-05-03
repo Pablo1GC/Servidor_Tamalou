@@ -3,6 +3,8 @@ package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
 import com.tamalou.servidor.socket.Signal;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -31,6 +33,7 @@ public class Game extends Thread{
         this.gameEnded = false;
         this.privateGame = isPrivate;
         this.gameName = gameName;
+        this.playersList = new ArrayList<>();
     }
 
     @Override

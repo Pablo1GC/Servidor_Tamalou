@@ -1,6 +1,9 @@
 package com.tamalou.servidor.socket;
 
+import com.google.gson.Gson;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
+import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
 import java.net.Socket;
@@ -11,18 +14,23 @@ public class ClientConnection {
     private GameManager gameManager;
     private SignalManager signalManager;
 
+    // @Autowired
+    private Gson gson;
+
     public ClientConnection(GameManager gameManager, SignalManager signalManager){
         this.gameManager = gameManager;
         this.signalManager = signalManager;
+        this.gson = new Gson();
     }
 
     public void connectClient(Socket clientSocket) {
         try {
             Player player = new Player(clientSocket);
 
-            int connectionSignal = Integer.parseInt(player.reader.nextLine());
+            String line = player.reader.nextLine();
+            int connectionSignal = gson.fromJson(line, Package.class).signal;
             if (connectionSignal == Signal.CONECTARSE)
-                player.writter.println(Signal.CONEXION_EXITOSA);
+                player.writter.println(gson.toJson(new Package<>(Signal.CONEXION_EXITOSA, null)));
             else {
                 clientSocket.close();
                 return;
