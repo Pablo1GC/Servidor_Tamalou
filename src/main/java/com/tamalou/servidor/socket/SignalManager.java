@@ -1,10 +1,14 @@
 package com.tamalou.servidor.socket;
 
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Game;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Match;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
+import org.apache.tomcat.util.json.JSONFilter;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -45,7 +49,7 @@ public class SignalManager {
                         case Signal.CREAR_TORNEO_PUBLICO               -> manageCreateGame(player, line, false);
                         case Signal.CREAR_TORNEO_PRIVADO               -> manageCreateGame(player, line, true);
                         case Signal.UNIRSE_TORNEO_PUBLICO,
-                                Signal.UNIRSE_TORNEO_PRIVADO -> mamageJoinGame(player);
+                                Signal.UNIRSE_TORNEO_PRIVADO -> mamageJoinGame(player, line);
                         case Signal.SOLICITAR_LISTA_TORNEOS            -> manageGameList(player.writter);
                         default -> false;
 
@@ -84,26 +88,27 @@ public class SignalManager {
     }
 
 
-    private boolean mamageJoinGame(Player player) throws NoSuchElementException {
+    private boolean mamageJoinGame(Player player, String packLine) throws NoSuchElementException {
         System.out.println("Join");
-        String key = player.reader.nextLine();
 
-        player.writter.println(Signal.ENVIAR_NOMBRE);
-        player.name = player.reader.nextLine();
+        JsonObject pack = gson.fromJson(packLine, JsonObject.class);
 
-        int result = gameManager.joinPlayerToGame(player, key);
+        String key = pack.get("data").getAsJsonObject().get("key").getAsString();
+        player.name = pack.get("data").getAsJsonObject().get("playerName").getAsString();
+
+        int resultSignal = gameManager.joinPlayerToGame(player, key);
 
         System.out.println("Key: " + key);
-        System.out.println("Result: " + result);
-        player.writter.println(result);
+        System.out.println("Result: " + resultSignal);
+        player.writter.printf("{\"signal\": %d}\n", resultSignal);
 
-        if(result == Signal.UNION_EXITOSA_TORNEO){
-            player.writter.println(Signal.NOMBRE_TORNEO);
-            player.writter.println(gameManager.listGames(key).getGameName());
+        if(resultSignal == Signal.UNION_EXITOSA_TORNEO){
+            // player.writter.println(Signal.NOMBRE_TORNEO);
+            // player.writter.println(gameManager.listGames(key).getGameName());
 
         }
 
-        return result != Signal.UNION_EXITOSA_TORNEO;
+        return resultSignal != Signal.UNION_EXITOSA_TORNEO;
     }
 
 
