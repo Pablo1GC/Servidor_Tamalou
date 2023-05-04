@@ -4,14 +4,14 @@ import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Friendship;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
 import com.tamalou.servidor.modelo.persistencia.UserRepository;
+import jakarta.persistence.NoResultException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * The UserController class is responsible for handling HTTP requests related to users and friendships.
@@ -35,7 +35,7 @@ public class UserController {
     /**
      * HTTP GET method for retrieving a user by ID.
      *
-     * @param id The ID of the user to retrieve.
+     * @param id    The ID of the user to retrieve.
      * @param token The access token from the fetching user.
      * @return A ResponseEntity containing the user or a HttpStatus NOT_FOUND if the user does not exist.
      */
@@ -47,7 +47,7 @@ public class UserController {
 
             // Do not provide too much information if the user
             // fetching the info doesn't validate its identity.
-            if(token == null ) { // TODO: Validate token
+            if (token == null) { // TODO: Validate token
                 user.setEmail(null);
             }
 
@@ -86,6 +86,7 @@ public class UserController {
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody User user) {
         User existingUser = userRepository.findById(id);
+        System.out.println(user.toString());
         if (existingUser != null) {
             user.setUid(id);
             userRepository.update(user);
@@ -133,4 +134,30 @@ public class UserController {
     }
 
 
+    /**
+     * REST endpoint for retrieving user statistics.
+     *
+     * @param uid The unique identifier of the user.
+     * @return A ResponseEntity containing a Map with the user's statistics if the user exists, or an error message if not found or an error occurred.
+     */
+    @GetMapping("/{uid}/stats")
+    public ResponseEntity<Map<String, Object>> getUserStats(@PathVariable String uid) {
+        Map<String, Object> stats = new HashMap<>();
+        try {
+            stats.put("totalGamesPlayed", userRepository.getTotalGamesPlayed(uid));
+            stats.put("averageScore", userRepository.getAverageScore(uid));
+            stats.put("gamesWon", userRepository.getGamesWon(uid));
+            stats.put("gamesLost", userRepository.getGamesLost(uid));
+            stats.put("averagePlayTime", userRepository.getAveragePlayTime(uid));
+            return new ResponseEntity<>(stats, HttpStatus.OK);
+        } catch (NoResultException e) {
+            Map<String, Object> error = Collections.singletonMap("error", "User not found");
+            return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+
+        } catch (Exception e) {
+            Map<String, Object> error = Collections.singletonMap("error", "An error occurred while fetching user stats");
+            System.out.println(e.getMessage());
+            return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

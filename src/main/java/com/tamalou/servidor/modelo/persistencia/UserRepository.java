@@ -8,10 +8,16 @@ package com.tamalou.servidor.modelo.persistencia;
 
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.ParameterMode;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.StoredProcedureQuery;
 import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.query.Procedure;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
+import java.sql.Types;
 import java.util.List;
 
 @Repository
@@ -80,4 +86,74 @@ public class UserRepository {
                 .getResultList();
     }
 
+    /**
+     * Retrieves the total number of games played by a player from the database.
+     *
+     * @param playerUid The unique identifier (uid) of the player to retrieve the total games played for.
+     * @return The total number of games played by the player.
+     */
+    @Procedure(name = "get_total_games_played")
+    public long getTotalGamesPlayed(@Param("player_uid") String playerUid) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("get_total_games_played");
+        query.registerStoredProcedureParameter("player_uid", String.class, ParameterMode.IN);
+        query.setParameter("player_uid", playerUid);
+        return (long) query.getSingleResult();
+    }
+
+    /**
+     * Retrieves the average score of a player from the database.
+     *
+     * @param playerUid The unique identifier (uid) of the player to retrieve the average score for.
+     * @return The average score of the player.
+     */
+    @Procedure(name = "get_average_score")
+
+    public BigDecimal getAverageScore(@Param("player_uid") String playerUid) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("get_average_score");
+        query.registerStoredProcedureParameter("player_uid", String.class, ParameterMode.IN);
+        query.setParameter("player_uid", playerUid);
+        return (BigDecimal) query.getSingleResult();
+    }
+
+    /**
+     * Retrieves the total number of games won by a player from the database.
+     *
+     * @param playerUid The unique identifier (uid) of the player to retrieve the total games won for.
+     * @return The total number of games won by the player.
+     */
+    @Procedure(name = "get_games_won")
+    public long getGamesWon(@Param("player_uid") String playerUid) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("get_games_won");
+        query.registerStoredProcedureParameter("player_uid", String.class, ParameterMode.IN);
+        query.setParameter("player_uid", playerUid);
+        return (long) query.getSingleResult();
+    }
+
+    /**
+     * Retrieves the total number of games lost by a player from the database.
+     *
+     * @param playerUid The unique identifier (uid) of the player to retrieve the total games lost for.
+     * @return The total number of games lost by the player.
+     */
+    @Procedure(name = "get_games_lost")
+    public long getGamesLost(@Param("player_uid") String playerUid) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("get_games_lost");
+        query.registerStoredProcedureParameter("player_uid", String.class, ParameterMode.IN);
+        query.setParameter("player_uid", playerUid);
+        return (long) query.getSingleResult();
+    }
+
+    /**
+     * Retrieves the average play time of a player from the database.
+     *
+     * @param playerUid The unique identifier (uid) of the player to retrieve the average play time for.
+     * @return The average play time of the player.
+     */
+    @Procedure(name = "get_average_play_time")
+    public BigDecimal getAveragePlayTime(@Param("player_uid") String playerUid) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("get_average_play_time");
+        query.registerStoredProcedureParameter("player_uid", String.class, ParameterMode.IN);
+        query.setParameter("player_uid", playerUid);
+        return (BigDecimal) query.getSingleResult();
+    }
 }
