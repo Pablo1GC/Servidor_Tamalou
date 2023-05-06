@@ -46,7 +46,7 @@ public class Round {
 
             // If someone has discarded all their cards, the round ends.
             for (Player player : playersList) {
-                player.writter.println(Signal.START_TURN);
+                player.writter.packAndWrite(Signal.START_TURN);
                 // The player's turn begins
                 if (deck.checkEmptyDeck()) {
                     returnDiscartedCardsToDeck();
@@ -94,10 +94,8 @@ public class Round {
      */
     public void showLastCardInDiscartedDeck() {
         System.out.println(discardedCardsDeck.lastElement());
-        Gson codifier = new Gson();
         for (Player p : playersList) {
-            p.writter.println(Signal.SHOW_LAST_CARD_DISCARTED_DECK);
-            p.writter.println(codifier.toJson(discardedCardsDeck.lastElement()));
+            p.writter.packAndWrite(Signal.SHOW_LAST_CARD_DISCARTED_DECK, discardedCardsDeck.lastElement());
         }
     }
 
@@ -122,10 +120,8 @@ public class Round {
         switch (option) {
             case 1 -> {
                 Card card = deck.takeCard();
-                Gson codifier = new Gson();
                 for (Player p : playersList) {
-                    p.writter.println(Signal.SHOW_LAST_CARD_DECK);
-                    p.writter.println(codifier.toJson(card));
+                    p.writter.packAndWrite(Signal.SHOW_LAST_CARD_DECK, card);
                 }
                 System.out.println(card.toString());
                 int option2;
@@ -149,7 +145,7 @@ public class Round {
                     discardedCardsDeck.add(card);
                     for (Player p : playersList) {
                         if (!p.equals(player))
-                        p.writter.println(Signal.PLAYER_DISCARDS_CARD);
+                            p.writter.packAndWrite(Signal.PLAYER_DISCARDS_CARD);
                     }
                 } else if (option2 == Signal.PLAYER_SWITCH_CARD_DECK) {
                     Card cardOfPlayer = swapCards(player, card);
@@ -242,7 +238,7 @@ public class Round {
      * @return Returns true if the option is "Yes", false if is "No"
      */
     public boolean standRound(Player player) {
-        player.writter.println(Signal.ASK_PLAYER_TO_STAND);
+        player.writter.packAndWrite(Signal.ASK_PLAYER_TO_STAND);
         System.out.println("Do you want to stand? [Yes/No]");
         // CHECK WITH @BRIAN
         String endTurn = player.reader.nextLine();
@@ -266,8 +262,7 @@ public class Round {
      */
     public void seeCard(Player player, Card card) {
         Gson codifier = new Gson();
-        player.writter.println(Signal.PLAYER_SEES_CARD);
-        player.writter.println(codifier.toJson(card));
+        player.writter.packAndWrite(Signal.PLAYER_SEES_CARD, card);
     }
 
     /**

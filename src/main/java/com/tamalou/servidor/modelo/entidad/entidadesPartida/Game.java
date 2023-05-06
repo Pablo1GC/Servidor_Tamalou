@@ -49,7 +49,7 @@ public class Game extends Thread{
      */
     public Player startGame() {
         for (Player p : playersList) {
-            p.writter.println(Signal.START_GAME);
+            p.writter.packAndWrite(Signal.START_GAME);
         }
 
         while (!gameEnded) {
@@ -119,8 +119,7 @@ public class Game extends Thread{
     public void addPlayer(Player player) {
         playersList.add(player);
         for (Player p : playersList) {
-            p.writter.println(Signal.PLAYER_JOINED_GAME);
-            p.writter.println(playersList.size());
+            p.writter.packAndWrite(Signal.PLAYER_JOINED_GAME, playersList.size());
         }
 
         if (playersList.size() == MAX_PLAYERS){
