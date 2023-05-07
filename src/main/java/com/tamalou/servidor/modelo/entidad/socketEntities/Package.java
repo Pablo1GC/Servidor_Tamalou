@@ -34,16 +34,7 @@ public class Package implements Serializable {
     @Override
     public String toString() {
         if(data != null){
-
-            if(data.isJsonObject())
-                return String.format("{\"signal\": %d, \"data\": %s}", signal, data.getAsJsonObject());
-
-            else if (data.isJsonArray())
-                return String.format("{\"signal\": %d, \"data\": %s}", signal, data.getAsJsonArray());
-
-            else
-                return String.format("{\"signal\": %d, \"data\": \"%s\"}", signal, data.getAsString());
-
+            return String.format("{\"signal\": %d, \"data\": %s}", signal, gson.toJson(data));
         }
 
         return String.format("{\"signal\": %d}", signal);

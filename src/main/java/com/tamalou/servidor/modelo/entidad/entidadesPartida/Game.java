@@ -4,7 +4,6 @@ package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 import com.tamalou.servidor.socket.Signal;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -18,7 +17,7 @@ public class Game extends Thread{
     private String gameName;
 
     private int maxRounds;
-    private List<Player> playersList;
+    private List<Player> playerList;
     private int actualRound;
     private boolean gameEnded;
     private Player winner;
@@ -26,34 +25,32 @@ public class Game extends Thread{
     /**
      * Cuando se crea el objeto crea una partida basado en los parámetros que recibe
      */
-    public Game(boolean isPrivate, String gameName) {
+    public Game(boolean isPrivate, String gameName, int maxRounds) {
         gameThread = new Thread(this);
         this.maxRounds = maxRounds;
         this.actualRound = 0;
         this.gameEnded = false;
         this.privateGame = isPrivate;
         this.gameName = gameName;
-        this.playersList = new ArrayList<>();
+        this.playerList = new ArrayList<>();
     }
 
     @Override
     public void run(){
         startGame();
     }
+
     /**
      * This method starts the game.
      * First, sends a signal toevery player (Client).
-     *
-     *
-     *
      */
     public Player startGame() {
-        for (Player p : playersList) {
+        for (Player p : playerList) {
             p.writter.packAndWrite(Signal.START_GAME);
         }
 
         while (!gameEnded) {
-            Round round = new Round(playersList);
+            Round round = new Round(playerList);
             round.playRound();
             actualRound++;
 
@@ -90,8 +87,8 @@ public class Game extends Thread{
      */
     private Player returnWinner() {
         Player ganador = null;
-        for (int i = 1; i < playersList.size(); i++) {
-            Player player = playersList.get(i);
+        for (int i = 1; i < playerList.size(); i++) {
+            Player player = playerList.get(i);
             if (player.getPoints() < ganador.getPoints()) {
                 ganador = player;
             }
@@ -103,12 +100,12 @@ public class Game extends Thread{
         return privateGame;
     }
 
-    public List<Player> getPlayersList() {
-        return playersList;
+    public List<Player> getPlayerList() {
+        return playerList;
     }
 
-    public void setPlayersList(List<Player> playersList) {
-        this.playersList = playersList;
+    public void setPlayerList(List<Player> playerList) {
+        this.playerList = playerList;
     }
 
     /**
@@ -117,12 +114,12 @@ public class Game extends Thread{
      * @param player
      */
     public void addPlayer(Player player) {
-        playersList.add(player);
-        for (Player p : playersList) {
-            p.writter.packAndWrite(Signal.PLAYER_JOINED_GAME, playersList.size());
+        playerList.add(player);
+        for (Player p : playerList) {
+            p.writter.packAndWrite(Signal.PLAYER_JOINED_GAME, playerList.size());
         }
 
-        if (playersList.size() == MAX_PLAYERS){
+        if (playerList.size() == MAX_PLAYERS){
             startGame();
         }
     }

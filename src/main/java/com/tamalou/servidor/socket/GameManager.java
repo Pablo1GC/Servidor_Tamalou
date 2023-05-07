@@ -51,7 +51,7 @@ public class GameManager {
         if (gameHashMap.get(gameKey) == null)
             return Signal.TORNEO_INEXISTENTE;
 
-        if (gameHashMap.get(gameKey).getPlayersList().size() == 4) {
+        if (gameHashMap.get(gameKey).getPlayerList().size() == 4) {
             return Signal.TORNEO_LLENO;
         } else {
             gameHashMap.get(gameKey).addPlayer(player);

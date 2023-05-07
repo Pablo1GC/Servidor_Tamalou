@@ -1,12 +1,9 @@
 package com.tamalou.servidor.modelo.entidad.entidadesUsuario;
 
-import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Game;
-import com.tamalou.servidor.modelo.entidad.entidadesUsuario.GamePlayerId;
-import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import jakarta.persistence.*;
 
 /**
- * Represents a player in a game, who participates in a specific game with a user and has associated score and winner status.
+ * Represents a player in a game with a score and winner status.
  * This class is mapped to the "game_player" table in the database.
  */
 @Entity
