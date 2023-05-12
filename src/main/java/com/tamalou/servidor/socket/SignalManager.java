@@ -35,11 +35,11 @@ public class SignalManager {
             boolean continueManage;
             do {
                 try{
-                    String line = player.reader.nextLine();
-                    Package pack = gson.fromJson(line, Package.class);
+
+                    Package pack = player.reader.readPackage();
                     int signal = pack.signal;
 
-                    System.out.println("Signal from " + player.getName() + " received by the server: " +signal);
+                    System.out.println("Signal from " + player.getUid() + " received by the server: " +signal);
 
 
                     continueManage = switch (signal) {

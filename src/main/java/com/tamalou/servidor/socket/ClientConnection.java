@@ -3,6 +3,7 @@ package com.tamalou.servidor.socket;
 import com.google.gson.Gson;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
+import com.tamalou.servidor.modelo.entidad.socketEntities.PackageReader;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
@@ -27,8 +28,11 @@ public class ClientConnection {
         try {
             Player player = new Player(clientSocket);
 
-            String line = player.reader.nextLine();
-            int connectionSignal = gson.fromJson(line, Package.class).signal;
+            Package pack = player.reader.readPackage();
+            System.out.println("Package: " + pack.toString());
+            player.setUid(pack.data.toString());
+            System.out.println("Player uid: " + player.getUid());
+            int connectionSignal = pack.signal;
             if (connectionSignal == Signal.CONECTARSE)
                 player.writter.packAndWrite(Signal.CONEXION_EXITOSA);
             else {

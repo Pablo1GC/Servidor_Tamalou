@@ -2,12 +2,14 @@ package com.tamalou.servidor.modelo.entidad.socketEntities;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import org.springframework.lang.NonNull;
 
 import java.io.Serializable;
 
 public class Package implements Serializable {
+
     public static Gson gson = new Gson();
 
     public int signal;

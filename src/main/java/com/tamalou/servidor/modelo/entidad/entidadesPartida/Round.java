@@ -121,7 +121,8 @@ public class Round {
             option = 1;
         } else {
             p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_PLAY);
-            option = 000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+
+            option = p.reader.readPackage().data.getAsInt();
         }
         switch (option) {
             case 1 -> {
@@ -133,7 +134,7 @@ public class Round {
 
                 p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_PLAY_2);
 
-                int option2 = 000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+                int option2 = p.reader.readPackage().data.getAsInt();
                 // Execute option2
                 if (option2 == Signal.PLAYER_DISCARDS_CARD) {
                     discardedCardsDeck.add(card);
@@ -178,7 +179,8 @@ public class Round {
 
                         // Ask player if he wants to switch the cards
                         p.writter.packAndWrite(Signal.ASK_PLAYER_SWITCH_CARD);
-                        if (000000000000000000000000000000000000000000000000000000000000000000000000000000000 == 1) {
+
+                        if (p.reader.readPackage().data.getAsInt() == 1) {
                             switchCardWithOponent(p, oponent, ownIndexCard, oponentIndexCard);
                         }
                     }
@@ -201,7 +203,7 @@ public class Round {
      */
     public int PlayerselectCard(Player p) {
         p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
-        int indexSelected = 000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+        int indexSelected = p.reader.readPackage().data.getAsInt();
         return indexSelected;
     }
 
@@ -232,7 +234,7 @@ public class Round {
      */
     public void discardPlayerCard(Player p) {
         p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
-        int index = 000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+        int index = p.reader.readPackage().data.getAsInt();
         Card card = p.getCards().get(index);
         if (card.getValue() == discardedCardsDeck.lastElement().getValue()) {
             p.getCards().remove(card);
@@ -258,9 +260,9 @@ public class Round {
     public boolean standRound(Player p) {
         p.writter.packAndWrite(Signal.ASK_PLAYER_TO_STAND);
         System.out.println("Do you want to stand? [Yes/No]");
-        // CHECK WITH @BRIAN
-        int endTurn = 000000000000000000000000000000000000000000000000000000000000000000000000000000000;
-        return endTurn == Signal.PLAYER_STANDS ? true : false;
+
+        int endTurn = p.reader.readPackage().data.getAsInt();
+        return endTurn == Signal.PLAYER_STANDS;
     }
 
     /**
@@ -287,10 +289,10 @@ public class Round {
      *
      * @param card
      */
-    public Card swapCards(Player player, Card card) {
-        int cardIndex = 000000000000000000000000000000000000000000000000000000000000000000000000000000000;
-        Card myCard = player.getCards().get(cardIndex);
-        player.getCards().set(cardIndex, card);
+    public Card swapCards(Player p, Card card) {
+        int cardIndex = p.reader.readPackage().data.getAsInt();
+        Card myCard = p.getCards().get(cardIndex);
+        p.getCards().set(cardIndex, card);
         return myCard;
     }
 
