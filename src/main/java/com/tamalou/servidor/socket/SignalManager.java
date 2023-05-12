@@ -1,16 +1,13 @@
 package com.tamalou.servidor.socket;
 
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Game;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Match;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
-import org.apache.tomcat.util.json.JSONFilter;
+import com.tamalou.servidor.modelo.entidad.socketEntities.PackageWriter;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
@@ -35,7 +32,7 @@ public class SignalManager {
 
     public void manage(Player player) {
         new Thread(() -> {
-            boolean continueManage = false;
+            boolean continueManage;
             do {
                 try{
                     String line = player.reader.nextLine();
@@ -46,10 +43,10 @@ public class SignalManager {
 
 
                     continueManage = switch (signal) {
-                        case Signal.CREAR_TORNEO_PUBLICO               -> manageCreateGame(player, line, false);
-                        case Signal.CREAR_TORNEO_PRIVADO               -> manageCreateGame(player, line, true);
+                        case Signal.CREAR_TORNEO_PUBLICO               -> manageCreateGame(player, pack.data.getAsJsonObject(), false);
+                        case Signal.CREAR_TORNEO_PRIVADO               -> manageCreateGame(player, pack.data.getAsJsonObject(), true);
                         case Signal.UNIRSE_TORNEO_PUBLICO,
-                                Signal.UNIRSE_TORNEO_PRIVADO -> mamageJoinGame(player, line);
+                                Signal.UNIRSE_TORNEO_PRIVADO -> mamageJoinGame(player, pack.data.getAsJsonObject());
                         case Signal.SOLICITAR_LISTA_TORNEOS            -> manageGameList(player.writter);
                         default -> false;
 
@@ -64,13 +61,13 @@ public class SignalManager {
     }
 
 
-    private boolean manageGameList(PrintStream writer){
+    private boolean manageGameList(PackageWriter writer){
         HashMap<String, Game> torneosPublicos = gameManager.showGames();
         List<Match> matches = new LinkedList<>();
 
         torneosPublicos.forEach((key, value) -> {
             String nombre = value.getGameName();
-            int jugadores = value.getPlayersList().size();
+            int jugadores = value.getPlayerList().size();
 
             Match match = new Match();
             match.name = nombre;
@@ -80,54 +77,51 @@ public class SignalManager {
             matches.add(match);
         });
 
-        Package<List<Match>> matchPackage = new Package<>(Signal.LISTA_TORNEOS, matches);
-        writer.println(gson.toJson(matchPackage));
+        writer.packAndWrite(Signal.LISTA_TORNEOS, matches);
 
         return true;
 
     }
 
 
-    private boolean mamageJoinGame(Player player, String packLine) throws NoSuchElementException {
+    private boolean mamageJoinGame(Player player, JsonObject data) throws NoSuchElementException {
         System.out.println("Join");
 
-        JsonObject pack = gson.fromJson(packLine, JsonObject.class);
-
-        String key = pack.get("data").getAsJsonObject().get("key").getAsString();
-        player.name = pack.get("data").getAsJsonObject().get("playerName").getAsString();
+        String key = data.get("key").getAsString();
+        player.name = data.get("player_name").getAsString();
 
         int resultSignal = gameManager.joinPlayerToGame(player, key);
 
         System.out.println("Key: " + key);
         System.out.println("Result: " + resultSignal);
-        player.writter.printf("{\"signal\": %d}\n", resultSignal);
 
-        if(resultSignal == Signal.UNION_EXITOSA_TORNEO){
-            // player.writter.println(Signal.NOMBRE_TORNEO);
-            // player.writter.println(gameManager.listGames(key).getGameName());
+        if(resultSignal == Signal.UNION_EXITOSA_TORNEO)
+            player.writter.packAndWrite(Signal.UNION_EXITOSA_TORNEO, gameManager.listGames(key).getGameName());
+        else
+            player.writter.packAndWrite(resultSignal);
 
-        }
 
         return resultSignal != Signal.UNION_EXITOSA_TORNEO;
     }
 
 
-    private boolean manageCreateGame(Player player, String packageLine, boolean isPrivate) throws NoSuchElementException {
+    private boolean manageCreateGame(Player player, JsonObject match, boolean isPrivate) throws NoSuchElementException {
 
-        Match match = gson.fromJson(packageLine, Package.MatchPackage.class).data;
+        String gameName = match.get("match_name").getAsString();
+        player.name = match.get("creator_name").getAsString();
+        int maxRounds = match.get("match_rounds").getAsInt();
 
-        String gameName = match.name;
-        player.name = match.creatorName;
-
-        Game game = new Game(isPrivate, gameName);
+        Game game = new Game(isPrivate, gameName, maxRounds);
         String key = gameManager.addGame(player, game);
         gameManager.joinPlayerToGame(player, key);
 
+        System.out.println(maxRounds);
+
         if(isPrivate){
-            player.writter.printf("{\"signal\": %d, \"data\": \"%s\"}\n",Signal.CLAVE_TORNEO, key);
+            player.writter.packAndWrite(Signal.CLAVE_TORNEO, key);
         }
 
-        player.writter.printf("{\"signal\": %d}\n", Signal.CONEXION_EXITOSA_TORNEO);
+        player.writter.packAndWrite(Signal.CONEXION_EXITOSA_TORNEO);
 
         return false;
     }

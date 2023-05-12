@@ -15,11 +15,16 @@ import java.io.Serializable;
 @Embeddable
 public class GamePlayerId implements Serializable {
 
+    @Column(name = "id_game")
+    private long gameId;
+
+    @Column(name = "id_user")
+    private String userId;
+
     /**
      * Default constructor for the GamePlayerId class.
      */
-    public GamePlayerId() {
-    }
+    public GamePlayerId() {}
 
     /**
      * Constructor for the GamePlayerId class.
@@ -31,12 +36,6 @@ public class GamePlayerId implements Serializable {
         this.gameId = gameId;
         this.userId = userId;
     }
-
-    @Column(name = "id_game")
-    private long gameId;
-
-    @Column(name = "id_user")
-    private String userId;
 
     // Getters and setters, constructors, etc.
 

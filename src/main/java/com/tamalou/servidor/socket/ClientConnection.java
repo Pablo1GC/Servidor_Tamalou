@@ -30,7 +30,7 @@ public class ClientConnection {
             String line = player.reader.nextLine();
             int connectionSignal = gson.fromJson(line, Package.class).signal;
             if (connectionSignal == Signal.CONECTARSE)
-                player.writter.println(gson.toJson(new Package<>(Signal.CONEXION_EXITOSA, null)));
+                player.writter.packAndWrite(Signal.CONEXION_EXITOSA);
             else {
                 clientSocket.close();
                 return;

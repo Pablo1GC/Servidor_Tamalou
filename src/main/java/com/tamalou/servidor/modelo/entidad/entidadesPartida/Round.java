@@ -1,6 +1,7 @@
 package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
-import com.tamalou.servidor.socket.Communicator;
+import com.google.gson.Gson;
+import com.tamalou.servidor.modelo.entidad.entidadesExtra.Utilidades;
 import com.tamalou.servidor.socket.Signal;
 
 import java.util.List;
@@ -44,8 +45,8 @@ public class Round {
         while (!endRound) {
 
             // If someone has discarded all their cards, the round ends.
-            for (Player p : playersList) {
-                Communicator.sendCommunication(p, Signal.START_TURN);
+            for (Player player : playersList) {
+                player.writter.packAndWrite(Signal.START_TURN);
                 // The player's turn begins
                 if (deck.checkEmptyDeck()) {
                     returnDiscartedCardsToDeck();

@@ -1,7 +1,7 @@
 package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
 import com.tamalou.servidor.modelo.entidad.entidadesExtra.Utilidades;
-import com.tamalou.servidor.socket.Communicator;
+import com.tamalou.servidor.modelo.entidad.socketEntities.PackageWriter;
 import jakarta.persistence.*;
 
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class Player {
     @Transient
     public Scanner reader;
     @Transient
-    public PrintStream writter;
+    public PackageWriter writter;
 
 
     public Player() {
@@ -58,7 +58,7 @@ public class Player {
     public Player(Socket socket) throws IOException {
         this.socket = socket;
         this.reader = new Scanner(socket.getInputStream());
-        this.writter = new PrintStream(socket.getOutputStream());
+        this.writter = new PackageWriter(socket.getOutputStream());
         this.points = 0;
         this.cards = new ArrayList<>();
         this.endTurn = false;
