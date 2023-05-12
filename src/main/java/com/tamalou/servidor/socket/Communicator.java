@@ -15,4 +15,8 @@ public class Communicator {
     public static void sendCommunication(Player player, int signal) {
         player.writter.printf("{\"signal\": %d}\n", signal);
     }
+
+    public static int receiveCommunication(){
+        return 0;
+    }
 }

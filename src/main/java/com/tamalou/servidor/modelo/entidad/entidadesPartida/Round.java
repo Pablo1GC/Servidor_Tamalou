@@ -1,7 +1,6 @@
 package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
-import com.google.gson.Gson;
-import com.tamalou.servidor.modelo.entidad.entidadesExtra.Utilidades;
+import com.tamalou.servidor.socket.Communicator;
 import com.tamalou.servidor.socket.Signal;
 
 import java.util.List;
@@ -45,8 +44,8 @@ public class Round {
         while (!endRound) {
 
             // If someone has discarded all their cards, the round ends.
-            for (Player player : playersList) {
-                player.writter.println(Signal.START_TURN);
+            for (Player p : playersList) {
+                Communicator.sendCommunication(p, Signal.START_TURN);
                 // The player's turn begins
                 if (deck.checkEmptyDeck()) {
                     returnDiscartedCardsToDeck();
@@ -57,21 +56,31 @@ public class Round {
 
                 // If round is above 5, player can stand and end the round.
                 if (actualTurn > 5) {
-                    boolean stand = standRound(player);
+                    boolean stand = standRound(p);
                     if (stand) {
                         endRound = true;
+                        for (Player p2 : playersList) {
+                            Communicator.sendCommunication(p2, Signal.PLAYER_STANDS);
+                        }
                         break;
                     }
                 }
 
                 // Player can choose what to do
-                chooseOptionToPlay(player);
+                chooseOptionToPlay(p);
 
-                System.out.println(player.getName() + " your turn has ended.");
-
+                System.out.println(p.getUid() + " your turn has ended.");
                 // If any player runs out of cards, the round ends.
-                if (player.getCards().size() == 0) {
+                if (p.getCards().size() == 0) {
                     endRound = true;
+                    for (Player p2 : playersList) {
+                        Communicator.sendCommunication(p2, Signal.PLAYER_CARDS_EMPTY, p.getUid());
+                        Communicator.sendCommunication(p2, Signal.END_ROUND);
+                    }
+                } else {
+                    for (Player p2 : playersList) {
+                        Communicator.sendCommunication(p2, Signal.PLAYER_TURN_ENDED, p.getUid());
+                    }
                 }
 
             }
@@ -94,96 +103,89 @@ public class Round {
      */
     public void showLastCardInDiscartedDeck() {
         System.out.println(discardedCardsDeck.lastElement());
-        Gson codifier = new Gson();
         for (Player p : playersList) {
-            p.writter.println(Signal.SHOW_LAST_CARD_DISCARTED_DECK);
-            p.writter.println(codifier.toJson(discardedCardsDeck.lastElement()));
+            Communicator.sendCommunication(p, Signal.SHOW_LAST_CARD_DISCARTED, discardedCardsDeck.lastElement());
         }
     }
 
     /**
      * Player can choose what to do in his turn.
      *
-     * @param player Player choosing the option
+     * @param p Player choosing the option
      */
-    public void chooseOptionToPlay(Player player) {
+    public void chooseOptionToPlay(Player p) {
         int option;
         if (discardedCardsDeck.isEmpty()) {
             option = 1;
         } else {
-            do {
-                System.out.println("What do you want to do?");
-                System.out.println("[1] Take a card of the deck.");
-                System.out.println("[2] Discard one of your cards.");
-                System.out.println("[3] Switch the card of the maze with one of your cards.");
-                option = Utilidades.leerEntero("");
-            } while (option < 1 || option > 3);
+            Communicator.sendCommunication(p, Signal.ASK_PLAYER_SELECT_PLAY);
+            option = Communicator.receiveCommunication();
         }
         switch (option) {
             case 1 -> {
                 Card card = deck.takeCard();
-                Gson codifier = new Gson();
-                for (Player p : playersList) {
-                    p.writter.println(Signal.SHOW_LAST_CARD_DECK);
-                    p.writter.println(codifier.toJson(card));
+                for (Player p2 : playersList) {
+                    Communicator.sendCommunication(p2, Signal.SHOW_LAST_CARD_DECK, card);
                 }
                 System.out.println(card.toString());
-                int option2;
-                int aux = 2;
-                //Select an option2
 
-                    /* THIS SHOULD GO IN THE CLIENT
-                    System.out.println("What do you want to do with the card?");
-                    System.out.println("[1] Discard the card.");
-                    System.out.println("[2] Change it for one of your cards.");
-                    if (card.getValue() > 10) {
-                        System.out.println("[3] Use the power of the card.");
-                        aux = 3;
-                    }
-                     */
+                Communicator.sendCommunication(p, Signal.ASK_PLAYER_SELECT_PLAY_2);
 
-                option2 = Integer.parseInt(player.reader.nextLine());
-
+                int option2 = Communicator.receiveCommunication();
                 // Execute option2
                 if (option2 == Signal.PLAYER_DISCARDS_CARD) {
                     discardedCardsDeck.add(card);
-                    for (Player p : playersList) {
-                        if (!p.equals(player))
-                        p.writter.println(Signal.PLAYER_DISCARDS_CARD);
+                    for (Player p2 : playersList) {
+                        if (!p2.equals(p))
+                            Communicator.sendCommunication(p2, Signal.PLAYER_DISCARDS_CARD);
                     }
                 } else if (option2 == Signal.PLAYER_SWITCH_CARD_DECK) {
-                    Card cardOfPlayer = swapCards(player, card);
+                    Card cardOfPlayer = swapCards(p, card);
                     discardedCardsDeck.add(cardOfPlayer);
+                    for (Player p2 : playersList) {
+                        if (!p2.equals(p))
+                            Communicator.sendCommunication(p2, Signal.PLAYER_SWITCH_CARD_DECK);
+                    }
                 } else if (option2 == Signal.PLAYER_USE_CARD_POWER) {
                     if (card.getValue() == 11) {
-                        Card cardAux = player.getCards().get(player.PlayerselectCard());
-                        seeCard(player, cardAux);
+                        int index = PlayerselectCard(p) - -1;
+                        Card cardAux = p.getCards().get(index);
+                        seeCard(p, cardAux);
+                        for (Player p2 : playersList) {
+                            if (!p2.equals(p))
+                                Communicator.sendCommunication(p2, Signal.PLAYER_SEES_CARD, index);
+                        }
                     } else if (card.getValue() == 12) {
-                        Player oponent = selectOpponent(player);
-                        int ownIndexCard = player.PlayerselectCard();
-                        int exchangedIndexCard = oponent.PlayerselectCard();
-                        switchCardWithOponent(player, oponent, ownIndexCard, exchangedIndexCard);
+                        int ownIndexCard = PlayerselectCard(p);
+                        // Select an oponent
+                        Player oponent = selectOpponent(p);
+                        // Now we select the oponent index card
+                        int oponentIndexCard = PlayerselectCard(p);
+                        switchCardWithOponent(p, oponent, ownIndexCard, oponentIndexCard);
 
                     } else if (card.getValue() == 13) {
-                        Player oponent = selectOpponent(player);
-                        int ownIndexCard = player.PlayerselectCard();
-                        int exchangedIndexCard = oponent.PlayerselectCard();
-                        Card cardAux = player.getCards().get(player.PlayerselectCard());
-                        seeCard(player, cardAux);
-                        // TO DO: SABER CÓMO INDICAR QUÉ JUGADOR ES EL OPONENTE
-                        cardAux = oponent.getCards().get(oponent.PlayerselectCard());
-                        seeCard(player, cardAux);
+                        int ownIndexCard = PlayerselectCard(p);
+                        Card cardAux = p.getCards().get(ownIndexCard);
+                        seeCard(p, cardAux);
+                        // Select an oponent
+                        Player oponent = selectOpponent(p);
+                        // Now we select the oponent index card
+                        int oponentIndexCard = PlayerselectCard(p);
+                        cardAux = oponent.getCards().get(oponentIndexCard);
+                        seeCard(p, cardAux);
 
-                        System.out.println("Do you want to switch the cards? [Yes/No]");
-                        if (Utilidades.leerCadena().equals("Yes")) {
-                            switchCardWithOponent(player, oponent, ownIndexCard, exchangedIndexCard);
+                        // Ask player if he wants to switch the cards
+                        Communicator.sendCommunication(p, Signal.ASK_PLAYER_SWITCH_CARD);
+                        if (Communicator.receiveCommunication() == 1) {
+                            switchCardWithOponent(p, oponent, ownIndexCard, oponentIndexCard);
                         }
                     }
                 }
             }
-            case 2 -> discardPlayerCard(player, player.getCard());
+            case 2 -> discardPlayerCard(p);
             case 3 -> {
-                Card cardOfPlayer = swapCards(player, discardedCardsDeck.pop());
+                // Implement how to communicate to other players card index of card swapped
+                Card cardOfPlayer = swapCards(p, discardedCardsDeck.pop());
                 discardedCardsDeck.add(cardOfPlayer);
             }
         }
@@ -191,28 +193,30 @@ public class Round {
     }
 
     /**
+     * Selects the card with which the player will interact
+     *
+     * @return Returns the index of the card selected by the player
+     */
+    public int PlayerselectCard(Player p) {
+        Communicator.sendCommunication(p, Signal.ASK_PLAYER_SELECT_CARD);
+        int indexSelected = Communicator.receiveCommunication();
+        return indexSelected;
+    }
+
+
+    /**
      * Allows a player to select an opponent to interact with
      *
-     * @param player who is playing the turn
+     * @param p who is playing the turn
      * @return The player chosen as an opponent
      */
-    public Player selectOpponent(Player player) {
-        boolean continueGame = false;
+    public Player selectOpponent(Player p) {
+        Communicator.sendCommunication(p, Signal.ASK_PLAYER_SELECT_OPONENT);
+        /**
+         *  Signal to opopnent object
+         */
         Player oponent = null;
-        do {
-            System.out.println("Which player you want to choose for switching cards?");
-            try {
-                oponent = playersList.get(Utilidades.leerEntero(""));
-            } catch (Exception e) {
-                System.out.println("You can´t choose that player!");
-            }
-            if (oponent == player) {
-                System.out.println("You can´t choose yourself!");
-            }
-            if (oponent != null && oponent != player) {
-                continueGame = true;
-            }
-        } while (!continueGame);
+        Communicator.receiveCommunication();
         return oponent;
     }
 
@@ -222,16 +226,24 @@ public class Round {
      * in the discard pile (of type Stack), and discards the card if it is.
      * Otherwise, the player is penalized with 5 points.
      *
-     * @param player The player who will discard the card
-     * @param card   The card to discard
+     * @param p The player who will discard the card
      */
-    public void discardPlayerCard(Player player, Card card) {
+    public void discardPlayerCard(Player p) {
+        Communicator.sendCommunication(p, Signal.ASK_PLAYER_SELECT_CARD);
+        int index = Communicator.receiveCommunication();
+        Card card = p.getCards().get(index);
         if (card.getValue() == discardedCardsDeck.lastElement().getValue()) {
-            player.getCards().remove(card);
+            p.getCards().remove(card);
             discardedCardsDeck.add(card);
+            for (Player p2 : playersList) {
+                Communicator.sendCommunication(p2, Signal.PLAYER_ONE_CARD_LESS, p.getUid());
+            }
         } else {
             System.out.println("The card does not have the same value, you are penalized with 5 points.");
-            player.setPoints(player.getPoints() + 5);
+            p.setPoints(p.getPoints() + 5);
+            for (Player p2 : playersList) {
+                Communicator.sendCommunication(p2, Signal.PLAYER_POINTS_PENALTY, p.getUid());
+            }
         }
     }
 
@@ -241,12 +253,12 @@ public class Round {
      *
      * @return Returns true if the option is "Yes", false if is "No"
      */
-    public boolean standRound(Player player) {
-        player.writter.println(Signal.ASK_PLAYER_TO_STAND);
+    public boolean standRound(Player p) {
+        Communicator.sendCommunication(p, Signal.ASK_PLAYER_TO_STAND);
         System.out.println("Do you want to stand? [Yes/No]");
         // CHECK WITH @BRIAN
-        String endTurn = player.reader.nextLine();
-        return endTurn.equals(Signal.PLAYER_STANDS) ? true : false;
+        int endTurn = Communicator.receiveCommunication();
+        return endTurn == Signal.PLAYER_STANDS ? true : false;
     }
 
     /**
@@ -264,10 +276,8 @@ public class Round {
     /**
      * Allows the player to see a card
      */
-    public void seeCard(Player player, Card card) {
-        Gson codifier = new Gson();
-        player.writter.println(Signal.PLAYER_SEES_CARD);
-        player.writter.println(codifier.toJson(card));
+    public void seeCard(Player p, Card card) {
+        Communicator.sendCommunication(p, Signal.PLAYER_SEES_CARD, card);
     }
 
     /**
@@ -276,7 +286,7 @@ public class Round {
      * @param card
      */
     public Card swapCards(Player player, Card card) {
-        int cardIndex = Integer.parseInt(player.reader.nextLine());
+        int cardIndex = Communicator.receiveCommunication();
         Card myCard = player.getCards().get(cardIndex);
         player.getCards().set(cardIndex, card);
         return myCard;

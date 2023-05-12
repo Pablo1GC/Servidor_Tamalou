@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Es la clase encargada de gestionar una partida
  */
-public class Game extends Thread{
+public class Game extends Thread {
     private Thread gameThread;
 
     public final int MAX_PLAYERS = 4;
@@ -37,19 +37,17 @@ public class Game extends Thread{
     }
 
     @Override
-    public void run(){
+    public void run() {
         startGame();
     }
+
     /**
      * This method starts the game.
      * First, sends a signal toevery player (Client).
-     *
-     *
-     *
      */
-    public Player startGame() {
+    public void startGame() {
         for (Player p : playersList) {
-            p.writter.println(Signal.START_GAME);
+            Communicator.sendCommunication(p, Signal.START_GAME);
         }
 
         while (!gameEnded) {
@@ -63,9 +61,10 @@ public class Game extends Thread{
         }
 
         winner = returnWinner();
-        System.out.println("¡La partida ha terminado! El ganador es: " + winner.getName());
-
-        return winner;
+        System.out.println("¡La partida ha terminado! El ganador es: " + winner.getUid());
+        for (Player p2 : playersList) {
+            Communicator.sendCommunication(p2, Signal.END_GAME, winner.getUid());
+        }
     }
 
     /**
@@ -74,18 +73,19 @@ public class Game extends Thread{
      * @return False en caso de que no haya ningun jugador que haya alcanzado los puntos maximos
 
     private boolean hayGanador() {
-        for (Player player : jugadores) {
-            if (player.getPoints() >= puntosMaximos) {
-                return true;
-            }
-        }
-        return false;
+    for (Player player : jugadores) {
+    if (player.getPoints() >= puntosMaximos) {
+    return true;
+    }
+    }
+    return false;
     }
      */
 
     /**
      * Determina que jugador de la partida ha sido ganador basandose en el que ha tenido menos
      * puntaje en la partida
+     *
      * @return devuelve el jugador ganador
      */
     private Player returnWinner() {
@@ -114,6 +114,7 @@ public class Game extends Thread{
     /**
      * Adds player to the game and send a signal to the other players (Client).
      * If the player´s list is full, the game starts.
+     *
      * @param player
      */
     public void addPlayer(Player player) {
@@ -123,7 +124,7 @@ public class Game extends Thread{
             p.writter.println(playersList.size());
         }
 
-        if (playersList.size() == MAX_PLAYERS){
+        if (playersList.size() == MAX_PLAYERS) {
             startGame();
         }
     }

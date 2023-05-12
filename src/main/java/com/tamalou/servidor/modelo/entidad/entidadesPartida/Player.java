@@ -1,6 +1,7 @@
 package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
 import com.tamalou.servidor.modelo.entidad.entidadesExtra.Utilidades;
+import com.tamalou.servidor.socket.Communicator;
 import jakarta.persistence.*;
 
 import java.io.IOException;
@@ -33,8 +34,6 @@ public class Player {
     private byte[] image;
 
     @Transient
-    public String name;
-    @Transient
     private int points;
     @Transient
     private List<Card> cards;
@@ -60,7 +59,6 @@ public class Player {
         this.socket = socket;
         this.reader = new Scanner(socket.getInputStream());
         this.writter = new PrintStream(socket.getOutputStream());
-        this.name = name;
         this.points = 0;
         this.cards = new ArrayList<>();
         this.endTurn = false;
@@ -68,26 +66,7 @@ public class Player {
 
 
 
-
-    /**
-     * Selects the card with which the player will interact
-     *
-     * @return Returns the index of the card selected by the player
-     */
-    public int PlayerselectCard() {
-        int numberOfCards = getCards().size();
-        int indexSelected;
-        do {
-            System.out.println(name + " has " + numberOfCards + ", Which card you want to choose?");
-            indexSelected = Utilidades.leerEntero("") - 1;
-        } while (indexSelected < 0 || indexSelected > numberOfCards - 1);
-        return indexSelected;
-    }
-
     // Getters and Setters
-    public Card getCard() {
-        return cards.get(PlayerselectCard());
-    }
 
     public String getUid() {
         return uid;
@@ -119,10 +98,6 @@ public class Player {
 
     public void setImage(byte[] image) {
         this.image = image;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public int getPoints() {

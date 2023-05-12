@@ -25,58 +25,40 @@ public class Signal {
 
 
 
-    public static final int PLAYER_JOINED_GAME = 21;
-    public static final int START_GAME = 22;
-    public static final int START_TURN = 23;
+    public static final int PLAYER_JOINED_GAME        = 21;
+    public static final int START_GAME                = 22;
+    public static final int START_TURN                = 23;
+    public static final int END_GAME                  = 24;
+
 
 
 
     // ROUND SIGNALS
     public static final int END_ROUND                 = 131;
-    public static final int CARD_DECK_TO_PLAYER       = 132;
-    public static final int DISCARTED_DECK_IS_EMPTY             = 132;
-    public static final int DECK_IS_EMPTY             = 132;
-    public static final int HAND_IS_EMPTY             = 132;
     public static final int SHOW_LAST_CARD_DECK       = 132;
-    public static final int SHOW_LAST_CARD_DISCARTED_DECK       = 132;
-    public static final int ASK_PLAYER_TO_STAND       = 132;
-    public static final int PLAYER_STANDS             = 132;
-    public static final int PLAYER_SEES_CARD            = 132;
+    public static final int SHOW_LAST_CARD_DISCARTED  = 133;
+    public static final int ASK_PLAYER_TO_STAND       = 134;
+    public static final int PLAYER_STANDS             = 135;
+    public static final int PLAYER_SEES_CARD          = 136;
+    public static final int PLAYER_DISCARDS_CARD      = 137;
+    public static final int PLAYER_SWITCH_CARD_DECK   = 138;
+    public static final int PLAYER_USE_CARD_POWER     = 139;
+    public static final int ASK_PLAYER_SELECT_OPONENT = 140;
+    public static final int ASK_PLAYER_SELECT_PLAY    = 141;
+    public static final int ASK_PLAYER_SELECT_PLAY_2  = 142;
+    public static final int ASK_PLAYER_SWITCH_CARD    = 143;
+    public static final int ASK_PLAYER_SELECT_CARD    = 144;
+    public static final int PLAYER_POINTS_PENALTY     = 145;
+    public static final int PLAYER_ONE_CARD_LESS      = 146;
+    public static final int PLAYER_TURN_ENDED         = 147;
+    public static final int PLAYER_CARDS_EMPTY        = 148;
+
+    public static final int CARD_DECK_TO_PLAYER       = 132;
+    public static final int DISCARTED_DECK_IS_EMPTY   = 133;
+    public static final int DECK_IS_EMPTY             = 134;
+    public static final int HAND_IS_EMPTY             = 135;
     public static final int PLAYER_TAKE_CARD_DECK     = 132;
-    public static final int PLAYER_DISCARDS_CARD      = 132;
     public static final int PLAYER_SWITCH_CARD_DISCARTED_DECK   = 132;
-    public static final int PLAYER_SWITCH_CARD_DECK   = 132;
-    public static final int PLAYER_USE_CARD_POWER     = 132;
-    public static final int ASK_PLAYER_SELECT_OPONENT = 132;
-    public static final int ASK_PLAYER_SELECT_CARD    = 132;
-    public static final int ASK_PLAYER_SWITCH_CARD    = 132;
-    public static final int PLAYER_POINTS_PENALTY     = 132;
-
-
-    public static final int PLAYER_1                  = 132;
-    public static final int PLAYER_2                  = 132;
-    public static final int PLAYER_3                  = 132;
-    public static final int PLAYER_4                  = 132;
-
-    public static final int PLAYER_CARD_1             = 132;
-    public static final int PLAYER_CARD_2             = 132;
-    public static final int PLAYER_CARD_3             = 132;
-    public static final int PLAYER_CARD_4             = 132;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     public static final int GANADOR_DE_RONDA          = 200;
