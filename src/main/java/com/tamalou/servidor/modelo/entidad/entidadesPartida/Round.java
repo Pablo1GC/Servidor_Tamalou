@@ -2,6 +2,7 @@ package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
 import com.google.gson.Gson;
 import com.tamalou.servidor.modelo.entidad.entidadesExtra.Utilidades;
+import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
 import com.tamalou.servidor.socket.Signal;
 
 import java.util.List;
@@ -45,8 +46,8 @@ public class Round {
         while (!endRound) {
 
             // If someone has discarded all their cards, the round ends.
-            for (Player player : playersList) {
-                player.writter.packAndWrite(Signal.START_TURN);
+            for (Player p : playersList) {
+                p.writter.packAndWrite(Signal.START_TURN);
                 // The player's turn begins
                 if (deck.checkEmptyDeck()) {
                     returnDiscartedCardsToDeck();
@@ -61,7 +62,7 @@ public class Round {
                     if (stand) {
                         endRound = true;
                         for (Player p2 : playersList) {
-                            Communicator.sendCommunication(p2, Signal.PLAYER_STANDS);
+                            p2.writter.packAndWrite(Signal.PLAYER_STANDS);
                         }
                         break;
                     }
@@ -75,12 +76,12 @@ public class Round {
                 if (p.getCards().size() == 0) {
                     endRound = true;
                     for (Player p2 : playersList) {
-                        Communicator.sendCommunication(p2, Signal.PLAYER_CARDS_EMPTY, p.getUid());
-                        Communicator.sendCommunication(p2, Signal.END_ROUND);
+                        p2.writter.packAndWrite( Signal.PLAYER_CARDS_EMPTY, p.getUid());
+                        p2.writter.packAndWrite(Signal.END_ROUND);
                     }
                 } else {
                     for (Player p2 : playersList) {
-                        Communicator.sendCommunication(p2, Signal.PLAYER_TURN_ENDED, p.getUid());
+                        p2.writter.packAndWrite(Signal.PLAYER_TURN_ENDED, p.getUid());
                     }
                 }
 
@@ -105,7 +106,7 @@ public class Round {
     public void showLastCardInDiscartedDeck() {
         System.out.println(discardedCardsDeck.lastElement());
         for (Player p : playersList) {
-            Communicator.sendCommunication(p, Signal.SHOW_LAST_CARD_DISCARTED, discardedCardsDeck.lastElement());
+            p.writter.packAndWrite(Signal.SHOW_LAST_CARD_DISCARTED, discardedCardsDeck.lastElement());
         }
     }
 
@@ -119,33 +120,33 @@ public class Round {
         if (discardedCardsDeck.isEmpty()) {
             option = 1;
         } else {
-            Communicator.sendCommunication(p, Signal.ASK_PLAYER_SELECT_PLAY);
-            option = Communicator.receiveCommunication();
+            p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_PLAY);
+            option = 000000000000000000000000000000000000000000000000000000000000000000000000000000000;
         }
         switch (option) {
             case 1 -> {
                 Card card = deck.takeCard();
                 for (Player p2 : playersList) {
-                    Communicator.sendCommunication(p2, Signal.SHOW_LAST_CARD_DECK, card);
+                    p2.writter.packAndWrite(Signal.SHOW_LAST_CARD_DECK, card);
                 }
                 System.out.println(card.toString());
 
-                Communicator.sendCommunication(p, Signal.ASK_PLAYER_SELECT_PLAY_2);
+                p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_PLAY_2);
 
-                int option2 = Communicator.receiveCommunication();
+                int option2 = 000000000000000000000000000000000000000000000000000000000000000000000000000000000;
                 // Execute option2
                 if (option2 == Signal.PLAYER_DISCARDS_CARD) {
                     discardedCardsDeck.add(card);
                     for (Player p2 : playersList) {
                         if (!p2.equals(p))
-                            Communicator.sendCommunication(p2, Signal.PLAYER_DISCARDS_CARD);
+                            p2.writter.packAndWrite(Signal.PLAYER_DISCARDS_CARD);
                     }
                 } else if (option2 == Signal.PLAYER_SWITCH_CARD_DECK) {
                     Card cardOfPlayer = swapCards(p, card);
                     discardedCardsDeck.add(cardOfPlayer);
                     for (Player p2 : playersList) {
                         if (!p2.equals(p))
-                            Communicator.sendCommunication(p2, Signal.PLAYER_SWITCH_CARD_DECK);
+                            p2.writter.packAndWrite(Signal.PLAYER_SWITCH_CARD_DECK);
                     }
                 } else if (option2 == Signal.PLAYER_USE_CARD_POWER) {
                     if (card.getValue() == 11) {
@@ -154,7 +155,7 @@ public class Round {
                         seeCard(p, cardAux);
                         for (Player p2 : playersList) {
                             if (!p2.equals(p))
-                                Communicator.sendCommunication(p2, Signal.PLAYER_SEES_CARD, index);
+                                p2.writter.packAndWrite(Signal.PLAYER_SEES_CARD, index);
                         }
                     } else if (card.getValue() == 12) {
                         int ownIndexCard = PlayerselectCard(p);
@@ -176,8 +177,8 @@ public class Round {
                         seeCard(p, cardAux);
 
                         // Ask player if he wants to switch the cards
-                        Communicator.sendCommunication(p, Signal.ASK_PLAYER_SWITCH_CARD);
-                        if (Communicator.receiveCommunication() == 1) {
+                        p.writter.packAndWrite(Signal.ASK_PLAYER_SWITCH_CARD);
+                        if (000000000000000000000000000000000000000000000000000000000000000000000000000000000 == 1) {
                             switchCardWithOponent(p, oponent, ownIndexCard, oponentIndexCard);
                         }
                     }
@@ -199,8 +200,8 @@ public class Round {
      * @return Returns the index of the card selected by the player
      */
     public int PlayerselectCard(Player p) {
-        Communicator.sendCommunication(p, Signal.ASK_PLAYER_SELECT_CARD);
-        int indexSelected = Communicator.receiveCommunication();
+        p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
+        int indexSelected = 000000000000000000000000000000000000000000000000000000000000000000000000000000000;
         return indexSelected;
     }
 
@@ -212,12 +213,12 @@ public class Round {
      * @return The player chosen as an opponent
      */
     public Player selectOpponent(Player p) {
-        Communicator.sendCommunication(p, Signal.ASK_PLAYER_SELECT_OPONENT);
+        p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_OPONENT);
         /**
          *  Signal to opopnent object
          */
         Player oponent = null;
-        Communicator.receiveCommunication();
+        // Communicator.receiveCommunication();
         return oponent;
     }
 
@@ -230,20 +231,20 @@ public class Round {
      * @param p The player who will discard the card
      */
     public void discardPlayerCard(Player p) {
-        Communicator.sendCommunication(p, Signal.ASK_PLAYER_SELECT_CARD);
-        int index = Communicator.receiveCommunication();
+        p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
+        int index = 000000000000000000000000000000000000000000000000000000000000000000000000000000000;
         Card card = p.getCards().get(index);
         if (card.getValue() == discardedCardsDeck.lastElement().getValue()) {
             p.getCards().remove(card);
             discardedCardsDeck.add(card);
             for (Player p2 : playersList) {
-                Communicator.sendCommunication(p2, Signal.PLAYER_ONE_CARD_LESS, p.getUid());
+                p2.writter.packAndWrite(Signal.PLAYER_ONE_CARD_LESS, p.getUid());
             }
         } else {
             System.out.println("The card does not have the same value, you are penalized with 5 points.");
             p.setPoints(p.getPoints() + 5);
             for (Player p2 : playersList) {
-                Communicator.sendCommunication(p2, Signal.PLAYER_POINTS_PENALTY, p.getUid());
+                p2.writter.packAndWrite(Signal.PLAYER_POINTS_PENALTY, p.getUid());
             }
         }
     }
@@ -255,10 +256,10 @@ public class Round {
      * @return Returns true if the option is "Yes", false if is "No"
      */
     public boolean standRound(Player p) {
-        Communicator.sendCommunication(p, Signal.ASK_PLAYER_TO_STAND);
+        p.writter.packAndWrite(Signal.ASK_PLAYER_TO_STAND);
         System.out.println("Do you want to stand? [Yes/No]");
         // CHECK WITH @BRIAN
-        int endTurn = Communicator.receiveCommunication();
+        int endTurn = 000000000000000000000000000000000000000000000000000000000000000000000000000000000;
         return endTurn == Signal.PLAYER_STANDS ? true : false;
     }
 
@@ -278,7 +279,7 @@ public class Round {
      * Allows the player to see a card
      */
     public void seeCard(Player p, Card card) {
-        Communicator.sendCommunication(p, Signal.PLAYER_SEES_CARD, card);
+        p.writter.packAndWrite(Signal.PLAYER_SEES_CARD, card);
     }
 
     /**
@@ -287,7 +288,7 @@ public class Round {
      * @param card
      */
     public Card swapCards(Player player, Card card) {
-        int cardIndex = Communicator.receiveCommunication();
+        int cardIndex = 000000000000000000000000000000000000000000000000000000000000000000000000000000000;
         Card myCard = player.getCards().get(cardIndex);
         player.getCards().set(cardIndex, card);
         return myCard;

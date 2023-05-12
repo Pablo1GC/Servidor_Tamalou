@@ -88,7 +88,6 @@ public class SignalManager {
         System.out.println("Join");
 
         String key = data.get("key").getAsString();
-        player.name = data.get("player_name").getAsString();
 
         int resultSignal = gameManager.joinPlayerToGame(player, key);
 
@@ -108,7 +107,6 @@ public class SignalManager {
     private boolean manageCreateGame(Player player, JsonObject match, boolean isPrivate) throws NoSuchElementException {
 
         String gameName = match.get("match_name").getAsString();
-        player.name = match.get("creator_name").getAsString();
         int maxRounds = match.get("match_rounds").getAsInt();
 
         Game game = new Game(isPrivate, gameName, maxRounds);
