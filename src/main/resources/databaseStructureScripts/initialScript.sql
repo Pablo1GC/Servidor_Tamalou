@@ -5,6 +5,8 @@ DROP TABLE IF EXISTS game_player;
 DROP TABLE IF EXISTS friendship;
 DROP TABLE IF EXISTS game;
 DROP TABLE IF EXISTS user;
+DROP PROCEDURE IF EXISTS get_games_by_player;
+DROP PROCEDURE IF EXISTS get_players_and_scores_by_game;
 DROP PROCEDURE IF EXISTS get_total_games_played;
 DROP PROCEDURE IF EXISTS get_average_score;
 DROP PROCEDURE IF EXISTS get_games_won;
@@ -106,6 +108,30 @@ END//
 DELIMITER ;
 
 -- Procedure to get the number of games played
+
+DELIMITER //
+CREATE PROCEDURE get_games_played_by_player(player_uid VARCHAR(255))
+BEGIN
+    SELECT g.*
+    FROM game_player gp
+        JOIN game g ON gp.id_game = g.id_game
+    WHERE gp.id_user = player_uid;
+END//
+DELIMITER ;
+
+-- procedure to get the players and their scores in a single game
+
+DELIMITER //
+CREATE PROCEDURE get_players_and_scores_in_game(game_id INT)
+BEGIN
+    SELECT u.*, gp.score
+    FROM game_player gp
+        JOIN user u ON gp.id_user = u.uid
+    WHERE gp.id_game = game_id;
+END//
+DELIMITER ;
+
+
 
 -- INSERT INTO player table
 INSERT INTO user (email, username, uid, image)

@@ -1,6 +1,5 @@
 /**
- * Repository class for User entity.
- *
+ * Repository class for User entity.*
  * This class is responsible for performing CRUD (Create, Read, Update, Delete)
  * operations on User entities in the database.
  */
@@ -17,7 +16,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.sql.Types;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Repository
@@ -156,4 +156,21 @@ public class UserRepository {
         query.setParameter("player_uid", playerUid);
         return (BigDecimal) query.getSingleResult();
     }
+
+    @Procedure(name = "get_total_games_played")
+    public ArrayList<Integer> getGamesPlayed (@Param("player_uid") String playerUid) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("get_total_games_played");
+        query.registerStoredProcedureParameter("player_uid", String.class, ParameterMode.IN);
+        query.setParameter("player_uid", playerUid);
+        return (ArrayList<Integer>) query.getResultList();
+    }
+
+    @Procedure(name = "get_players_and_scores_in_game")
+    public List<Object> getPlayersAndScoresInGame (@Param("game_uid") String playerUid) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("get_players_and_scores_in_game");
+        query.registerStoredProcedureParameter("game_uid", String.class, ParameterMode.IN);
+        query.setParameter("game_uid", playerUid);
+        return query.getResultList();
+    }
+
 }

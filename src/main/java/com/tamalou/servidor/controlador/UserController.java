@@ -160,4 +160,35 @@ public class UserController {
             return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    /**
+     * REST endpoint for retrieving the id of all games played by a user.
+     *
+     * @param uid The unique identifier of the user.
+     * @return A ResponseEntity containing the total number of games played by the user if the user exists, or an error message if not found or an error occurred.
+     */
+    @GetMapping("/{uid}/games-played")
+    public ResponseEntity<List<Integer>> getTotalGamesPlayed(@PathVariable String uid) {
+        ArrayList<Integer> resultList = userRepository.getGamesPlayed(uid);
+        if (!resultList.isEmpty()) {
+            return new ResponseEntity<>(resultList, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/{uid}/games/{gameId}/scores")
+    public ResponseEntity<List<Object>>  getPlayersAndScores(@PathVariable String uid, @PathVariable String gameId) {
+        List<Object> resultList = userRepository.getPlayersAndScoresInGame(gameId);
+        if (!resultList.isEmpty()) {
+            return new ResponseEntity<>(resultList, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+
+
+
+
 }
