@@ -3,6 +3,10 @@ package com.tamalou.servidor.modelo.entidad.entidadesUsuario;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+
+import java.io.Serializable;
+import java.util.Arrays;
+
 /**
  * Represents a user entity in the application.
  *
@@ -28,6 +32,16 @@ public class User {
     @Lob
     @Column(name = "image")
     private byte[] image;
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "uid='" + uid + '\'' +
+                ", email='" + email + '\'' +
+                ", username='" + username + '\'' +
+                ", image=" + Arrays.toString(image) +
+                '}';
+    }
 
     public String getUid() {
         return uid;
