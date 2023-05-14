@@ -47,7 +47,7 @@ public class Game extends Thread {
      */
     public void startGame() {
         for (Player p : playerList) {
-            p.writter.packAndWrite(Signal.START_GAME);
+            p.writter.packAndWrite(Signal.START_GAME, playerList);
         }
 
         while (!gameEnded) {

@@ -28,7 +28,8 @@ public class Signal {
     public static final int PLAYER_JOINED_GAME        = 21;
     public static final int START_GAME                = 22;
     public static final int START_TURN                = 23;
-    public static final int END_GAME                  = 24;
+    public static final int OTHER_PLAYER_TURN         = 24;
+    public static final int END_GAME                  = 25;
 
 
 

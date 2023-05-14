@@ -48,6 +48,11 @@ public class Round {
             // If someone has discarded all their cards, the round ends.
             for (Player p : playersList) {
                 p.writter.packAndWrite(Signal.START_TURN);
+
+                // send all players except the one with the turn, that it's "p's" turn
+                playersList.stream().filter((player -> player != p)).forEach((player -> {
+                    player.writter.packAndWrite(Signal.OTHER_PLAYER_TURN, p.getUid());
+                }));
                 // The player's turn begins
                 if (deck.checkEmptyDeck()) {
                     returnDiscartedCardsToDeck();
