@@ -1,12 +1,12 @@
 package com.tamalou.servidor;
 
+import com.tamalou.servidor.modelo.persistencia.UserRepository;
 import com.tamalou.servidor.socket.ClientConnection;
 import com.tamalou.servidor.socket.SignalManager;
 import com.tamalou.servidor.socket.GameManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -17,18 +17,18 @@ import java.net.Socket;
 public class Main {
     private static final int PUERTO = 9191;
 
-    // private static ApplicationContext context;
+    private static ApplicationContext context;
 
     public static void main(String[] args) {
 
         //context = new AnnotationConfigApplicationContext(SpringConfiguration.class);
 
         // Spring
-        SpringApplication.run(Main.class, args);
-
+        context = SpringApplication.run(Main.class, args);
+        UserRepository userRepository = context.getBean("userRepository", UserRepository.class);
         GameManager manejadorTorneos = new GameManager();
         SignalManager signalManager = new SignalManager(manejadorTorneos);
-        ClientConnection clientConnection = new ClientConnection(manejadorTorneos, signalManager);
+        ClientConnection clientConnection = new ClientConnection(manejadorTorneos, signalManager, userRepository);
         Socket socketAlCliente = null;
         InetSocketAddress direccion = new InetSocketAddress(PUERTO);
         try (ServerSocket serverSocket = new ServerSocket()){

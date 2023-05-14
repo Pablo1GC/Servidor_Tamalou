@@ -2,8 +2,9 @@ package com.tamalou.servidor.socket;
 
 import com.google.gson.Gson;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
+import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
-import com.tamalou.servidor.modelo.entidad.socketEntities.PackageReader;
+import com.tamalou.servidor.modelo.persistencia.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
@@ -18,10 +19,13 @@ public class ClientConnection {
     // @Autowired
     private Gson gson;
 
-    public ClientConnection(GameManager gameManager, SignalManager signalManager){
+    private UserRepository userRepository;
+
+    public ClientConnection(GameManager gameManager, SignalManager signalManager, UserRepository userRepository){
         this.gameManager = gameManager;
         this.signalManager = signalManager;
         this.gson = new Gson();
+        this.userRepository = userRepository;
     }
 
     public void connectClient(Socket clientSocket) {
@@ -30,7 +34,13 @@ public class ClientConnection {
 
             Package pack = player.reader.readPackage();
             System.out.println("Package: " + pack.toString());
-            player.setUid(pack.data.toString());
+            player.setUid(pack.data.getAsString());
+
+            User player1 = userRepository.findById(player.getUid());
+            player.setUsername(player1.getUsername());
+            player.setImage(player1.getImage());
+
+
             System.out.println("Player uid: " + player.getUid());
             int connectionSignal = pack.signal;
             if (connectionSignal == Signal.CONECTARSE)

@@ -41,11 +41,11 @@ public class Player {
     @Transient
     private boolean endTurn;
     @Transient
-    public Socket socket;
+    transient public Socket socket;
     @Transient
-    public PackageReader reader;
+    transient public PackageReader reader;
     @Transient
-    public PackageWriter writter;
+    transient public PackageWriter writter;
 
 
     public Player() {
