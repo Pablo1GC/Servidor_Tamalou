@@ -37,9 +37,7 @@ public class Player {
     @Transient
     private int points;
     @Transient
-    private List<Card> cards;
-    @Transient
-    private boolean endTurn;
+    transient private List<Card> cards;
     @Transient
     transient public Socket socket;
     @Transient
@@ -62,7 +60,6 @@ public class Player {
         this.writter = new PackageWriter(socket.getOutputStream());
         this.points = 0;
         this.cards = new ArrayList<>();
-        this.endTurn = false;
     }
 
 

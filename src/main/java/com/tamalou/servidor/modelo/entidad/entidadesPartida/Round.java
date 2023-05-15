@@ -1,8 +1,6 @@
 package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
-import com.google.gson.Gson;
-import com.tamalou.servidor.modelo.entidad.entidadesExtra.Utilidades;
-import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
+import com.tamalou.servidor.modelo.entidad.socketEntities.JsonField;
 import com.tamalou.servidor.socket.Signal;
 
 import java.util.List;
@@ -66,9 +64,10 @@ public class Round {
                     boolean stand = standRound(p);
                     if (stand) {
                         endRound = true;
-                        for (Player p2 : playersList) {
-                            p2.writter.packAndWrite(Signal.PLAYER_STANDS);
-                        }
+                        // send all players except the one with the turn, that "p's" has standed.
+                        playersList.stream().filter((player -> player != p)).forEach((player -> {
+                            player.writter.packAndWrite(Signal.OTHER_PLAYER_STANDS, p.getUid());
+                        }));
                         break;
                     }
                 }
@@ -81,7 +80,7 @@ public class Round {
                 if (p.getCards().size() == 0) {
                     endRound = true;
                     for (Player p2 : playersList) {
-                        p2.writter.packAndWrite( Signal.PLAYER_CARDS_EMPTY, p.getUid());
+                        p2.writter.packAndWrite(Signal.PLAYER_CARDS_EMPTY, p.getUid());
                         p2.writter.packAndWrite(Signal.END_ROUND);
                     }
                 } else {
@@ -111,7 +110,7 @@ public class Round {
     public void showLastCardInDiscartedDeck() {
         System.out.println(discardedCardsDeck.lastElement());
         for (Player p : playersList) {
-            p.writter.packAndWrite(Signal.SHOW_LAST_CARD_DISCARTED, discardedCardsDeck.lastElement());
+            p.writter.packAndWrite(Signal.SHOW_LAST_CARD_DISCARTED, discardedCardsDeck.lastElement().toString());
         }
     }
 
@@ -133,52 +132,49 @@ public class Round {
             case 1 -> {
                 Card card = deck.takeCard();
                 for (Player p2 : playersList) {
-                    p2.writter.packAndWrite(Signal.SHOW_LAST_CARD_DECK, card);
+                    p2.writter.packAndWrite(Signal.SHOW_LAST_CARD_DECK, card.toString());
                 }
                 System.out.println(card.toString());
 
-                p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_PLAY_2);
+                p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_PLAY_2, card.getValue());
 
                 int option2 = p.reader.readPackage().data.getAsInt();
                 // Execute option2
-                if (option2 == Signal.PLAYER_DISCARDS_CARD) {
+                if (option2 == 1) {
                     discardedCardsDeck.add(card);
                     for (Player p2 : playersList) {
-                        if (!p2.equals(p))
-                            p2.writter.packAndWrite(Signal.PLAYER_DISCARDS_CARD);
+                        p2.writter.packAndWrite(Signal.PLAYER_DISCARDS_CARD, card.toString());
                     }
-                } else if (option2 == Signal.PLAYER_SWITCH_CARD_DECK) {
+                } else if (option2 == 2) {
                     Card cardOfPlayer = swapCards(p, card);
                     discardedCardsDeck.add(cardOfPlayer);
-                    for (Player p2 : playersList) {
-                        if (!p2.equals(p))
-                            p2.writter.packAndWrite(Signal.PLAYER_SWITCH_CARD_DECK);
-                    }
-                } else if (option2 == Signal.PLAYER_USE_CARD_POWER) {
+                } else if (option2 == 3) {
                     if (card.getValue() == 11) {
-                        int index = PlayerselectCard(p) - -1;
+                        int index = playerSelectCard(p) - -1;
                         Card cardAux = p.getCards().get(index);
-                        seeCard(p, cardAux);
-                        for (Player p2 : playersList) {
-                            if (!p2.equals(p))
-                                p2.writter.packAndWrite(Signal.PLAYER_SEES_CARD, index);
-                        }
+                        p.writter.packAndWrite(Signal.PLAYER_SEES_OWN_CARD, new JsonField("card", cardAux.toString()), new JsonField("index", index));
+
+                        // send all players except the one with the turn, that "p's" has seen one of his cards.
+                        playersList.stream().filter((player -> player != p)).forEach((player -> {
+                            player.writter.packAndWrite(Signal.OTHER_PLAYER_SEES_CARD, p.getUid() + index);
+                        }));
+
                     } else if (card.getValue() == 12) {
-                        int ownIndexCard = PlayerselectCard(p);
+                        int ownIndexCard = playerSelectCard(p);
                         // Select an oponent
                         Player oponent = selectOpponent(p);
                         // Now we select the oponent index card
-                        int oponentIndexCard = PlayerselectCard(p);
+                        int oponentIndexCard = playerSelectCardOponent(p, oponent);
                         switchCardWithOponent(p, oponent, ownIndexCard, oponentIndexCard);
 
                     } else if (card.getValue() == 13) {
-                        int ownIndexCard = PlayerselectCard(p);
+                        int ownIndexCard = playerSelectCard(p);
                         Card cardAux = p.getCards().get(ownIndexCard);
                         seeCard(p, cardAux);
                         // Select an oponent
                         Player oponent = selectOpponent(p);
                         // Now we select the oponent index card
-                        int oponentIndexCard = PlayerselectCard(p);
+                        int oponentIndexCard = playerSelectCard(p);
                         cardAux = oponent.getCards().get(oponentIndexCard);
                         seeCard(p, cardAux);
 
@@ -201,12 +197,18 @@ public class Round {
 
     }
 
+    private int playerSelectCardOponent(Player p, Player oponent) {
+        p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_OPONENT_CARD, oponent.getUid());
+        int indexSelected = p.reader.readPackage().data.getAsInt();
+        return indexSelected;
+    }
+
     /**
      * Selects the card with which the player will interact
      *
      * @return Returns the index of the card selected by the player
      */
-    public int PlayerselectCard(Player p) {
+    public int playerSelectCard(Player p) {
         p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
         int indexSelected = p.reader.readPackage().data.getAsInt();
         return indexSelected;
@@ -221,11 +223,8 @@ public class Round {
      */
     public Player selectOpponent(Player p) {
         p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_OPONENT);
-        /**
-         *  Signal to opopnent object
-         */
-        Player oponent = null;
-        // Communicator.receiveCommunication();
+        String uidOponent = p.reader.readPackage().data.getAsString();
+        Player oponent = playersList.stream().filter(player -> player.getUid().equals(uidOponent)).toList().get(0);
         return oponent;
     }
 
@@ -286,7 +285,7 @@ public class Round {
      * Allows the player to see a card
      */
     public void seeCard(Player p, Card card) {
-        p.writter.packAndWrite(Signal.PLAYER_SEES_CARD, card);
+        p.writter.packAndWrite(Signal.OTHER_PLAYER_SEES_CARD, card.toString());
     }
 
     /**
@@ -295,9 +294,13 @@ public class Round {
      * @param card
      */
     public Card swapCards(Player p, Card card) {
+        p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
         int cardIndex = p.reader.readPackage().data.getAsInt();
         Card myCard = p.getCards().get(cardIndex);
         p.getCards().set(cardIndex, card);
+        for (Player p2 : playersList) {
+            p2.writter.packAndWrite(Signal.PLAYER_SWITCH_CARD_DECK, "{player:" + p.getUid() + ", index:" + cardIndex + "}");
+        }
         return myCard;
     }
 

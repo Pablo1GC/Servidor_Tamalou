@@ -40,7 +40,7 @@ public class Signal {
     public static final int SHOW_LAST_CARD_DISCARTED  = 133;
     public static final int ASK_PLAYER_TO_STAND       = 134;
     public static final int PLAYER_STANDS             = 135;
-    public static final int PLAYER_SEES_CARD          = 136;
+    public static final int OTHER_PLAYER_SEES_CARD = 136;
     public static final int PLAYER_DISCARDS_CARD      = 137;
     public static final int PLAYER_SWITCH_CARD_DECK   = 138;
     public static final int PLAYER_USE_CARD_POWER     = 139;
@@ -53,6 +53,11 @@ public class Signal {
     public static final int PLAYER_ONE_CARD_LESS      = 146;
     public static final int PLAYER_TURN_ENDED         = 147;
     public static final int PLAYER_CARDS_EMPTY        = 148;
+    public static final int OTHER_PLAYER_STANDS       = 149;
+    public static final int PLAYER_SEES_OWN_CARD      = 150;
+    public static final int ASK_PLAYER_SELECT_OPONENT_CARD      = 151;
+
+
 
     public static final int CARD_DECK_TO_PLAYER       = 132;
     public static final int DISCARTED_DECK_IS_EMPTY   = 133;
