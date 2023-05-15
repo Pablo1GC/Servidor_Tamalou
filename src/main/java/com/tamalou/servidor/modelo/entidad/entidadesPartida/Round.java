@@ -131,9 +131,9 @@ public class Round {
         switch (option) {
             case 1 -> {
                 Card card = deck.takeCard();
-                for (Player p2 : playersList) {
+                for (Player p2 : playersList)
                     p2.writter.packAndWrite(Signal.SHOW_LAST_CARD_DECK, card.toString());
-                }
+
                 System.out.println(card.toString());
 
                 p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_PLAY_2, card.getValue());
@@ -152,11 +152,11 @@ public class Round {
                     if (card.getValue() == 11) {
                         int index = playerSelectCard(p) - -1;
                         Card cardAux = p.getCards().get(index);
-                        p.writter.packAndWrite(Signal.PLAYER_SEES_OWN_CARD, new JsonField("card", cardAux.toString()), new JsonField("index", index));
+                        p.writter.packAndWrite(Signal.PLAYER_SEES_OWN_CARD, new JsonField("card", cardAux.toString()), new JsonField("card_index", index));
 
-                        // send all players except the one with the turn, that "p's" has seen one of his cards.
+                        // send all players except the one with the turn, that "p" has seen one of his cards.
                         playersList.stream().filter((player -> player != p)).forEach((player -> {
-                            player.writter.packAndWrite(Signal.OTHER_PLAYER_SEES_CARD, p.getUid() + index);
+                            player.writter.packAndWrite(Signal.OTHER_PLAYER_SEES_CARD, new JsonField("player_uid", p.getUid()), new JsonField("card_index", index));
                         }));
 
                     } else if (card.getValue() == 12) {
@@ -298,9 +298,9 @@ public class Round {
         int cardIndex = p.reader.readPackage().data.getAsInt();
         Card myCard = p.getCards().get(cardIndex);
         p.getCards().set(cardIndex, card);
-        for (Player p2 : playersList) {
-            p2.writter.packAndWrite(Signal.PLAYER_SWITCH_CARD_DECK, "{player:" + p.getUid() + ", index:" + cardIndex + "}");
-        }
+        for (Player p2 : playersList)
+            p2.writter.packAndWrite(Signal.PLAYER_SWITCH_CARD_DECK, new JsonField("player_uid", p.getUid()), new JsonField("card_index", cardIndex));
+
         return myCard;
     }
 
