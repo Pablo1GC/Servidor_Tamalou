@@ -5,6 +5,7 @@
  */
 package com.tamalou.servidor.modelo.persistencia;
 
+import com.tamalou.servidor.modelo.entidad.entidadesUsuario.PlayerGameInfo;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.ParameterMode;
@@ -174,8 +175,8 @@ public class UserRepository {
     }
 
     @Procedure(name = "get_player_game_info")
-    public List<Object> getPlayerGamesInfo(String uid) {
-        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("get_player_game_info");
+    public List<PlayerGameInfo> getPlayerGamesInfo(String uid) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("get_player_game_info", PlayerGameInfo.class);
         query.registerStoredProcedureParameter("player_uid", String.class, ParameterMode.IN);
         query.setParameter("player_uid", uid);
         return query.getResultList();
