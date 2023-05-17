@@ -3,7 +3,8 @@ package com.tamalou.servidor.modelo.entidad.entidadesUsuario;
 public class PlayerGameInfo {
 
     private int id;
-    private  String name;
+    private String name;
+    private  Integer score;
     private String played_on;
 
     public PlayerGameInfo() {
@@ -25,11 +26,19 @@ public class PlayerGameInfo {
         this.name = name;
     }
 
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
     public String getPlayed_on() {
         return played_on;
     }
 
-    public void setPlayed_on(String played_on) {
+    public void setPlayed_on( String played_on) {
         this.played_on = played_on;
     }
 }

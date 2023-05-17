@@ -18,7 +18,6 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @Repository
@@ -176,10 +175,22 @@ public class UserRepository {
 
     @Procedure(name = "get_player_game_info")
     public List<PlayerGameInfo> getPlayerGamesInfo(String uid) {
-        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("get_player_game_info", PlayerGameInfo.class);
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("get_player_game_info");
         query.registerStoredProcedureParameter("player_uid", String.class, ParameterMode.IN);
         query.setParameter("player_uid", uid);
-        return query.getResultList();
+
+        List<PlayerGameInfo> playerGamesInfo = new ArrayList<>();
+        List<Object[]> results = query.getResultList();
+        for (Object[] result : results) {
+            PlayerGameInfo playerGameInfo = new PlayerGameInfo();
+            playerGameInfo.setName((String) result[0]);
+            playerGameInfo.setScore((int) result[2]);
+            playerGameInfo.setPlayed_on((String) result[1]);
+            playerGameInfo.setId((int) result[3]);
+            playerGamesInfo.add(playerGameInfo);
+        }
+
+        return playerGamesInfo;
     }
 
 }

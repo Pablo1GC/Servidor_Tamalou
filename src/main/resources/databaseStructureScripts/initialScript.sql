@@ -144,7 +144,7 @@ DELIMITER //
 CREATE PROCEDURE get_player_game_info(player_uid VARCHAR(255))
 BEGIN
     -- Retrieve the game information for the given player UID
-    SELECT g.name AS 'Game Name', DATE_FORMAT(gp.start_time, '%d/%m/%Y %H:%i') AS 'Game Date', gp.score AS 'Player Score'
+    SELECT g.name AS 'Game Name', DATE_FORMAT(gp.start_time, '%d/%m/%Y %H:%i') AS 'Game Date', gp.score AS 'Player Score', g.id_game AS 'id'
     FROM game_player gp
              INNER JOIN game g ON gp.id_game = g.id_game
     WHERE gp.id_user = player_uid;
