@@ -12,6 +12,7 @@ DROP PROCEDURE IF EXISTS get_average_score;
 DROP PROCEDURE IF EXISTS get_games_won;
 DROP PROCEDURE IF EXISTS get_games_lost;
 DROP PROCEDURE IF EXISTS get_average_play_time;
+DROP PROCEDURE IF EXISTS get_player_game_info;
 
 
 -- Each table has its own set of columns and relationships to other tables.
@@ -41,6 +42,7 @@ CREATE TABLE friendship
 CREATE TABLE game
 (
     id_game    INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255),
     num_rounds INT
 );
 
@@ -133,6 +135,26 @@ DELIMITER ;
 
 
 
+DELIMITER //
+
+-- Procedure to retrieve the game information (name, date, score) for a player based on their UID
+DELIMITER //
+
+-- Procedure to retrieve the game information (name, date, score) for a player based on their UID
+CREATE PROCEDURE get_player_game_info(player_uid VARCHAR(255))
+BEGIN
+    -- Retrieve the game information for the given player UID
+    SELECT g.name AS 'Game Name', DATE_FORMAT(gp.start_time, '%d/%m/%Y %H:%i') AS 'Game Date', gp.score AS 'Player Score'
+    FROM game_player gp
+             INNER JOIN game g ON gp.id_game = g.id_game
+    WHERE gp.id_user = player_uid;
+END //
+
+DELIMITER ;
+
+
+
+
 -- INSERT INTO player table
 INSERT INTO user (email, username, uid, image)
 VALUES ('francoernestocollins@gmail.com', 'johndoe', '0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', NULL),
@@ -150,12 +172,13 @@ VALUES ('0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', '789012', 'accepted'),
        ('567890', '901234', 'accepted');
 
 -- INSERT INTO game table
-INSERT INTO game (num_rounds)
-VALUES (10),
-       (5),
-       (15),
-       (8),
-       (12);
+INSERT INTO game (name, num_rounds)
+VALUES ('Game 1', 10),
+       ('Game 2', 5),
+       ('Game 3', 15),
+       ('Game 4', 8),
+       ('Game 5', 12);
+
 
 -- INSERT INTO game_player table
 INSERT INTO game_player (id_game, id_user, score, winner)
@@ -169,3 +192,7 @@ VALUES (1, '0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', 100, true),
        (4, '0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', 70, false),
        (5, '345678', 110, false),
        (5, '567890', 140, true);
+
+
+DELIMITER //
+

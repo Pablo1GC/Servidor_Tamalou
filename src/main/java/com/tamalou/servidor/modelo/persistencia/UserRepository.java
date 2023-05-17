@@ -173,4 +173,12 @@ public class UserRepository {
         return query.getResultList();
     }
 
+    @Procedure(name = "get_player_game_info")
+    public List<Object> getPlayerGamesInfo(String uid) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("get_player_game_info");
+        query.registerStoredProcedureParameter("game_uid", String.class, ParameterMode.IN);
+        query.setParameter("player_uid", uid);
+        return query.getResultList();
+    }
+
 }

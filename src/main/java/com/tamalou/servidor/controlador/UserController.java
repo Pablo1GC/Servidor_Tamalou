@@ -186,6 +186,15 @@ public class UserController {
         }
     }
 
+    @GetMapping("/{uid}/games")
+    public ResponseEntity<List<Object>>  getPlayerGamesInfo(@PathVariable String uid) {
+        List<Object> resultList = userRepository.getPlayerGamesInfo(uid);
+        if (!resultList.isEmpty()) {
+            return new ResponseEntity<>(resultList, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
 
 
