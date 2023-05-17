@@ -1,6 +1,7 @@
 package com.tamalou.servidor.controlador;
 
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Friendship;
+import com.tamalou.servidor.modelo.entidad.entidadesUsuario.PlayerGameInfo;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
 import com.tamalou.servidor.modelo.persistencia.UserRepository;
@@ -187,8 +188,8 @@ public class UserController {
     }
 
     @GetMapping("/{uid}/games")
-    public ResponseEntity<List<Object>>getPlayerGamesInfo(@PathVariable String uid) {
-        List<Object> resultList = userRepository.getPlayerGamesInfo(uid);
+    public ResponseEntity<List<PlayerGameInfo>>getPlayerGamesInfo(@PathVariable String uid) {
+        List<PlayerGameInfo> resultList = userRepository.getPlayerGamesInfo(uid);
         if (!resultList.isEmpty()) {
             return new ResponseEntity<>(resultList, HttpStatus.OK);
         } else {
