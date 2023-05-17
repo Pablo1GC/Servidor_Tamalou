@@ -1,5 +1,8 @@
 -- This script creates four tables: user, friendship, game, and game_player.
 
+-- Fix for mariadb
+USE trickster_tussle
+
 -- DROP TABLES (in case they already exist)
 DROP TABLE IF EXISTS game_player;
 DROP TABLE IF EXISTS friendship;
