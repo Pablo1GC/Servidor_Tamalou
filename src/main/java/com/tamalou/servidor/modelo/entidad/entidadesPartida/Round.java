@@ -166,17 +166,19 @@ public class Round {
                         // Now we select the oponent index card
                         int oponentIndexCard = playerSelectCardOponent(p, oponent);
                         switchCardWithOponent(p, oponent, ownIndexCard, oponentIndexCard);
-
+                        for (Player p2 : playersList) {
+                            p2.writter.packAndWrite(Signal.PLAYER_SWITCH_CARD_PLAYER,
+                                    new JsonField("player_uid", p.getUid()), new JsonField("p_card_index", ownIndexCard),
+                                    new JsonField("oponent_uid", oponent.getUid()), new JsonField("o_card_index", oponentIndexCard));
+                        }
                     } else if (card.getValue() == 13) {
                         int ownIndexCard = playerSelectCard(p);
-                        Card cardAux = p.getCards().get(ownIndexCard);
-                        seeCard(p, cardAux);
+                        seeCard(p, ownIndexCard);
                         // Select an oponent
                         Player oponent = selectOpponent(p);
                         // Now we select the oponent index card
                         int oponentIndexCard = playerSelectCard(p);
-                        cardAux = oponent.getCards().get(oponentIndexCard);
-                        seeCard(p, cardAux);
+                        seeOponentCard(p, oponent, oponentIndexCard);
 
                         // Ask player if he wants to switch the cards
                         p.writter.packAndWrite(Signal.ASK_PLAYER_SWITCH_CARD);
@@ -279,13 +281,22 @@ public class Round {
     public void switchCardWithOponent(Player player, Player opponent, int ownIndexCard, int exchangedIndexCard) {
         player.getCards().set(ownIndexCard, opponent.getCards().get(exchangedIndexCard));
         opponent.getCards().set(exchangedIndexCard, player.getCards().get(ownIndexCard));
+
     }
 
     /**
      * Allows the player to see a card
      */
-    public void seeCard(Player p, Card card) {
-        p.writter.packAndWrite(Signal.OTHER_PLAYER_SEES_CARD, card.toString());
+    public void seeCard(Player p, int index) {
+        Card card = p.getCards().get(index);
+        p.writter.packAndWrite(Signal.PLAYER_SEES_OWN_CARD, new JsonField("card", card.toString()), new JsonField("index", index));
+    }
+
+    public void seeOponentCard(Player p, Player oponent, int index) {
+        Card card = oponent.getCards().get(index);
+        p.writter.packAndWrite(Signal.PLAYER_SEES_OWN_CARD,
+                new JsonField("player_uid", p.getUid()), new JsonField("oponent_uid", oponent.getUid()),
+                new JsonField("card", card.toString()), new JsonField("index", index));
     }
 
     /**

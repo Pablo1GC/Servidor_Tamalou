@@ -56,6 +56,8 @@ public class Signal {
     public static final int OTHER_PLAYER_STANDS       = 149;
     public static final int PLAYER_SEES_OWN_CARD      = 150;
     public static final int ASK_PLAYER_SELECT_OPONENT_CARD      = 151;
+    public static final int PLAYER_SWITCH_CARD_PLAYER     = 145;
+
 
 
 
