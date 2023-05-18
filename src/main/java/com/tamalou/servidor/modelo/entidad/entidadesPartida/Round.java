@@ -14,6 +14,28 @@ public class Round {
     private boolean endRound;
     private int actualTurn;
 
+    private enum PlayOption {
+        GRAB_CARD,
+        DISCARD_CARD,
+        SWAP_CARD,
+        CARD_POWER
+    }
+
+    private enum CardValue {
+        J(11),
+        Q(12),
+        K(13);
+
+
+
+        private final int value;
+
+        CardValue(final int value){
+            this.value = value;
+        }
+
+    }
+
     /**
      * When an object is instantiated, a new round is started.
      *
@@ -43,6 +65,9 @@ public class Round {
 
         while (!endRound) {
 
+
+
+
             // If someone has discarded all their cards, the round ends.
             for (Player p : playersList) {
                 p.writter.packAndWrite(Signal.START_TURN);
@@ -53,18 +78,19 @@ public class Round {
                 }));
                 // The player's turn begins
                 if (deck.checkEmptyDeck()) {
-                    returnDiscartedCardsToDeck();
+                    returnDiscardedCardsToDeck();
                 }
 
-                //The last card in the Maze is always shown
-                showLastCardInDiscartedDeck();
+
+                //The last card in the discarded deck is always shown
+                showLastCardInDiscardedDeck();
 
                 // If round is above 5, player can stand and end the round.
                 if (actualTurn > 5) {
                     boolean stand = standRound(p);
                     if (stand) {
                         endRound = true;
-                        // send all players except the one with the turn, that "p's" has standed.
+                        // send all players except the one with the turn, that "p" has stood.
                         playersList.stream().filter((player -> player != p)).forEach((player -> {
                             player.writter.packAndWrite(Signal.OTHER_PLAYER_STANDS, p.getUid());
                             p.writter.packAndWrite(Signal.END_ROUND);
@@ -97,7 +123,7 @@ public class Round {
     }
 
 
-    private void returnDiscartedCardsToDeck() {
+    private void returnDiscardedCardsToDeck() {
         deck.setCardsDeck(discardedCardsDeck);
         deck.shuffleDeck();
         discardedCardsDeck.clear();
@@ -108,7 +134,7 @@ public class Round {
     /**
      * Shows the last card in the discarded deck.
      */
-    public void showLastCardInDiscartedDeck() {
+    public void showLastCardInDiscardedDeck() {
         System.out.println(discardedCardsDeck.lastElement());
         for (Player p : playersList) {
             p.writter.packAndWrite(Signal.SHOW_LAST_CARD_DISCARTED, discardedCardsDeck.lastElement().toString());
@@ -121,39 +147,38 @@ public class Round {
      * @param p Player choosing the option
      */
     public void chooseOptionToPlay(Player p) {
-        int option;
+        PlayOption option;
         if (discardedCardsDeck.isEmpty()) {
-            option = 1;
+            option = PlayOption.GRAB_CARD;
         } else {
             p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_PLAY);
 
-            option = p.reader.readPackage().data.getAsInt();
+            option = PlayOption.values()[p.reader.readPackage().data.getAsInt()];
         }
         switch (option) {
-            case 1 -> {
+            case GRAB_CARD -> {
                 Card card = deck.takeCard();
                 for (Player p2 : playersList)
                     p2.writter.packAndWrite(Signal.SHOW_LAST_CARD_DECK, card.toString());
 
                 System.out.println(card.toString());
 
-                p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_PLAY_2, card.getValue());
+                p.writter.packAndWrite(Signal.ASK_PLAYER_CARD_OPTION, card.getValue());
 
-                int option2 = p.reader.readPackage().data.getAsInt();
-                // Execute option2
-                if (option2 == 1) {
+                PlayOption optionForSelectedCard = PlayOption.values()[p.reader.readPackage().data.getAsInt()];
+                // Execute optionForSelectedCard
+                if (optionForSelectedCard == PlayOption.DISCARD_CARD) { // discard
                     discardedCardsDeck.add(card);
                     for (Player p2 : playersList) {
                         p2.writter.packAndWrite(Signal.PLAYER_DISCARDS_CARD, card.toString());
                     }
-                } else if (option2 == 2) {
-                    Card cardOfPlayer = swapCards(p, card);
-                    discardedCardsDeck.add(cardOfPlayer);
-                } else if (option2 == 3) {
-                    if (card.getValue() == 11) {
+                } else if (optionForSelectedCard == PlayOption.SWAP_CARD) { // swap with one of my cards
+                    swapCards(p, card);
+                } else if (optionForSelectedCard == PlayOption.CARD_POWER) { // use card power
+                    if (card.getValue() == CardValue.J.value) {
                         int index = playerSelectCard(p) - -1;
                         seeCard(p, index);
-                    } else if (card.getValue() == 12) {
+                    } else if (card.getValue() == CardValue.Q.value) {
                         int ownIndexCard = playerSelectCard(p);
                         // Select an oponent
                         Player oponent = selectOpponent(p);
@@ -165,32 +190,31 @@ public class Round {
                                     new JsonField("player_uid", p.getUid()), new JsonField("p_card_index", ownIndexCard),
                                     new JsonField("oponent_uid", oponent.getUid()), new JsonField("o_card_index", oponentIndexCard));
                         }
-                    } else if (card.getValue() == 13) {
+                    } else if (card.getValue() == CardValue.K.value) {
                         int ownIndexCard = playerSelectCard(p);
                         seeCard(p, ownIndexCard);
                         // Select an oponent
                         Player oponent = selectOpponent(p);
                         // Now we select the oponent index card
-                        int oponentIndexCard = playerSelectCard(p);
+                        int oponentIndexCard = playerSelectCardOponent(p, oponent);
                         seeOponentCard(p, oponent, oponentIndexCard);
 
                         // Ask player if he wants to switch the cards
                         p.writter.packAndWrite(Signal.ASK_PLAYER_SWITCH_CARD);
 
-                        if (p.reader.readPackage().data.getAsInt() == 1) {
+                        if (p.reader.readPackage().data.getAsBoolean()) {
                             switchCardWithOponent(p, oponent, ownIndexCard, oponentIndexCard);
+                            // send signal swap card
                         }
+
                     }
+                    discardedCardsDeck.add(card);
+                    // send signal discard card
                 }
             }
-            case 2 -> discardPlayerCard(p);
-            case 3 -> {
-                // Implement how to communicate to other players card index of card swapped
-                Card cardOfPlayer = swapCards(p, discardedCardsDeck.pop());
-                discardedCardsDeck.add(cardOfPlayer);
-            }
+            case DISCARD_CARD -> discardPlayerCard(p);
+            case SWAP_CARD -> swapCards(p, discardedCardsDeck.pop());
         }
-
     }
 
     private int playerSelectCardOponent(Player p, Player oponent) {
@@ -227,7 +251,7 @@ public class Round {
 
     /**
      * Checks if the card received as a parameter is equal to the last card
-     * in the discard pile (of type Stack), and discards the card if it is.
+     * in the discard pile, and discards the card if it is.
      * Otherwise, the player is penalized with 5 points.
      *
      * @param p The player who will discard the card
@@ -245,6 +269,9 @@ public class Round {
                         new JsonField("card", card.toString()));
             }
         } else {
+            p.writter.packAndWrite(Signal.PLAYER_SEES_OWN_CARD, new JsonField("card_index", index),
+                    new JsonField("card", card.toString()));
+
             System.out.println("The card does not have the same value, you are penalized with 5 points.");
             p.setPoints(p.getPoints() + 5);
             for (Player p2 : playersList) {
@@ -313,7 +340,7 @@ public class Round {
      *
      * @param card
      */
-    public Card swapCards(Player p, Card card) {
+    public void swapCards(Player p, Card card) {
         p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
         int cardIndex = p.reader.readPackage().data.getAsInt();
         Card myCard = p.getCards().get(cardIndex);
@@ -321,7 +348,7 @@ public class Round {
         for (Player p2 : playersList)
             p2.writter.packAndWrite(Signal.PLAYER_SWITCH_CARD_DECK, new JsonField("player_uid", p.getUid()), new JsonField("card_index", cardIndex));
 
-        return myCard;
+        discardedCardsDeck.add(myCard);
     }
 
     // Getters and Setters
