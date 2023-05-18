@@ -67,6 +67,7 @@ public class Round {
                         // send all players except the one with the turn, that "p's" has standed.
                         playersList.stream().filter((player -> player != p)).forEach((player -> {
                             player.writter.packAndWrite(Signal.OTHER_PLAYER_STANDS, p.getUid());
+                            p.writter.packAndWrite(Signal.END_ROUND);
                         }));
                         break;
                     }
@@ -151,14 +152,7 @@ public class Round {
                 } else if (option2 == 3) {
                     if (card.getValue() == 11) {
                         int index = playerSelectCard(p) - -1;
-                        Card cardAux = p.getCards().get(index);
-                        p.writter.packAndWrite(Signal.PLAYER_SEES_OWN_CARD, new JsonField("card", cardAux.toString()), new JsonField("card_index", index));
-
-                        // send all players except the one with the turn, that "p" has seen one of his cards.
-                        playersList.stream().filter((player -> player != p)).forEach((player -> {
-                            player.writter.packAndWrite(Signal.OTHER_PLAYER_SEES_CARD, new JsonField("player_uid", p.getUid()), new JsonField("card_index", index));
-                        }));
-
+                        seeCard(p, index);
                     } else if (card.getValue() == 12) {
                         int ownIndexCard = playerSelectCard(p);
                         // Select an oponent
@@ -246,7 +240,9 @@ public class Round {
             p.getCards().remove(card);
             discardedCardsDeck.add(card);
             for (Player p2 : playersList) {
-                p2.writter.packAndWrite(Signal.PLAYER_ONE_CARD_LESS, p.getUid());
+                p2.writter.packAndWrite(Signal.PLAYER_ONE_CARD_LESS,
+                        new JsonField("player_uid", p.getUid()), new JsonField("card_index", index),
+                        new JsonField("card", card.toString()));
             }
         } else {
             System.out.println("The card does not have the same value, you are penalized with 5 points.");
@@ -289,14 +285,27 @@ public class Round {
      */
     public void seeCard(Player p, int index) {
         Card card = p.getCards().get(index);
-        p.writter.packAndWrite(Signal.PLAYER_SEES_OWN_CARD, new JsonField("card", card.toString()), new JsonField("index", index));
+        p.writter.packAndWrite(Signal.PLAYER_SEES_OWN_CARD, new JsonField("card", card.toString()), new JsonField("card_index", index));
+
+        // send all players except the one with the turn, that "p" has seen his own card.
+        playersList.stream().filter((player -> player != p)).forEach((player -> {
+            player.writter.packAndWrite(Signal.OTHER_PLAYER_SEES_CARD,
+                    new JsonField("player_uid", p.getUid()), new JsonField("card_index", index));
+        }));
+
     }
 
     public void seeOponentCard(Player p, Player oponent, int index) {
         Card card = oponent.getCards().get(index);
-        p.writter.packAndWrite(Signal.PLAYER_SEES_OWN_CARD,
+        p.writter.packAndWrite(Signal.PLAYER_SEES_OPONENT_CARD,
                 new JsonField("player_uid", p.getUid()), new JsonField("oponent_uid", oponent.getUid()),
                 new JsonField("card", card.toString()), new JsonField("index", index));
+
+        // send all players except the one with the turn, that "p" has seen an oponent card.
+        playersList.stream().filter((player -> player != p)).forEach((player -> {
+            player.writter.packAndWrite(Signal.OTHER_PLAYER_SEES_OPONENT_CARD,
+                    new JsonField("player_uid", p.getUid()), new JsonField("oponent_uid", oponent.getUid()), new JsonField("card_index", index));
+        }));
     }
 
     /**
