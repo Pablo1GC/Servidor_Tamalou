@@ -87,14 +87,14 @@ public class Round {
 
                 // If round is above 5, player can stand and end the round.
                 if (actualTurn > 5) {
-                    boolean stand = standRound(p);
+                    boolean stand = askPlayerToStand(p);
                     if (stand) {
                         endRound = true;
                         // send all players except the one with the turn, that "p" has stood.
-                        playersList.stream().filter((player -> player != p)).forEach((player -> {
-                            player.writter.packAndWrite(Signal.OTHER_PLAYER_STANDS, p.getUid());
-                            p.writter.packAndWrite(Signal.END_ROUND);
-                        }));
+                        playersList.stream().filter((player -> player != p)).forEach((player ->
+                                player.writter.packAndWrite(Signal.OTHER_PLAYER_STANDS, p.getUid())));
+
+                        p.writter.packAndWrite(Signal.END_ROUND);
                         break;
                     }
                 }
@@ -137,7 +137,7 @@ public class Round {
     public void showLastCardInDiscardedDeck() {
         System.out.println(discardedCardsDeck.lastElement());
         for (Player p : playersList) {
-            p.writter.packAndWrite(Signal.SHOW_LAST_CARD_DISCARTED, discardedCardsDeck.lastElement().toString());
+            p.writter.packAndWrite(Signal.SHOW_LAST_CARD_DISCARDED, discardedCardsDeck.lastElement());
         }
     }
 
@@ -286,12 +286,11 @@ public class Round {
      *
      * @return Returns true if the option is "Yes", false if is "No"
      */
-    public boolean standRound(Player p) {
+    public boolean askPlayerToStand(Player p) {
         p.writter.packAndWrite(Signal.ASK_PLAYER_TO_STAND);
         System.out.println("Do you want to stand? [Yes/No]");
 
-        int endTurn = p.reader.readPackage().data.getAsInt();
-        return endTurn == Signal.PLAYER_STANDS;
+        return p.reader.readPackage().data.getAsBoolean();
     }
 
     /**

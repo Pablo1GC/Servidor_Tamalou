@@ -38,7 +38,7 @@ public class Signal {
     public static final int END_ROUND                 = 131;
     public static final int END_TURN                  = 7348;
     public static final int SHOW_LAST_CARD_DECK       = 132;
-    public static final int SHOW_LAST_CARD_DISCARTED  = 133;
+    public static final int SHOW_LAST_CARD_DISCARDED = 133;
     public static final int ASK_PLAYER_TO_STAND       = 134;
     public static final int PLAYER_STANDS             = 135;
     public static final int OTHER_PLAYER_SEES_CARD = 136;
