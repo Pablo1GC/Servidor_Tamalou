@@ -83,7 +83,8 @@ public class Round {
 
 
                 //The last card in the discarded deck is always shown
-                showLastCardInDiscardedDeck();
+                if (!discardedCardsDeck.isEmpty())
+                    showLastCardInDiscardedDeck();
 
                 // If round is above 5, player can stand and end the round.
                 if (actualTurn > 5) {
@@ -150,6 +151,8 @@ public class Round {
         PlayOption option;
         if (discardedCardsDeck.isEmpty()) {
             option = PlayOption.GRAB_CARD;
+            p.writter.packAndWrite(Signal.DISCARDED_DECK_IS_EMPTY);
+
         } else {
             p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_PLAY);
 
@@ -159,57 +162,61 @@ public class Round {
             case GRAB_CARD -> {
                 Card card = deck.takeCard();
                 for (Player p2 : playersList)
-                    p2.writter.packAndWrite(Signal.SHOW_LAST_CARD_DECK, card.toString());
+                    p2.writter.packAndWrite(Signal.SHOW_LAST_CARD_DECK, card);
 
                 System.out.println(card.toString());
 
-                p.writter.packAndWrite(Signal.ASK_PLAYER_CARD_OPTION, card.getValue());
+                p.writter.packAndWrite(Signal.ASK_PLAYER_CARD_OPTION, card);
 
                 PlayOption optionForSelectedCard = PlayOption.values()[p.reader.readPackage().data.getAsInt()];
                 // Execute optionForSelectedCard
-                if (optionForSelectedCard == PlayOption.DISCARD_CARD) { // discard
-                    discardedCardsDeck.add(card);
-                    for (Player p2 : playersList) {
-                        p2.writter.packAndWrite(Signal.PLAYER_DISCARDS_CARD, card.toString());
+
+                switch (optionForSelectedCard){
+                    case DISCARD_CARD -> {
+                        discardedCardsDeck.add(card);
+                        for (Player p2 : playersList)
+                            p2.writter.packAndWrite(Signal.PLAYER_DISCARDS_CARD, card.toString());
                     }
-                } else if (optionForSelectedCard == PlayOption.SWAP_CARD) { // swap with one of my cards
-                    swapCards(p, card);
-                } else if (optionForSelectedCard == PlayOption.CARD_POWER) { // use card power
-                    if (card.getValue() == CardValue.J.value) {
-                        int index = playerSelectCard(p) - -1;
-                        seeCard(p, index);
-                    } else if (card.getValue() == CardValue.Q.value) {
-                        int ownIndexCard = playerSelectCard(p);
-                        // Select an oponent
-                        Player oponent = selectOpponent(p);
-                        // Now we select the oponent index card
-                        int oponentIndexCard = playerSelectCardOponent(p, oponent);
-                        switchCardWithOponent(p, oponent, ownIndexCard, oponentIndexCard);
-                        for (Player p2 : playersList) {
-                            p2.writter.packAndWrite(Signal.PLAYER_SWITCH_CARD_PLAYER,
-                                    new JsonField("player_uid", p.getUid()), new JsonField("p_card_index", ownIndexCard),
-                                    new JsonField("oponent_uid", oponent.getUid()), new JsonField("o_card_index", oponentIndexCard));
-                        }
-                    } else if (card.getValue() == CardValue.K.value) {
-                        int ownIndexCard = playerSelectCard(p);
-                        seeCard(p, ownIndexCard);
-                        // Select an oponent
-                        Player oponent = selectOpponent(p);
-                        // Now we select the oponent index card
-                        int oponentIndexCard = playerSelectCardOponent(p, oponent);
-                        seeOponentCard(p, oponent, oponentIndexCard);
-
-                        // Ask player if he wants to switch the cards
-                        p.writter.packAndWrite(Signal.ASK_PLAYER_SWITCH_CARD);
-
-                        if (p.reader.readPackage().data.getAsBoolean()) {
+                    case SWAP_CARD -> swapCards(p, card);
+                    case CARD_POWER -> {
+                        if (card.getValue() == CardValue.J.value) {
+                            int index = playerSelectCard(p) - -1;
+                            seeCard(p, index);
+                        } else if (card.getValue() == CardValue.Q.value) {
+                            int ownIndexCard = playerSelectCard(p);
+                            // Select an oponent
+                            Player oponent = selectOpponent(p);
+                            // Now we select the oponent index card
+                            int oponentIndexCard = playerSelectCardOponent(p, oponent);
                             switchCardWithOponent(p, oponent, ownIndexCard, oponentIndexCard);
-                            // send signal swap card
+                            for (Player p2 : playersList) {
+                                p2.writter.packAndWrite(Signal.PLAYER_SWITCH_CARD_PLAYER,
+                                        new JsonField("player_uid", p.getUid()), new JsonField("p_card_index", ownIndexCard),
+                                        new JsonField("oponent_uid", oponent.getUid()), new JsonField("o_card_index", oponentIndexCard));
+                            }
+                        } else if (card.getValue() == CardValue.K.value) {
+                            int ownIndexCard = playerSelectCard(p);
+                            seeCard(p, ownIndexCard);
+                            // Select an oponent
+                            Player oponent = selectOpponent(p);
+                            // Now we select the oponent index card
+                            int oponentIndexCard = playerSelectCardOponent(p, oponent);
+                            seeOponentCard(p, oponent, oponentIndexCard);
+
+                            // Ask player if he wants to switch the cards
+                            p.writter.packAndWrite(Signal.ASK_PLAYER_SWITCH_CARD);
+
+                            if (p.reader.readPackage().data.getAsBoolean()) {
+                                switchCardWithOponent(p, oponent, ownIndexCard, oponentIndexCard);
+                                // send signal swap card
+                            }
+
                         }
+                        discardedCardsDeck.add(card);
+                        // send signal discard card
 
                     }
-                    discardedCardsDeck.add(card);
-                    // send signal discard card
+
                 }
             }
             case DISCARD_CARD -> discardPlayerCard(p);

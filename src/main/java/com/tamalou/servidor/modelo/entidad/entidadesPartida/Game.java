@@ -124,7 +124,7 @@ public class Game extends Thread {
         }
 
         if (playerList.size() == MAX_PLAYERS) {
-            startGame();
+            this.start();
         }
     }
 

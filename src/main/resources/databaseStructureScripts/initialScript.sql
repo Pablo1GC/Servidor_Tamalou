@@ -161,18 +161,18 @@ DELIMITER ;
 -- INSERT INTO player table
 INSERT INTO user (email, username, uid, image)
 VALUES ('francoernestocollins@gmail.com', 'johndoe', '0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', NULL),
-       ('jane@example.com', 'janedoe', '789012', NULL),
-       ('bob@example.com', 'bobsmith', '345678', NULL),
-       ('alice@example.com', 'alicewonderland', '901234', NULL),
-       ('steve@example.com', 'stevecarell', '567890', NULL);
+       ('jane@example.com', 'janedoe', 'zu9ZCxzhD7biz5dNqbo7EEJvR1q2', NULL),
+       ('bob@example.com', 'bobsmith', 'zN3ZxWxwUCaAMeA1vEgTXURb4fF3', NULL),
+       ('alice@example.com', 'alicewonderland', 'lFd6QrfZP9Wy6sILpARhvXhljXL2', NULL),
+       ('steve@example.com', 'stevecarell', 'pM788g1l9YWfVD8C7b3XpxgU33A3', NULL);
 
 -- INSERT INTO friendship table
 INSERT INTO friendship (sender, receiver, status)
-VALUES ('0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', '789012', 'accepted'),
-       ('789012', '0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', 'accepted'),
-       ('345678', '901234', 'pending'),
-       ('901234', '567890', 'rejected'),
-       ('567890', '901234', 'accepted');
+VALUES ('0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', 'zu9ZCxzhD7biz5dNqbo7EEJvR1q2', 'accepted'),
+       ('zu9ZCxzhD7biz5dNqbo7EEJvR1q2', '0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', 'accepted'),
+       ('zN3ZxWxwUCaAMeA1vEgTXURb4fF3', 'lFd6QrfZP9Wy6sILpARhvXhljXL2', 'pending'),
+       ('lFd6QrfZP9Wy6sILpARhvXhljXL2', 'pM788g1l9YWfVD8C7b3XpxgU33A3', 'rejected'),
+       ('pM788g1l9YWfVD8C7b3XpxgU33A3', 'lFd6QrfZP9Wy6sILpARhvXhljXL2', 'accepted');
 
 -- INSERT INTO game table
 INSERT INTO game (name, num_rounds)
@@ -186,15 +186,15 @@ VALUES ('Game 1', 10),
 -- INSERT INTO game_player table
 INSERT INTO game_player (id_game, id_user, score, winner)
 VALUES (1, '0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', 100, true),
-       (1, '789012', 80, false),
-       (2, '345678', 50, false),
-       (2, '567890', 60, true),
+       (1, 'zu9ZCxzhD7biz5dNqbo7EEJvR1q2', 80, false),
+       (2, 'zN3ZxWxwUCaAMeA1vEgTXURb4fF3', 50, false),
+       (2, 'pM788g1l9YWfVD8C7b3XpxgU33A3', 60, true),
        (3, '0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', 150, true),
-       (3, '567890', 120, false),
-       (4, '901234', 80, true),
+       (3, 'pM788g1l9YWfVD8C7b3XpxgU33A3', 120, false),
+       (4, 'lFd6QrfZP9Wy6sILpARhvXhljXL2', 80, true),
        (4, '0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', 70, false),
-       (5, '345678', 110, false),
-       (5, '567890', 140, true);
+       (5, 'zN3ZxWxwUCaAMeA1vEgTXURb4fF3', 110, false),
+       (5, 'pM788g1l9YWfVD8C7b3XpxgU33A3', 140, true);
 
 
 DELIMITER //
