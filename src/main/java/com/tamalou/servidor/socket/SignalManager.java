@@ -119,7 +119,7 @@ public class SignalManager {
             player.writter.packAndWrite(Signal.CLAVE_TORNEO, key);
         }
 
-        player.writter.packAndWrite(Signal.CONEXION_EXITOSA_TORNEO);
+        player.writter.packAndWrite(Signal.SUCCESSFUL_MATCH_CREATION);
 
         return false;
     }

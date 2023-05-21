@@ -39,6 +39,7 @@ public class ClientConnection {
             User player1 = userRepository.findById(player.getUid());
             player.setUsername(player1.getUsername());
             player.setImage(player1.getImage());
+            player.setPoints(0);
 
 
             System.out.println("Player uid: " + player.getUid());

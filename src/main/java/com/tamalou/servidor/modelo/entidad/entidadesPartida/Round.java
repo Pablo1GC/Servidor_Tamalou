@@ -3,6 +3,7 @@ package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 import com.tamalou.servidor.modelo.entidad.socketEntities.JsonField;
 import com.tamalou.servidor.socket.Signal;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
@@ -57,6 +58,7 @@ public class Round {
      */
     public void playRound() {
         deck.shuffleDeck();
+
         for (Player player : playersList) {
             for (int i = 0; i < 4; i++) {
                 player.takeCard(deck.takeCard());
@@ -117,10 +119,26 @@ public class Round {
                     }
                 }
 
+
+                // Creating a list with players that contain only uid and points
+                List<Player> tmpPlayersWithScore = new ArrayList<>(this.playersList.size());
+
+                playersList.forEach((player -> {
+                    Player addingPlayer = new Player();
+
+                    addingPlayer.setUid(player.getUid());
+                    addingPlayer.setPoints(player.getPoints());
+
+                    tmpPlayersWithScore.add(addingPlayer);
+                }));
+
+                for (Player player : playersList){
+                    player.writter.packAndWrite(Signal.PLAYERS_POINTS,
+                            new JsonField("players", tmpPlayersWithScore));
+                }
             }
             actualTurn++;
         }
-
     }
 
 
@@ -174,8 +192,9 @@ public class Round {
                 switch (optionForSelectedCard){
                     case DISCARD_CARD -> {
                         discardedCardsDeck.add(card);
+
                         for (Player p2 : playersList)
-                            p2.writter.packAndWrite(Signal.PLAYER_DISCARDS_CARD, card.toString());
+                            p2.writter.packAndWrite(Signal.PLAYER_DISCARDS_CARD, new JsonField("player_uid", p.getUid()), new JsonField("card" ,card));
                     }
                     case SWAP_CARD -> swapCards(p, card);
                     case CARD_POWER -> {
@@ -273,11 +292,11 @@ public class Round {
             for (Player p2 : playersList) {
                 p2.writter.packAndWrite(Signal.PLAYER_ONE_CARD_LESS,
                         new JsonField("player_uid", p.getUid()), new JsonField("card_index", index),
-                        new JsonField("card", card.toString()));
+                        new JsonField("card", card));
             }
         } else {
             p.writter.packAndWrite(Signal.PLAYER_SEES_OWN_CARD, new JsonField("card_index", index),
-                    new JsonField("card", card.toString()));
+                    new JsonField("card", card));
 
             System.out.println("The card does not have the same value, you are penalized with 5 points.");
             p.setPoints(p.getPoints() + 5);
@@ -342,16 +361,18 @@ public class Round {
     }
 
     /**
-     * Allows the player to swap one of his cards with another card of the game.
+     * Allows the player to swap one of his cards with another card of the discarded deck.
      *
-     * @param card
+     * @param card The card to swap with the one the player chose
      */
     public void swapCards(Player p, Card card) {
         p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
         int cardIndex = p.reader.readPackage().data.getAsInt();
         Card myCard = p.getCards().get(cardIndex);
         p.getCards().set(cardIndex, card);
-        for (Player p2 : playersList)
+
+        // for each player that's not "p"
+        for (Player p2 : playersList.stream().filter(player -> player != p).toList())
             p2.writter.packAndWrite(Signal.PLAYER_SWITCH_CARD_DECK, new JsonField("player_uid", p.getUid()), new JsonField("card_index", cardIndex));
 
         discardedCardsDeck.add(myCard);

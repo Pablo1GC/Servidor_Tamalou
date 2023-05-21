@@ -44,10 +44,10 @@ public class Signal {
     public static final int OTHER_PLAYER_SEES_CARD = 136;
     public static final int PLAYER_DISCARDS_CARD      = 140;
     public static final int PLAYER_SWITCH_CARD_DECK   = 138;
-    public static final int ASK_PLAYER_SELECT_OPONENT = 140;
+    public static final int ASK_PLAYER_SELECT_OPONENT = 143;
     public static final int ASK_PLAYER_SELECT_PLAY    = 141;
     public static final int ASK_PLAYER_CARD_OPTION = 142;
-    public static final int ASK_PLAYER_SWITCH_CARD    = 143;
+    public static final int ASK_PLAYER_SWITCH_CARD    = 145;
     public static final int ASK_PLAYER_SELECT_CARD    = 144;
     public static final int PLAYER_POINTS_PENALTY     = 145;
     public static final int PLAYER_ONE_CARD_LESS      = 146;
@@ -85,7 +85,7 @@ public class Signal {
 
     public static final int EMPATE                      = 207;
 
-    public static final int PAQUETE_PUNTUACION          = 808;
+    public static final int PLAYERS_POINTS = 808;
 
     public static final int COMENZAR_PARTIDA_FINAL = 209;
 
@@ -97,7 +97,7 @@ public class Signal {
     public static final char SEPARADOR                 = '|';
 
     public static final int LOBBY_LLENO =               810;
-    public static final int CONEXION_EXITOSA_TORNEO =   9030;
+    public static final int SUCCESSFUL_MATCH_CREATION =   9030;
 
     public static final int DESCONECTADO               = 329;
 
