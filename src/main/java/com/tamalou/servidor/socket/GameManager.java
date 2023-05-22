@@ -4,6 +4,7 @@ import com.tamalou.servidor.modelo.entidad.entidadesPartida.Game;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class GameManager {
@@ -39,19 +40,31 @@ public class GameManager {
      * @return
      */
     public synchronized HashMap<String, Game> showGames() {
-        HashMap<String, Game> publicTournaments = new HashMap<>();
+        HashMap<String, Game> publicGames = new HashMap<>();
         gameHashMap.forEach((key, value) -> {
             if (!value.isPrivate())
-                publicTournaments.put(key, value);
+                publicGames.put(key, value);
         });
-        return publicTournaments;
+        return publicGames;
     }
 
     public synchronized int joinPlayerToGame(Player player, String gameKey) {
+        for(Map.Entry<String, Game> entry : gameHashMap.entrySet()){
+            Game game = entry.getValue();
+
+            for (Player p : game.getPlayersList()){
+                if (p.getUid().equals(player.getUid())){
+                    player.setPoints(p.getPoints());
+                    game.getPlayersList().remove(p);
+                    p = null;
+                    game.getPlayersList().add(player);
+                }
+            }
+        }
         if (gameHashMap.get(gameKey) == null)
             return Signal.TORNEO_INEXISTENTE;
 
-        if (gameHashMap.get(gameKey).getPlayerList().size() == 4) {
+        if (gameHashMap.get(gameKey).getPlayersList().size() == 4) {
             return Signal.TORNEO_LLENO;
         } else {
             gameHashMap.get(gameKey).addPlayer(player);

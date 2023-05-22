@@ -48,6 +48,8 @@ public class Deck {
         return false;
     }
 
+    // GETTERS AND SETTERS
+
     public Stack<Card> getCardsDeck() {
         return cardsDeck;
     }

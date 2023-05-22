@@ -46,7 +46,7 @@ public class SignalManager {
                         case Signal.CREAR_TORNEO_PUBLICO               -> manageCreateGame(player, pack.data.getAsJsonObject(), false);
                         case Signal.CREAR_TORNEO_PRIVADO               -> manageCreateGame(player, pack.data.getAsJsonObject(), true);
                         case Signal.UNIRSE_TORNEO_PUBLICO,
-                                Signal.UNIRSE_TORNEO_PRIVADO -> mamageJoinGame(player, pack.data.getAsJsonObject());
+                                Signal.UNIRSE_TORNEO_PRIVADO -> manageJoinGame(player, pack.data.getAsJsonObject());
                         case Signal.SOLICITAR_LISTA_TORNEOS            -> manageGameList(player.writter);
                         default -> false;
 
@@ -67,7 +67,7 @@ public class SignalManager {
 
         torneosPublicos.forEach((key, value) -> {
             String nombre = value.getGameName();
-            int jugadores = value.getPlayerList().size();
+            int jugadores = value.getPlayersList().size();
 
             Match match = new Match();
             match.name = nombre;
@@ -84,7 +84,7 @@ public class SignalManager {
     }
 
 
-    private boolean mamageJoinGame(Player player, JsonObject data) throws NoSuchElementException {
+    private boolean manageJoinGame(Player player, JsonObject data) throws NoSuchElementException {
         System.out.println("Join");
 
         String key = data.get("key").getAsString();

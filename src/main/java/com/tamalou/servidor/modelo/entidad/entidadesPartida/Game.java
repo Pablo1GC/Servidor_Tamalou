@@ -4,7 +4,6 @@ package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 import com.tamalou.servidor.socket.Signal;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -18,7 +17,7 @@ public class Game extends Thread {
     private String gameName;
 
     private int maxRounds;
-    private List<Player> playerList;
+    private List<Player> playersList;
     private int actualRound;
     private boolean gameEnded;
     private Player winner;
@@ -33,7 +32,7 @@ public class Game extends Thread {
         this.gameEnded = false;
         this.privateGame = isPrivate;
         this.gameName = gameName;
-        this.playerList = new ArrayList<>();
+        this.playersList = new ArrayList<>();
     }
 
     @Override
@@ -43,15 +42,18 @@ public class Game extends Thread {
 
     /**
      * This method starts the game.
-     * First, sends a signal toevery player (Client).
+     * First, sends a signal to every player (Client).
      */
     public void startGame() {
-        for (Player p : playerList) {
-            p.writter.packAndWrite(Signal.START_GAME, playerList);
+        for (Player p : playersList) {
+            p.writter.packAndWrite(Signal.START_GAME, playersList);
         }
 
         while (!gameEnded) {
-            Round round = new Round(playerList);
+            for (Player p : playersList) {
+                p.writter.packAndWrite(Signal.REFRESH_POINTS, playersList);
+            }
+            Round round = new Round(playersList);
             round.playRound();
             actualRound++;
 
@@ -61,54 +63,34 @@ public class Game extends Thread {
         }
 
         winner = returnWinner();
-        System.out.println("¡La partida ha terminado! El ganador es: " + winner.getUid());
-        for (Player p2 : playerList) {
+        System.out.println("¡Game has ended! The winner is: " + winner.getUid());
+        for (Player p2 : playersList) {
             p2.writter.packAndWrite(Signal.END_GAME, winner.getUid());
         }
     }
 
     /**
-     * (Próxima versión) Comprueba si hay algun ganador entre la lista de jugadores.
-     * @return True en caso de que haya un jugador ganador, sobrepasando los puntos maximos
-     * @return False en caso de que no haya ningun jugador que haya alcanzado los puntos maximos
-
-    private boolean hayGanador() {
-    for (Player player : jugadores) {
-    if (player.getPoints() >= puntosMaximos) {
-    return true;
-    }
-    }
-    return false;
-    }
-     */
-
-    /**
-     * Determina que jugador de la partida ha sido ganador basandose en el que ha tenido menos
-     * puntaje en la partida
+     * Determines which player in the game has been the winner based on the one with the lowest score in the game
      *
-     * @return devuelve el jugador ganador
+     * @return the winner of the game
      */
     private Player returnWinner() {
-        Player ganador = null;
-        for (int i = 1; i < playerList.size(); i++) {
-            Player player = playerList.get(i);
-            if (player.getPoints() < ganador.getPoints()) {
-                ganador = player;
+        Player winner = null;
+        for (int i = 1; i < playersList.size(); i++) {
+            Player player = playersList.get(i);
+            if (player.getPoints() < winner.getPoints()) {
+                winner = player;
             }
         }
-        return ganador;
+        return winner;
     }
 
+    /**
+     *
+     * @return true if the game is private
+     */
     public boolean isPrivate() {
         return privateGame;
-    }
-
-    public List<Player> getPlayerList() {
-        return playerList;
-    }
-
-    public void setPlayerList(List<Player> playerList) {
-        this.playerList = playerList;
     }
 
     /**
@@ -118,14 +100,24 @@ public class Game extends Thread {
      * @param player
      */
     public void addPlayer(Player player) {
-        playerList.add(player);
-        for (Player p : playerList) {
-            p.writter.packAndWrite(Signal.PLAYER_JOINED_GAME, playerList.size());
+        playersList.add(player);
+        for (Player p : playersList) {
+            p.writter.packAndWrite(Signal.PLAYER_JOINED_GAME, playersList.size());
         }
-
-        if (playerList.size() == MAX_PLAYERS) {
+        if (playersList.size() == MAX_PLAYERS) {
             startGame();
         }
+    }
+
+
+    // GETTERS AND SETTERS
+
+    public List<Player> getPlayersList() {
+        return playersList;
+    }
+
+    public void setPlayersList(List<Player> playersList) {
+        this.playersList = playersList;
     }
 
     public String getGameName() {

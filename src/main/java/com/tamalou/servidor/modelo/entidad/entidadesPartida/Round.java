@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Stack;
 
 public class Round {
-    private Thread roundThread;
     private final List<Player> playersList;
     private final Deck deck;
     private final Stack<Card> discardedCardsDeck;
@@ -26,14 +25,11 @@ public class Round {
         Q(12),
         K(13);
 
-
-
         private final int value;
 
-        CardValue(final int value){
+        CardValue(final int value) {
             this.value = value;
         }
-
     }
 
     /**
@@ -49,11 +45,9 @@ public class Round {
         this.endRound = false;
     }
 
+
     /**
      * This method starts the round.
-     * It first shuffles the deck.
-     * It gives four cards to each player.
-     * Players take turns until the end of the round.
      */
     public void playRound() {
         deck.shuffleDeck();
@@ -63,12 +57,20 @@ public class Round {
             }
         }
 
+        // This loop won't end until one player stands or has discarted all his cards
         while (!endRound) {
 
+            // Check if any player has disconnected from the game
+            for (Player p : playersList){
+                if (p.getSocket().isClosed()){
+                    playersList.remove(p);
+                    playersList.stream().filter((player -> player != p)).forEach((player -> {
+                        player.writter.packAndWrite(Signal.PLAYER_DISCONNECTED, p.getUid());
+                    }));
+                }
+            }
 
-
-
-            // If someone has discarded all their cards, the round ends.
+            // The player's turn begins
             for (Player p : playersList) {
                 p.writter.packAndWrite(Signal.START_TURN);
 
@@ -76,8 +78,11 @@ public class Round {
                 playersList.stream().filter((player -> player != p)).forEach((player -> {
                     player.writter.packAndWrite(Signal.OTHER_PLAYER_TURN, p.getUid());
                 }));
-                // The player's turn begins
+
                 if (deck.checkEmptyDeck()) {
+                    for (Player p2 : playersList) {
+                        p2.writter.packAndWrite(Signal.DECK_IS_EMPTY);
+                    }
                     returnDiscardedCardsToDeck();
                 }
 
@@ -99,7 +104,7 @@ public class Round {
                     }
                 }
 
-                // Player can choose what to do
+                // Call method that allows the player to interact with the game
                 chooseOptionToPlay(p);
 
                 System.out.println(p.getUid() + " your turn has ended.");
@@ -119,10 +124,21 @@ public class Round {
             }
             actualTurn++;
         }
+        for(Player p : playersList){
+            for (Card card: p.getCards()){
+                int points = 0;
+                points += card.getValue();
+                p.setPoints(points + p.getPoints());
+            }
+        }
 
     }
 
-
+    /**
+     * This method send´s all the cards from the discarted deck to the deck.
+     * Shuffle´s the deck
+     * Clear´s the discarted deck and take the last card of the deck to the discarted deck.
+     */
     private void returnDiscardedCardsToDeck() {
         deck.setCardsDeck(discardedCardsDeck);
         deck.shuffleDeck();
@@ -176,7 +192,7 @@ public class Round {
                     swapCards(p, card);
                 } else if (optionForSelectedCard == PlayOption.CARD_POWER) { // use card power
                     if (card.getValue() == CardValue.J.value) {
-                        int index = playerSelectCard(p) - -1;
+                        int index = playerSelectCard(p);
                         seeCard(p, index);
                     } else if (card.getValue() == CardValue.Q.value) {
                         int ownIndexCard = playerSelectCard(p);
@@ -204,12 +220,16 @@ public class Round {
 
                         if (p.reader.readPackage().data.getAsBoolean()) {
                             switchCardWithOponent(p, oponent, ownIndexCard, oponentIndexCard);
-                            // send signal swap card
+                            for (Player p2 : playersList) {
+                                p2.writter.packAndWrite(Signal.PLAYER_SWITCH_CARD_PLAYER,
+                                        new JsonField("player_uid", p.getUid()), new JsonField("p_card_index", ownIndexCard),
+                                        new JsonField("oponent_uid", oponent.getUid()), new JsonField("o_card_index", oponentIndexCard));
+
+                            }
                         }
 
                     }
                     discardedCardsDeck.add(card);
-                    // send signal discard card
                 }
             }
             case DISCARD_CARD -> discardPlayerCard(p);
@@ -217,6 +237,13 @@ public class Round {
         }
     }
 
+    /**
+     * Allows the player to select a card from an oponent
+     *
+     * @param p       who is playing the turn
+     * @param oponent of the player
+     * @return Returns the index of the card selected by the player
+     */
     private int playerSelectCardOponent(Player p, Player oponent) {
         p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_OPONENT_CARD, oponent.getUid());
         int indexSelected = p.reader.readPackage().data.getAsInt();
@@ -226,6 +253,7 @@ public class Round {
     /**
      * Selects the card with which the player will interact
      *
+     * @param p who is playing the turn
      * @return Returns the index of the card selected by the player
      */
     public int playerSelectCard(Player p) {
@@ -296,18 +324,22 @@ public class Round {
     /**
      * It is responsible for exchanging two cards with another player
      *
+     * @param p                  who is playing the turn
      * @param opponent           is the player with whom you want to exchange the cards
      * @param ownIndexCard       is the index of the card that will be exchanged with the opponent passed by parameter
      * @param exchangedIndexCard is the index of the opponent's card that the player will receive
      */
-    public void switchCardWithOponent(Player player, Player opponent, int ownIndexCard, int exchangedIndexCard) {
-        player.getCards().set(ownIndexCard, opponent.getCards().get(exchangedIndexCard));
-        opponent.getCards().set(exchangedIndexCard, player.getCards().get(ownIndexCard));
+    public void switchCardWithOponent(Player p, Player opponent, int ownIndexCard, int exchangedIndexCard) {
+        p.getCards().set(ownIndexCard, opponent.getCards().get(exchangedIndexCard));
+        opponent.getCards().set(exchangedIndexCard, p.getCards().get(ownIndexCard));
 
     }
 
     /**
      * Allows the player to see a card
+     *
+     * @param p     who is playing the turn
+     * @param index is the index of the card
      */
     public void seeCard(Player p, int index) {
         Card card = p.getCards().get(index);
@@ -321,23 +353,31 @@ public class Round {
 
     }
 
-    public void seeOponentCard(Player p, Player oponent, int index) {
-        Card card = oponent.getCards().get(index);
+    /**
+     * Allows the player to see the card of an oponent
+     *
+     * @param p        who is playing the turn
+     * @param opponent is the oponent choosen by the player
+     * @param index    is the index of the opponent's card that the player wants to see
+     */
+    public void seeOponentCard(Player p, Player opponent, int index) {
+        Card card = opponent.getCards().get(index);
         p.writter.packAndWrite(Signal.PLAYER_SEES_OPONENT_CARD,
-                new JsonField("player_uid", p.getUid()), new JsonField("oponent_uid", oponent.getUid()),
+                new JsonField("player_uid", p.getUid()), new JsonField("oponent_uid", opponent.getUid()),
                 new JsonField("card", card.toString()), new JsonField("index", index));
 
         // send all players except the one with the turn, that "p" has seen an oponent card.
         playersList.stream().filter((player -> player != p)).forEach((player -> {
             player.writter.packAndWrite(Signal.OTHER_PLAYER_SEES_OPONENT_CARD,
-                    new JsonField("player_uid", p.getUid()), new JsonField("oponent_uid", oponent.getUid()), new JsonField("card_index", index));
+                    new JsonField("player_uid", p.getUid()), new JsonField("oponent_uid", opponent.getUid()), new JsonField("card_index", index));
         }));
     }
 
     /**
      * Allows the player to swap one of his cards with another card of the game.
      *
-     * @param card
+     * @param p    who is playing the turn
+     * @param card is the card that the player wants to swap
      */
     public void swapCards(Player p, Card card) {
         p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
@@ -349,15 +389,5 @@ public class Round {
 
         discardedCardsDeck.add(myCard);
     }
-
-    // Getters and Setters
-    public Deck getDeck() {
-        return deck;
-    }
-
-    public List<Card> getDiscardedCardsDeck() {
-        return discardedCardsDeck;
-    }
-
 
 }

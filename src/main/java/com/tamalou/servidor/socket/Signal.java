@@ -6,21 +6,7 @@ public class Signal {
     public static final int NO = 0;
 
     public static final int CONECTARSE = 299328;
-    public static final int JUGADORES_EN_LOBBY        = 923;
 
-
-    public static final int ENVIAR_SELECCION          = 51; // Piedra papel o tijera
-    public static final int ENVIAR_SELECCION_RIVAL    = 52;
-    public static final int ENVIAR_NOMBRE             = 53;
-
-    public static final int NOMBRE_DEL_RIVAL          = 940;
-
-    public static final int COMENZAR_ENFRENTAMIENTO   = 991;
-    public static final int COMENZAR_TORNEO           = 992;
-
-    public static final int FINAL_DE_RONDA            = 54;
-    public static final int FINAL_DE_ENFRENTAMIENTO   = 55;
-    public static final int FINAL_DE_TORNEO           = 56;
     public static final int CONEXION_EXITOSA          = 58;
 
 
@@ -30,17 +16,16 @@ public class Signal {
     public static final int START_TURN                = 23;
     public static final int OTHER_PLAYER_TURN         = 24;
     public static final int END_GAME                  = 25;
+    public static final int REFRESH_POINTS            = 26;
 
 
 
 
     // ROUND SIGNALS
     public static final int END_ROUND                 = 131;
-    public static final int END_TURN                  = 7348;
     public static final int SHOW_LAST_CARD_DECK       = 132;
     public static final int SHOW_LAST_CARD_DISCARDED = 133;
     public static final int ASK_PLAYER_TO_STAND       = 134;
-    public static final int PLAYER_STANDS             = 135;
     public static final int OTHER_PLAYER_SEES_CARD = 136;
     public static final int PLAYER_DISCARDS_CARD      = 137;
     public static final int PLAYER_SWITCH_CARD_DECK   = 138;
@@ -57,15 +42,12 @@ public class Signal {
     public static final int PLAYER_SEES_OWN_CARD      = 150;
     public static final int PLAYER_SEES_OPONENT_CARD      = 150;
     public static final int ASK_PLAYER_SELECT_OPONENT_CARD      = 151;
-    public static final int PLAYER_SWITCH_CARD_PLAYER     = 145;
-    public static final int OTHER_PLAYER_SEES_OPONENT_CARD = 145;
+    public static final int PLAYER_SWITCH_CARD_PLAYER     = 152;
+    public static final int OTHER_PLAYER_SEES_OPONENT_CARD = 153;
+    public static final int PLAYER_DISCONNECTED = 154;
+    public static final int DECK_IS_EMPTY             = 155;
 
 
-
-
-    public static final int CARD_DECK_TO_PLAYER       = 132;
-    public static final int DISCARTED_DECK_IS_EMPTY   = 133;
-    public static final int DECK_IS_EMPTY             = 134;
     public static final int HAND_IS_EMPTY             = 135;
     public static final int PLAYER_TAKE_CARD_DECK     = 132;
     public static final int PLAYER_SWITCH_CARD_DISCARTED_DECK   = 132;
