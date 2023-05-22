@@ -180,7 +180,7 @@ public class Round {
             case GRAB_CARD -> {
                 Card card = deck.takeCard();
                 for (Player p2 : playersList)
-                    p2.writter.packAndWrite(Signal.SHOW_LAST_CARD_DECK, card);
+                    p2.writter.packAndWrite(Signal.SHOW_CARD_GRABBED, card);
 
                 System.out.println(card.toString());
 
@@ -194,7 +194,7 @@ public class Round {
                         discardedCardsDeck.add(card);
 
                         for (Player p2 : playersList)
-                            p2.writter.packAndWrite(Signal.PLAYER_DISCARDS_CARD, new JsonField("player_uid", p.getUid()), new JsonField("card" ,card));
+                            p2.writter.packAndWrite(Signal.PLAYER_DISCARDS_CARD, new JsonField("player_uid", p.getUid()));
                     }
                     case SWAP_CARD -> swapCards(p, card);
                     case CARD_POWER -> {
