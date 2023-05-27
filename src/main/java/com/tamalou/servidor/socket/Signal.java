@@ -110,7 +110,8 @@ public class Signal {
     public static final int UNIRSE_TORNEO_PUBLICO           = 10003;
     public static final int UNIRSE_TORNEO_PRIVADO           = 10004;
     public static final int SOLICITAR_LISTA_TORNEOS         = 10005;
-    public static final int LEAVE_MATCH = 8071995;
+    public static final int LEAVE_MATCH                     = 8071995;
+    public static final int INVITE_PLAYER                   = 2020;
 
 
     // Señales con las que el servidor responde a esas peticiones

@@ -133,8 +133,7 @@ public class Round {
                 }));
 
                 for (Player player : playersList){
-                    player.writter.packAndWrite(Signal.PLAYERS_POINTS,
-                            new JsonField("players", tmpPlayersWithScore));
+                    player.writter.packAndWrite(Signal.PLAYERS_POINTS, tmpPlayersWithScore);
                 }
             }
             actualTurn++;
@@ -194,7 +193,7 @@ public class Round {
                         discardedCardsDeck.add(card);
 
                         for (Player p2 : playersList)
-                            p2.writter.packAndWrite(Signal.PLAYER_DISCARDS_CARD, new JsonField("card", card));
+                            p2.writter.packAndWrite(Signal.PLAYER_DISCARDS_CARD, card);
                     }
                     case SWAP_CARD -> swapCards(p, card);
                     case CARD_POWER -> {
