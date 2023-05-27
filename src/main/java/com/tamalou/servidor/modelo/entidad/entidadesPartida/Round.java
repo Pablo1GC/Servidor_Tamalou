@@ -52,9 +52,9 @@ public class Round {
      */
     public void playRound() {
         deck.shuffleDeck();
-        for (Player player : playersList) {
+        for (Player p : playersList) {
             for (int i = 0; i < 4; i++) {
-                player.takeCard(deck.takeCard());
+                p.takeCard(deck.takeCard());
             }
         }
 
@@ -180,18 +180,18 @@ public class Round {
     /**
      * Player can choose what to do in his turn.
      *
-     * @param p Player choosing the option
+     * @param player Player choosing the option
      */
-    public void chooseOptionToPlay(Player p) {
+    public void chooseOptionToPlay(Player player) {
         PlayOption option;
         if (discardedCardsDeck.isEmpty()) {
             option = PlayOption.GRAB_CARD;
-            p.writter.packAndWrite(Signal.DISCARDED_DECK_IS_EMPTY);
+            player.writter.packAndWrite(Signal.DISCARDED_DECK_IS_EMPTY);
 
         } else {
-            p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_PLAY);
+            player.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_PLAY);
 
-            option = PlayOption.values()[p.reader.readPackage().data.getAsInt()];
+            option = PlayOption.values()[player.reader.readPackage().data.getAsInt()];
         }
         switch (option) {
             case GRAB_CARD -> {
@@ -201,9 +201,9 @@ public class Round {
 
                 System.out.println(card.toString());
 
-                p.writter.packAndWrite(Signal.ASK_PLAYER_CARD_OPTION, card);
+                player.writter.packAndWrite(Signal.ASK_PLAYER_CARD_OPTION, card);
 
-                PlayOption optionForSelectedCard = PlayOption.values()[p.reader.readPackage().data.getAsInt()];
+                PlayOption optionForSelectedCard = PlayOption.values()[player.reader.readPackage().data.getAsInt()];
                 // Execute optionForSelectedCard
 
                 switch (optionForSelectedCard){
@@ -213,41 +213,41 @@ public class Round {
                         for (Player p2 : playersList)
                             p2.writter.packAndWrite(Signal.PLAYER_DISCARDS_CARD, card);
                     }
-                    case SWAP_CARD -> swapCards(p, card);
+                    case SWAP_CARD -> swapCards(player, card);
                     case CARD_POWER -> {
                         // select own card to see
                         if (card.getValue() == CardValue.J.value) {
-                            int ownIndex = playerSelectCard(p);
-                            seeCard(p, ownIndex);
+                            int ownIndex = playerSelectCard(player);
+                            seeCard(player, ownIndex);
                         } else if (card.getValue() == CardValue.Q.value) { // Swap card with opponent
-                            int indexCard = playerSelectCard(p);
+                            int indexCard = playerSelectCard(player);
                             // Select an opponent
-                            Player opponent = selectOpponent(p);
+                            Player opponent = selectOpponent(player);
                             // Now we select the opponent index card
-                            int opponentIndexCard = playerSelectCardOponent(p, opponent);
-                            switchCardWithOpponent(p, opponent, indexCard, opponentIndexCard);
+                            int opponentIndexCard = playerSelectCardOponent(player, opponent);
+                            switchCardWithOpponent(player, opponent, indexCard, opponentIndexCard);
 
                             // tell all players they exchanged cards
                             for (Player p2 : playersList) {
                                 p2.writter.packAndWrite(Signal.PLAYERS_SWITCHED_CARDS,
-                                        new JsonField("player_uid", p.getUid()), new JsonField("p_card_index", indexCard),
+                                        new JsonField("player_uid", player.getUid()), new JsonField("p_card_index", indexCard),
                                         new JsonField("opponent_uid", opponent.getUid()), new JsonField("o_card_index", opponentIndexCard));
                             }
                         } else if (card.getValue() == CardValue.K.value) {
                             // Player can see both their selected card and the selected opponent card
-                            int ownIndexCard = playerSelectCard(p);
-                            seeCard(p, ownIndexCard);
+                            int ownIndexCard = playerSelectCard(player);
+                            seeCard(player, ownIndexCard);
                             // Select an opponent
-                            Player opponent = selectOpponent(p);
+                            Player opponent = selectOpponent(player);
                             // Now we select the opponent index card
-                            int opponentIndexCard = playerSelectCardOponent(p, opponent);
-                            seeOpponentCard(p, opponent, opponentIndexCard);
+                            int opponentIndexCard = playerSelectCardOponent(player, opponent);
+                            seeOpponentCard(player, opponent, opponentIndexCard);
 
                             // Ask player if he wants to switch the cards
-                            p.writter.packAndWrite(Signal.ASK_PLAYER_SWITCH_CARD);
+                            player.writter.packAndWrite(Signal.ASK_PLAYER_SWITCH_CARD);
 
-                            if (p.reader.readPackage().data.getAsBoolean()) {
-                                switchCardWithOpponent(p, opponent, ownIndexCard, opponentIndexCard);
+                            if (player.reader.readPackage().data.getAsBoolean()) {
+                                switchCardWithOpponent(player, opponent, ownIndexCard, opponentIndexCard);
                                 // send signal swap card
                             }
 
@@ -259,33 +259,33 @@ public class Round {
 
                 }
             }
-            case DISCARD_CARD -> discardPlayerCard(p);
-            case SWAP_CARD -> swapCards(p, discardedCardsDeck.pop());
+            case DISCARD_CARD -> discardPlayerCard(player);
+            case SWAP_CARD -> swapCards(player, discardedCardsDeck.pop());
         }
     }
 
     /**
-     * Allows the player to select a card from an oponent
+     * Allows the player to select a card from an opponent
      *
-     * @param p       who is playing the turn
-     * @param oponent of the player
+     * @param player       who is playing the turn
+     * @param opponent of the player
      * @return Returns the index of the card selected by the player
      */
-    private int playerSelectCardOponent(Player p, Player oponent) {
-        p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_OPONENT_CARD, oponent.getUid());
-        int indexSelected = p.reader.readPackage().data.getAsInt();
+    private int playerSelectCardOponent(Player player, Player opponent) {
+        player.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_OPONENT_CARD, opponent.getUid());
+        int indexSelected = player.reader.readPackage().data.getAsInt();
         return indexSelected;
     }
 
     /**
      * Selects the card with which the player will interact
      *
-     * @param p who is playing the turn
+     * @param player who is playing the turn
      * @return Returns the index of the card selected by the player
      */
-    public int playerSelectCard(Player p) {
-        p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
-        int indexSelected = p.reader.readPackage().data.getAsInt();
+    public int playerSelectCard(Player player) {
+        player.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
+        int indexSelected = player.reader.readPackage().data.getAsInt();
         return indexSelected;
     }
 
@@ -293,13 +293,13 @@ public class Round {
     /**
      * Allows a player to select an opponent to interact with
      *
-     * @param p who is playing the turn
+     * @param player who is playing the turn
      * @return The player chosen as an opponent
      */
-    public Player selectOpponent(Player p) {
-        p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_OPONENT);
-        String uidOponent = p.reader.readPackage().data.getAsString();
-        Player opponent = playersList.stream().filter(player -> player.getUid().equals(uidOponent)).toList().get(0);
+    public Player selectOpponent(Player player) {
+        player.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_OPONENT);
+        String uidOponent = player.reader.readPackage().data.getAsString();
+        Player opponent = playersList.stream().filter(p -> p.getUid().equals(uidOponent)).toList().get(0);
         return opponent;
     }
 
@@ -309,28 +309,28 @@ public class Round {
      * in the discard pile, and discards the card if it is.
      * Otherwise, the player is penalized with 5 points.
      *
-     * @param p The player who will discard the card
+     * @param player The player who will discard the card
      */
-    public void discardPlayerCard(Player p) {
-        p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
-        int index = p.reader.readPackage().data.getAsInt();
-        Card card = p.getCards().get(index);
+    public void discardPlayerCard(Player player) {
+        player.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
+        int index = player.reader.readPackage().data.getAsInt();
+        Card card = player.getCards().get(index);
         if (card.getValue() == discardedCardsDeck.lastElement().getValue()) {
-            p.getCards().remove(card);
+            player.getCards().remove(card);
             discardedCardsDeck.add(card);
             for (Player p2 : playersList) {
                 p2.writter.packAndWrite(Signal.PLAYER_ONE_CARD_LESS,
-                        new JsonField("player_uid", p.getUid()), new JsonField("card_index", index),
+                        new JsonField("player_uid", player.getUid()), new JsonField("card_index", index),
                         new JsonField("card", card));
             }
         } else {
-            p.writter.packAndWrite(Signal.PLAYER_SEES_OWN_CARD, new JsonField("card_index", index),
+            player.writter.packAndWrite(Signal.PLAYER_SEES_OWN_CARD, new JsonField("card_index", index),
                     new JsonField("card", card));
 
             System.out.println("The card does not have the same value, you are penalized with 5 points.");
-            p.setPoints(p.getPoints() + 5);
+            player.setPoints(player.getPoints() + 5);
             for (Player p2 : playersList) {
-                p2.writter.packAndWrite(Signal.PLAYER_POINTS_PENALTY, p.getUid());
+                p2.writter.packAndWrite(Signal.PLAYER_POINTS_PENALTY, player.getUid());
             }
         }
     }
@@ -339,13 +339,14 @@ public class Round {
     /**
      * Gives the option to the player to stand and end the round.
      *
+     * @param player                  who is playing the turn
      * @return Returns true if the option is "Yes", false if is "No"
      */
-    public boolean askPlayerToStand(Player p) {
-        p.writter.packAndWrite(Signal.ASK_PLAYER_TO_STAND);
+    public boolean askPlayerToStand(Player player) {
+        player.writter.packAndWrite(Signal.ASK_PLAYER_TO_STAND);
         System.out.println("Do you want to stand? [Yes/No]");
 
-        return p.reader.readPackage().data.getAsBoolean();
+        return player.reader.readPackage().data.getAsBoolean();
     }
 
     /**
@@ -365,17 +366,17 @@ public class Round {
     /**
      * Allows the player to see a card
      *
-     * @param p     who is playing the turn
+     * @param player     who is playing the turn
      * @param index is the index of the card
      */
-    public void seeCard(Player p, int index) {
-        Card card = p.getCards().get(index);
-        p.writter.packAndWrite(Signal.PLAYER_SEES_OWN_CARD, new JsonField("card", card.toString()), new JsonField("card_index", index));
+    public void seeCard(Player player, int index) {
+        Card card = player.getCards().get(index);
+        player.writter.packAndWrite(Signal.PLAYER_SEES_OWN_CARD, new JsonField("card", card.toString()), new JsonField("card_index", index));
 
-        // send all players except the one with the turn, that "p" has seen his own card.
-        playersList.stream().filter((player -> player != p)).forEach((player -> {
-            player.writter.packAndWrite(Signal.OTHER_PLAYER_SEES_CARD,
-                    new JsonField("player_uid", p.getUid()), new JsonField("card_index", index));
+        // send all players except the one with the turn, that "player" has seen his own card.
+        playersList.stream().filter((p -> p != player)).forEach((p -> {
+            p.writter.packAndWrite(Signal.OTHER_PLAYER_SEES_CARD,
+                    new JsonField("player_uid", player.getUid()), new JsonField("card_index", index));
         }));
 
     }
@@ -383,38 +384,38 @@ public class Round {
     /**
      * Allows the player to see the card of an opponent
      *
-     * @param p        who is playing the turn
+     * @param player        who is playing the turn
      * @param opponent is the opponent choosen by the player
      * @param index    is the index of the opponent's card that the player wants to see
      */
-    public void seeOpponentCard(Player p, Player opponent, int index) {
+    public void seeOpponentCard(Player player, Player opponent, int index) {
         Card card = opponent.getCards().get(index);
-        p.writter.packAndWrite(Signal.PLAYER_SEES_OPONENT_CARD,
-                new JsonField("player_uid", p.getUid()), new JsonField("opponent_uid", opponent.getUid()),
+        player.writter.packAndWrite(Signal.PLAYER_SEES_OPONENT_CARD,
+                new JsonField("player_uid", player.getUid()), new JsonField("opponent_uid", opponent.getUid()),
                 new JsonField("card", card.toString()), new JsonField("index", index));
 
-        // send all players except the one with the turn, that "p" has seen an oponent card.
-        playersList.stream().filter((player -> player != p)).forEach((player -> {
-            player.writter.packAndWrite(Signal.OTHER_PLAYER_SEES_OPONENT_CARD,
-                    new JsonField("player_uid", p.getUid()), new JsonField("opponent_uid", opponent.getUid()), new JsonField("card_index", index));
+        // send all players except the one with the turn, that "player" has seen an opponent card.
+        playersList.stream().filter((p -> p != player)).forEach((p -> {
+            p.writter.packAndWrite(Signal.OTHER_PLAYER_SEES_OPONENT_CARD,
+                    new JsonField("player_uid", player.getUid()), new JsonField("opponent_uid", opponent.getUid()), new JsonField("card_index", index));
         }));
     }
 
     /**
      * Allows the player to swap one of his cards with another card of the discarded deck.
      *
-     * @param p    who is playing the turn
+     * @param player    who is playing the turn
      * @param card is the card that the player wants to swap
      */
-    public void swapCards(Player p, Card card) {
-        p.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
-        int cardIndex = p.reader.readPackage().data.getAsInt();
-        Card myCard = p.getCards().get(cardIndex);
-        p.getCards().set(cardIndex, card);
+    public void swapCards(Player player, Card card) {
+        player.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
+        int cardIndex = player.reader.readPackage().data.getAsInt();
+        Card myCard = player.getCards().get(cardIndex);
+        player.getCards().set(cardIndex, card);
 
-        // for each player that's not "p"
-        for (Player p2 : playersList.stream().filter(player -> player != p).toList())
-            p2.writter.packAndWrite(Signal.PLAYER_SWITCH_CARD_DECK, new JsonField("player_uid", p.getUid()), new JsonField("card_index", cardIndex));
+        // for each player that's not "player"
+        for (Player p2 : playersList.stream().filter(p -> p != player).toList())
+            p2.writter.packAndWrite(Signal.PLAYER_SWITCH_CARD_DECK, new JsonField("player_uid", player.getUid()), new JsonField("card_index", cardIndex));
 
         discardedCardsDeck.add(myCard);
     }
