@@ -14,16 +14,16 @@ import jakarta.persistence.*;
 @Table(name = "friendship")
 public class Friendship {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @EmbeddedId
+    private FriendshipId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("sender")
     @JoinColumn(name = "sender", referencedColumnName = "uid")
     private User sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("receiver")
     @JoinColumn(name = "receiver", referencedColumnName = "uid")
     private User receiver;
 
@@ -31,14 +31,13 @@ public class Friendship {
     @Column(name = "status")
     private FriendshipStatus status;
 
-
     // Getters and setters, constructors, etc.
 
-    public Long getId() {
+    public FriendshipId getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(FriendshipId id) {
         this.id = id;
     }
 
@@ -66,4 +65,3 @@ public class Friendship {
         this.status = status;
     }
 }
-

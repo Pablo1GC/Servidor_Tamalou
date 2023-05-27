@@ -7,8 +7,8 @@
  */
 package com.tamalou.servidor.modelo.persistencia;
 
-import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Friendship;
+import com.tamalou.servidor.modelo.entidad.entidadesUsuario.FriendshipId;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -38,7 +38,7 @@ public class FriendshipRepository {
      * @param id The unique identifier of the Friendship entity.
      * @return The retrieved Friendship entity, or null if not found.
      */
-    public Friendship findById(Long id) {
+    public Friendship findById(FriendshipId id) {
         return entityManager.find(Friendship.class, id);
     }
 

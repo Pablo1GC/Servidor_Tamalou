@@ -32,10 +32,10 @@ CREATE TABLE user
 
 CREATE TABLE friendship
 (
-    id       INT PRIMARY KEY AUTO_INCREMENT,
     sender   VARCHAR(255),
     receiver VARCHAR(255),
     status   ENUM ('PENDING', 'ACCEPTED', 'REJECTED') NOT NULL DEFAULT 'pending',
+    PRIMARY KEY (sender, receiver),
     FOREIGN KEY (sender) REFERENCES user (uid),
     FOREIGN KEY (receiver) REFERENCES user (uid)
 );
