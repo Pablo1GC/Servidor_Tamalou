@@ -31,6 +31,7 @@ public class Main {
         ClientConnection clientConnection = new ClientConnection(manejadorTorneos, signalManager, userRepository);
         Socket socketAlCliente = null;
         InetSocketAddress direccion = new InetSocketAddress(PUERTO);
+        //clientConnection.handleConnectedPlayers();
         try (ServerSocket serverSocket = new ServerSocket()){
             serverSocket.bind(direccion);
             do {

@@ -7,6 +7,7 @@
  */
 package com.tamalou.servidor.modelo.persistencia;
 
+import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Friendship;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -75,7 +76,7 @@ public class FriendshipRepository {
      * @param userId The user ID for which to retrieve the Friendship entities.
      * @return A list of Friendship entities associated with the given user ID.
      */
-    public List<Friendship> findByUserId(Long userId) {
+    public List<Friendship> findByUserId(String userId) {
         return entityManager.createQuery("SELECT f FROM Friendship f WHERE f.sender = :userId", Friendship.class)
                 .setParameter("userId", userId)
                 .getResultList();

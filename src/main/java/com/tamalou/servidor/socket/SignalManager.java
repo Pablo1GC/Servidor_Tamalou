@@ -48,6 +48,7 @@ public class SignalManager {
                         case Signal.UNIRSE_TORNEO_PUBLICO,
                                 Signal.UNIRSE_TORNEO_PRIVADO -> mamageJoinGame(player, pack.data.getAsJsonObject());
                         case Signal.SOLICITAR_LISTA_TORNEOS            -> manageGameList(player.writter);
+                        //case Signal.INVITE_PLAYER                      -> manageInvitePlayer();
                         default -> false;
 
                     };

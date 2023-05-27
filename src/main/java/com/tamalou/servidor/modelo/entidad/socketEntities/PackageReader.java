@@ -18,7 +18,13 @@ public class PackageReader {
     }
 
     public Package readPackage(){
-        return gson.fromJson(reader.nextLine(), Package.class);
+        String message = null;
+        try {
+            message = reader.nextLine();
+            return gson.fromJson(message, Package.class);
+        } catch (Exception e){
+            System.out.println("Invalid json package: " + message);
+            throw e;
+        }
     }
-
 }
