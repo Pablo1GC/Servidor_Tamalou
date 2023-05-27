@@ -4,28 +4,33 @@ import com.google.gson.Gson;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
+import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
 import com.tamalou.servidor.modelo.persistencia.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 
 public class ClientConnection {
 
     private GameManager gameManager;
     private SignalManager signalManager;
+    private final HashMap<String, Player> connectedPlayers;
 
     // @Autowired
     private Gson gson;
 
     private UserRepository userRepository;
+    private FriendshipRepository friendshipRepository;
 
     public ClientConnection(GameManager gameManager, SignalManager signalManager, UserRepository userRepository){
         this.gameManager = gameManager;
         this.signalManager = signalManager;
         this.gson = new Gson();
         this.userRepository = userRepository;
+        this.connectedPlayers = new HashMap<>();
     }
 
     public void connectClient(Socket clientSocket) {
@@ -39,6 +44,7 @@ public class ClientConnection {
             User player1 = userRepository.findById(player.getUid());
             player.setUsername(player1.getUsername());
             player.setImage(player1.getImage());
+            player.setPoints(0);
 
 
             System.out.println("Player uid: " + player.getUid());
@@ -51,6 +57,7 @@ public class ClientConnection {
             }
 
             System.out.println("SERVER: Player with IP " + player.socket.getInetAddress().getHostName() + " has connected.");
+            connectedPlayers.put(player.getUid(), player);
             signalManager.manage(player);
 
         } catch (IOException e) {
@@ -62,5 +69,35 @@ public class ClientConnection {
             System.err.println("SERVER: Error -> " + e);
             e.printStackTrace();
         }
+    }
+
+    public void handleConnectedPlayers(){
+        new Thread(() -> {
+            while (true) {
+                try {
+                    synchronized (this) {
+
+                        synchronized (connectedPlayers) {
+
+                            connectedPlayers.forEach((uid, player) -> {
+                                if (player.socket.isClosed() || player.socket.isConnected()) {
+                                    connectedPlayers.remove(uid);
+                                } else{
+//                                    friendshipRepository.findByUserId(player.getUid()).stream().map(friendship ->
+//                                        // Get the user with different uid from the friendship (the friend uid, not the player's)
+//                                        friendship.getReceiver().getUid().equals(player.getUid())
+//                                                ? friendship.getSender() : friendship.getReceiver()
+//                                    ).toList().forEach((friend) -> {
+//                                        friend.
+//                                    });
+                                }
+                            });
+
+                        }
+                        wait(5000);
+                    }
+                } catch (InterruptedException ignored) {}
+            }
+        }).start();
     }
 }

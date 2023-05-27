@@ -17,7 +17,7 @@ public class Game extends Thread {
     private String gameName;
 
     private int maxRounds;
-    private List<Player> playersList;
+    private List<Player> playerList;
     private int actualRound;
     private boolean gameEnded;
     private Player winner;
@@ -32,7 +32,7 @@ public class Game extends Thread {
         this.gameEnded = false;
         this.privateGame = isPrivate;
         this.gameName = gameName;
-        this.playersList = new ArrayList<>();
+        this.playerList = new ArrayList<>();
     }
 
     @Override
@@ -45,15 +45,12 @@ public class Game extends Thread {
      * First, sends a signal to every player (Client).
      */
     public void startGame() {
-        for (Player p : playersList) {
-            p.writter.packAndWrite(Signal.START_GAME, playersList);
+        for (Player p : playerList) {
+            p.writter.packAndWrite(Signal.START_GAME, playerList);
         }
 
         while (!gameEnded) {
-            for (Player p : playersList) {
-                p.writter.packAndWrite(Signal.REFRESH_POINTS, playersList);
-            }
-            Round round = new Round(playersList);
+            Round round = new Round(playerList);
             round.playRound();
             actualRound++;
 
@@ -64,7 +61,7 @@ public class Game extends Thread {
 
         winner = returnWinner();
         System.out.println("¡Game has ended! The winner is: " + winner.getUid());
-        for (Player p2 : playersList) {
+        for (Player p2 : playerList) {
             p2.writter.packAndWrite(Signal.END_GAME, winner.getUid());
         }
     }
@@ -76,8 +73,8 @@ public class Game extends Thread {
      */
     private Player returnWinner() {
         Player winner = null;
-        for (int i = 1; i < playersList.size(); i++) {
-            Player player = playersList.get(i);
+        for (int i = 1; i < playerList.size(); i++) {
+            Player player = playerList.get(i);
             if (player.getPoints() < winner.getPoints()) {
                 winner = player;
             }
@@ -100,12 +97,13 @@ public class Game extends Thread {
      * @param player
      */
     public void addPlayer(Player player) {
-        playersList.add(player);
-        for (Player p : playersList) {
-            p.writter.packAndWrite(Signal.PLAYER_JOINED_GAME, playersList.size());
+        playerList.add(player);
+        for (Player p : playerList) {
+            p.writter.packAndWrite(Signal.PLAYER_JOINED_GAME, playerList.size());
         }
-        if (playersList.size() == MAX_PLAYERS) {
-            startGame();
+
+        if (playerList.size() == MAX_PLAYERS) {
+            this.start();
         }
     }
 
@@ -113,11 +111,11 @@ public class Game extends Thread {
     // GETTERS AND SETTERS
 
     public List<Player> getPlayersList() {
-        return playersList;
+        return playerList;
     }
 
     public void setPlayersList(List<Player> playersList) {
-        this.playersList = playersList;
+        this.playerList = playersList;
     }
 
     public String getGameName() {

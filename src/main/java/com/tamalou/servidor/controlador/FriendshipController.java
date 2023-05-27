@@ -1,6 +1,7 @@
 package com.tamalou.servidor.controlador;
 
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Friendship;
+import com.tamalou.servidor.modelo.entidad.entidadesUsuario.FriendshipId;
 import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
 import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,18 +35,19 @@ public class FriendshipController {
     /**
      * HTTP GET method for retrieving a Friendship by ID.
      *
-     * @param id The ID of the Friendship to retrieve.
+     * @param friendshipId The FriendshipId of the Friendship to retrieve.
      * @return A ResponseEntity containing a Friendship object if found, or HttpStatus.NOT_FOUND if not found.
      */
-    @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Friendship> getFriendshipById(@PathVariable Long id) {
-        Friendship friendship = friendshipRepository.findById(id);
+    @GetMapping(path = "/{friendshipId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Friendship> getFriendshipById(@PathVariable FriendshipId friendshipId) {
+        Friendship friendship = friendshipRepository.findById(friendshipId);
         if (friendship != null) {
             return new ResponseEntity<>(friendship, HttpStatus.FOUND);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
 
     /**
      * HTTP GET method for retrieving a Friendship by id of both parties.
@@ -84,15 +86,15 @@ public class FriendshipController {
     /**
      * HTTP PUT method for updating an existing Friendship.
      *
-     * @param id         The ID of the Friendship to update.
-     * @param friendship The updated Friendship object.
+     * @param friendshipId The FriendshipId of the Friendship to update.
+     * @param friendship   The updated Friendship object.
      * @return A ResponseEntity with HttpStatus.ACCEPTED if successful, or HttpStatus.NOT_FOUND if the Friendship to update was not found.
      */
-    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> updateFriendship(@PathVariable Long id, @RequestBody Friendship friendship) {
-        Friendship existingFriendship = friendshipRepository.findById(id);
+    @PutMapping(path = "/{friendshipId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> updateFriendship(@PathVariable FriendshipId friendshipId, @RequestBody Friendship friendship) {
+        Friendship existingFriendship = friendshipRepository.findById(friendshipId);
         if (existingFriendship != null) {
-            friendship.setId(id);
+            friendship.setId(friendshipId);
             friendshipRepository.update(friendship);
             return new ResponseEntity<>(HttpStatus.ACCEPTED);
         } else {
@@ -100,15 +102,16 @@ public class FriendshipController {
         }
     }
 
+
     /**
      * HTTP DELETE method for deleting a Friendship by ID.
      *
-     * @param id The ID of the Friendship to delete.
+     * @param friendshipId The FriendshipId of the Friendship to delete.
      * @return A ResponseEntity containing the deleted Friendship object if successful, or HttpStatus.CONFLICT if the Friendship to delete was not found.
      */
-    @DeleteMapping(path = "/{id}")
-    public ResponseEntity<Friendship> deleteFriendship(@PathVariable Long id) {
-        Friendship friendship = friendshipRepository.findById(id);
+    @DeleteMapping(path = "/{friendshipId}")
+    public ResponseEntity<Friendship> deleteFriendship(@PathVariable FriendshipId friendshipId) {
+        Friendship friendship = friendshipRepository.findById(friendshipId);
         if (friendship != null) {
             friendshipRepository.delete(friendship);
             return new ResponseEntity<>(friendship, HttpStatus.ACCEPTED);
@@ -116,4 +119,5 @@ public class FriendshipController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
+
 }

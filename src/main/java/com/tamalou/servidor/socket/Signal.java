@@ -16,23 +16,24 @@ public class Signal {
     public static final int START_TURN                = 23;
     public static final int OTHER_PLAYER_TURN         = 24;
     public static final int END_GAME                  = 25;
-    public static final int REFRESH_POINTS            = 26;
 
 
 
 
     // ROUND SIGNALS
     public static final int END_ROUND                 = 131;
-    public static final int SHOW_LAST_CARD_DECK       = 132;
+    public static final int END_TURN                  = 7348;
+    public static final int SHOW_CARD_GRABBED = 132;
     public static final int SHOW_LAST_CARD_DISCARDED = 133;
-    public static final int ASK_PLAYER_TO_STAND       = 134;
+    public static final int ASK_PLAYER_TO_STAND       = 137;
+    public static final int PLAYER_STANDS             = 135;
     public static final int OTHER_PLAYER_SEES_CARD = 136;
-    public static final int PLAYER_DISCARDS_CARD      = 137;
+    public static final int PLAYER_DISCARDS_CARD      = 140;
     public static final int PLAYER_SWITCH_CARD_DECK   = 138;
-    public static final int ASK_PLAYER_SELECT_OPONENT = 140;
+    public static final int ASK_PLAYER_SELECT_OPONENT = 143;
     public static final int ASK_PLAYER_SELECT_PLAY    = 141;
     public static final int ASK_PLAYER_CARD_OPTION = 142;
-    public static final int ASK_PLAYER_SWITCH_CARD    = 143;
+    public static final int ASK_PLAYER_SWITCH_CARD    = 145;
     public static final int ASK_PLAYER_SELECT_CARD    = 144;
     public static final int PLAYER_POINTS_PENALTY     = 145;
     public static final int PLAYER_ONE_CARD_LESS      = 146;
@@ -42,12 +43,17 @@ public class Signal {
     public static final int PLAYER_SEES_OWN_CARD      = 150;
     public static final int PLAYER_SEES_OPONENT_CARD      = 150;
     public static final int ASK_PLAYER_SELECT_OPONENT_CARD      = 151;
+    public static final int PLAYERS_SWITCHED_CARDS = 192391;
+    public static final int OTHER_PLAYER_SEES_OPONENT_CARD = 145;
+
     public static final int PLAYER_SWITCH_CARD_PLAYER     = 152;
-    public static final int OTHER_PLAYER_SEES_OPONENT_CARD = 153;
     public static final int PLAYER_DISCONNECTED = 154;
-    public static final int DECK_IS_EMPTY             = 155;
 
 
+
+    public static final int CARD_DECK_TO_PLAYER       = 132;
+    public static final int DISCARDED_DECK_IS_EMPTY = 133;
+    public static final int DECK_IS_EMPTY             = 134;
     public static final int HAND_IS_EMPTY             = 135;
     public static final int PLAYER_TAKE_CARD_DECK     = 132;
     public static final int PLAYER_SWITCH_CARD_DISCARTED_DECK   = 132;
@@ -67,7 +73,7 @@ public class Signal {
 
     public static final int EMPATE                      = 207;
 
-    public static final int PAQUETE_PUNTUACION          = 808;
+    public static final int PLAYERS_POINTS = 808;
 
     public static final int COMENZAR_PARTIDA_FINAL = 209;
 
@@ -79,7 +85,7 @@ public class Signal {
     public static final char SEPARADOR                 = '|';
 
     public static final int LOBBY_LLENO =               810;
-    public static final int CONEXION_EXITOSA_TORNEO =   9030;
+    public static final int SUCCESSFUL_MATCH_CREATION =   9030;
 
     public static final int DESCONECTADO               = 329;
 
@@ -92,7 +98,8 @@ public class Signal {
     public static final int UNIRSE_TORNEO_PUBLICO           = 10003;
     public static final int UNIRSE_TORNEO_PRIVADO           = 10004;
     public static final int SOLICITAR_LISTA_TORNEOS         = 10005;
-    public static final int LEAVE_MATCH = 8071995;
+    public static final int LEAVE_MATCH                     = 8071995;
+    public static final int INVITE_PLAYER                   = 2020;
 
 
     // Señales con las que el servidor responde a esas peticiones

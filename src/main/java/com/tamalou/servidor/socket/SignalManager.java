@@ -4,9 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Game;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
+import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Match;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
 import com.tamalou.servidor.modelo.entidad.socketEntities.PackageWriter;
+import com.tamalou.servidor.modelo.persistencia.UserRepository;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +25,8 @@ public class SignalManager {
 
     // @Autowired
     private final Gson gson;
+
+    private UserRepository userRepository;
 
     public SignalManager(GameManager manager) {
         this.gameManager = manager;
@@ -48,6 +52,7 @@ public class SignalManager {
                         case Signal.UNIRSE_TORNEO_PUBLICO,
                                 Signal.UNIRSE_TORNEO_PRIVADO -> manageJoinGame(player, pack.data.getAsJsonObject());
                         case Signal.SOLICITAR_LISTA_TORNEOS            -> manageGameList(player.writter);
+                        case Signal.INVITE_PLAYER                      -> manageInvitePlayer(player.writter, pack.data.getAsString());
                         default -> false;
 
                     };
@@ -119,8 +124,17 @@ public class SignalManager {
             player.writter.packAndWrite(Signal.CLAVE_TORNEO, key);
         }
 
-        player.writter.packAndWrite(Signal.CONEXION_EXITOSA_TORNEO);
+        player.writter.packAndWrite(Signal.SUCCESSFUL_MATCH_CREATION);
 
         return false;
+    }
+
+    private boolean manageInvitePlayer(PackageWriter writer, String uid){
+
+        User player = userRepository.findById(uid);
+
+
+
+        return true;
     }
 }
