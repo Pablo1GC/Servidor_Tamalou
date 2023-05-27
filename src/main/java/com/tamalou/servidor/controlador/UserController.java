@@ -1,10 +1,10 @@
 package com.tamalou.servidor.controlador;
 
+import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Friendship;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.PlayerGameInfo;
-import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
-import com.tamalou.servidor.modelo.persistencia.UserRepository;
+import com.tamalou.servidor.modelo.persistencia.PlayerRepository;
 import jakarta.persistence.NoResultException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,10 +21,10 @@ import java.util.*;
 @RequestMapping("/users")
 public class UserController {
     /**
-     * Autowired UserRepository instance to perform user-related database operations.
+     * Autowired UserRepository instance to perform Player-related database operations.
      */
     @Autowired
-    private UserRepository userRepository;
+    private PlayerRepository playerRepository;
 
     /**
      * Autowired FriendshipRepository instance to perform friendship-related database operations.
@@ -34,42 +34,42 @@ public class UserController {
 
 
     /**
-     * HTTP GET method for retrieving a user by ID.
+     * HTTP GET method for retrieving a Player by ID.
      *
-     * @param id    The ID of the user to retrieve.
-     * @param token The access token from the fetching user.
-     * @return A ResponseEntity containing the user or a HttpStatus NOT_FOUND if the user does not exist.
+     * @param id    The ID of the Player to retrieve.
+     * @param token The access token from the fetching Player.
+     * @return A ResponseEntity containing the Player or a HttpStatus NOT_FOUND if the Player does not exist.
      */
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<User> getUserById(@PathVariable String id,
-                                            @RequestParam(value = "token", required = false) String token) {
-        User user = userRepository.findById(id);
-        if (user != null) {
+    public ResponseEntity<Player> getUserById(@PathVariable String id,
+                                              @RequestParam(value = "token", required = false) String token) {
+        Player Player = playerRepository.findById(id);
+        if (Player != null) {
 
-            // Do not provide too much information if the user
+            // Do not provide too much information if the Player
             // fetching the info doesn't validate its identity.
             if (token == null) { // TODO: Validate token
-                user.setEmail(null);
+                Player.setEmail(null);
             }
 
 
-            return new ResponseEntity<>(user, HttpStatus.OK);
+            return new ResponseEntity<>(Player, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     /**
-     * HTTP POST method for creating a new user.
+     * HTTP POST method for creating a new Player.
      *
-     * @param user The user object to create.
-     * @return A ResponseEntity containing the created user or a HttpStatus BAD_REQUEST if the user could not be created.
+     * @param Player The Player object to create.
+     * @return A ResponseEntity containing the created Player or a HttpStatus BAD_REQUEST if the Player could not be created.
      */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<Player> createUser(@RequestBody Player Player) {
         try {
-            userRepository.save(user);
-            return new ResponseEntity<>(user, HttpStatus.CREATED);
+            playerRepository.save(Player);
+            return new ResponseEntity<>(Player, HttpStatus.CREATED);
 
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -78,54 +78,54 @@ public class UserController {
     }
 
     /**
-     * HTTP PUT method for updating an existing user.
+     * HTTP PUT method for updating an existing Player.
      *
-     * @param id   The ID of the user to update.
-     * @param user The updated user object.
-     * @return A ResponseEntity containing the updated user or a HttpStatus NOT_FOUND if the user does not exist.
+     * @param id   The ID of the Player to update.
+     * @param Player The updated Player object.
+     * @return A ResponseEntity containing the updated Player or a HttpStatus NOT_FOUND if the Player does not exist.
      */
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody User user) {
-        User existingUser = userRepository.findById(id);
-        System.out.println(user.toString());
+    public ResponseEntity<Player> updateUser(@PathVariable String id, @RequestBody Player Player) {
+        Player existingUser = playerRepository.findById(id);
+        System.out.println(Player.toString());
         if (existingUser != null) {
-            user.setUid(id);
-            userRepository.update(user);
-            return new ResponseEntity<>(user, HttpStatus.OK);
+            Player.setUid(id);
+            playerRepository.update(Player);
+            return new ResponseEntity<>(Player, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(user, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(Player, HttpStatus.NOT_FOUND);
         }
     }
 
     /**
-     * HTTP DELETE method for deleting a User by ID.
+     * HTTP DELETE method for deleting a Player by ID.
      *
-     * @param id The ID of the User to be deleted.
-     * @return ResponseEntity<User> The deleted User with HttpStatus GONE if successful, or HttpStatus CONFLICT if User not found.
+     * @param id The ID of the Player to be deleted.
+     * @return ResponseEntity<Player> The deleted Player with HttpStatus GONE if successful, or HttpStatus CONFLICT if Player not found.
      */
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<User> deleteUser(@PathVariable String id) {
-        User user = userRepository.findById(id);
-        if (user != null) {
-            userRepository.delete(user);
-            return new ResponseEntity<>(user, HttpStatus.GONE);
+    public ResponseEntity<Player> deleteUser(@PathVariable String id) {
+        Player Player = playerRepository.findById(id);
+        if (Player != null) {
+            playerRepository.delete(Player);
+            return new ResponseEntity<>(Player, HttpStatus.GONE);
         } else {
-            return new ResponseEntity<>(user, HttpStatus.CONFLICT);
+            return new ResponseEntity<>(Player, HttpStatus.CONFLICT);
         }
     }
 
     /**
-     * HTTP GET method for retrieving friends of a User by User ID.
+     * HTTP GET method for retrieving friends of a Player by Player ID.
      *
-     * @param uid The User ID for which friends need to be retrieved.
-     * @return ResponseEntity containing a list of User objects representing the friends of the User.
+     * @param uid The Player ID for which friends need to be retrieved.
+     * @return ResponseEntity containing a list of Player objects representing the friends of the Player.
      */
     @GetMapping(value = "/{uid}/friends", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<User>> getFriendsByUserId(@PathVariable String uid) {
+    public ResponseEntity<List<Player>> getFriendsByUserId(@PathVariable String uid) {
         List<Friendship> friendships = friendshipRepository.findBySenderUid(uid);
-        List<User> friends = new ArrayList<>();
+        List<Player> friends = new ArrayList<>();
         for (Friendship friendship : friendships) {
-            User friend = friendship.getReceiver();
+            Player friend = friendship.getReceiver();
             if (friend.getUid().equals(uid)) {
                 friend = friendship.getSender();
             }
@@ -136,40 +136,40 @@ public class UserController {
 
 
     /**
-     * REST endpoint for retrieving user statistics.
+     * REST endpoint for retrieving Player statistics.
      *
-     * @param uid The unique identifier of the user.
-     * @return A ResponseEntity containing a Map with the user's statistics if the user exists, or an error message if not found or an error occurred.
+     * @param uid The unique identifier of the Player.
+     * @return A ResponseEntity containing a Map with the Player's statistics if the Player exists, or an error message if not found or an error occurred.
      */
     @GetMapping("/{uid}/stats")
     public ResponseEntity<Map<String, Object>> getUserStats(@PathVariable String uid) {
         Map<String, Object> stats = new HashMap<>();
         try {
-            stats.put("totalGamesPlayed", userRepository.getTotalGamesPlayed(uid));
-            stats.put("averageScore", userRepository.getAverageScore(uid));
-            stats.put("gamesWon", userRepository.getGamesWon(uid));
-            stats.put("gamesLost", userRepository.getGamesLost(uid));
-            stats.put("averagePlayTime", userRepository.getAveragePlayTime(uid));
+            stats.put("totalGamesPlayed", playerRepository.getTotalGamesPlayed(uid));
+            stats.put("averageScore", playerRepository.getAverageScore(uid));
+            stats.put("gamesWon", playerRepository.getGamesWon(uid));
+            stats.put("gamesLost", playerRepository.getGamesLost(uid));
+            stats.put("averagePlayTime", playerRepository.getAveragePlayTime(uid));
             return new ResponseEntity<>(stats, HttpStatus.OK);
         } catch (NoResultException e) {
-            Map<String, Object> error = Collections.singletonMap("error", "User not found");
+            Map<String, Object> error = Collections.singletonMap("error", "Player not found");
             return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
 
         } catch (Exception e) {
-            Map<String, Object> error = Collections.singletonMap("error", "An error occurred while fetching user stats");
+            Map<String, Object> error = Collections.singletonMap("error", "An error occurred while fetching Player stats");
             System.out.println(e.getMessage());
             return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     /**
-     * REST endpoint for retrieving the id of all games played by a user.
+     * REST endpoint for retrieving the id of all games played by a Player.
      *
-     * @param uid The unique identifier of the user.
-     * @return A ResponseEntity containing the total number of games played by the user if the user exists, or an error message if not found or an error occurred.
+     * @param uid The unique identifier of the Player.
+     * @return A ResponseEntity containing the total number of games played by the Player if the Player exists, or an error message if not found or an error occurred.
      */
     @GetMapping("/{uid}/games-played")
     public ResponseEntity<List<Integer>> getTotalGamesPlayed(@PathVariable String uid) {
-        ArrayList<Integer> resultList = userRepository.getGamesPlayed(uid);
+        ArrayList<Integer> resultList = playerRepository.getGamesPlayed(uid);
         if (!resultList.isEmpty()) {
             return new ResponseEntity<>(resultList, HttpStatus.OK);
         } else {
@@ -179,7 +179,7 @@ public class UserController {
 
     @GetMapping("/{uid}/games/{gameId}/scores")
     public ResponseEntity<List<Object>>  getPlayersAndScores(@PathVariable String uid, @PathVariable String gameId) {
-        List<Object> resultList = userRepository.getPlayersAndScoresInGame(gameId);
+        List<Object> resultList = playerRepository.getPlayersAndScoresInGame(gameId);
         if (!resultList.isEmpty()) {
             return new ResponseEntity<>(resultList, HttpStatus.OK);
         } else {
@@ -189,7 +189,7 @@ public class UserController {
 
     @GetMapping("/{uid}/games")
     public ResponseEntity<List<PlayerGameInfo>>getPlayerGamesInfo(@PathVariable String uid) {
-        List<PlayerGameInfo> resultList = userRepository.getPlayerGamesInfo(uid);
+        List<PlayerGameInfo> resultList = playerRepository.getPlayerGamesInfo(uid);
         if (!resultList.isEmpty()) {
             return new ResponseEntity<>(resultList, HttpStatus.OK);
         } else {

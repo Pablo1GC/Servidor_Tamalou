@@ -1,12 +1,13 @@
 package com.tamalou.servidor.modelo.entidad.entidadesUsuario;
 
+import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import jakarta.persistence.*;
 /**
  * Represents a friendship entity in the application.
  *
  * This class is an entity mapped to the "friendship" table in the database.
- * It represents the friendship between two users of the app, where one user
- * sends a friend request and the other user can accept, reject, or the request
+ * It represents the friendship between two users of the app, where one Player
+ * sends a friend request and the other Player can accept, reject, or the request
  * can be pending. It contains information about the unique identifier of the
  * friendship, the sender and receiver users, and the status of the friendship.
  */
@@ -20,12 +21,12 @@ public class Friendship {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("sender")
     @JoinColumn(name = "sender", referencedColumnName = "uid")
-    private User sender;
+    private Player sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("receiver")
     @JoinColumn(name = "receiver", referencedColumnName = "uid")
-    private User receiver;
+    private Player receiver;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -41,19 +42,19 @@ public class Friendship {
         this.id = id;
     }
 
-    public User getSender() {
+    public Player getSender() {
         return sender;
     }
 
-    public void setSender(User sender) {
+    public void setSender(Player sender) {
         this.sender = sender;
     }
 
-    public User getReceiver() {
+    public Player getReceiver() {
         return receiver;
     }
 
-    public void setReceiver(User receiver) {
+    public void setReceiver(Player receiver) {
         this.receiver = receiver;
     }
 

@@ -1,6 +1,6 @@
 package com.tamalou.servidor;
 
-import com.tamalou.servidor.modelo.persistencia.UserRepository;
+import com.tamalou.servidor.modelo.persistencia.PlayerRepository;
 import com.tamalou.servidor.socket.ClientConnection;
 import com.tamalou.servidor.socket.SignalManager;
 import com.tamalou.servidor.socket.GameManager;
@@ -25,10 +25,10 @@ public class Main {
 
         // Spring
         context = SpringApplication.run(Main.class, args);
-        UserRepository userRepository = context.getBean("userRepository", UserRepository.class);
+        PlayerRepository playerRepository = context.getBean("playerRepository", PlayerRepository.class);
         GameManager manejadorTorneos = new GameManager();
         SignalManager signalManager = new SignalManager(manejadorTorneos);
-        ClientConnection clientConnection = new ClientConnection(manejadorTorneos, signalManager, userRepository);
+        ClientConnection clientConnection = new ClientConnection(manejadorTorneos, signalManager, playerRepository);
         Socket socketAlCliente = null;
         InetSocketAddress direccion = new InetSocketAddress(PUERTO);
         //clientConnection.handleConnectedPlayers();

@@ -4,11 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Game;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
-import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Match;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
 import com.tamalou.servidor.modelo.entidad.socketEntities.PackageWriter;
-import com.tamalou.servidor.modelo.persistencia.UserRepository;
+import com.tamalou.servidor.modelo.persistencia.PlayerRepository;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +25,7 @@ public class SignalManager {
     // @Autowired
     private final Gson gson;
 
-    private UserRepository userRepository;
+    private PlayerRepository playerRepository;
 
     public SignalManager(GameManager manager) {
         this.gameManager = manager;
@@ -131,7 +130,7 @@ public class SignalManager {
 
     private boolean manageInvitePlayer(PackageWriter writer, String uid){
 
-        User player = userRepository.findById(uid);
+        Player player = playerRepository.findById(uid);
 
 
 

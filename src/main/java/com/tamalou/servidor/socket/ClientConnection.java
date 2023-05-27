@@ -5,8 +5,7 @@ import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
 import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
-import com.tamalou.servidor.modelo.persistencia.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.tamalou.servidor.modelo.persistencia.PlayerRepository;
 
 import java.io.*;
 import java.net.Socket;
@@ -22,14 +21,14 @@ public class ClientConnection {
     // @Autowired
     private Gson gson;
 
-    private UserRepository userRepository;
+    private PlayerRepository playerRepository;
     private FriendshipRepository friendshipRepository;
 
-    public ClientConnection(GameManager gameManager, SignalManager signalManager, UserRepository userRepository){
+    public ClientConnection(GameManager gameManager, SignalManager signalManager, PlayerRepository playerRepository){
         this.gameManager = gameManager;
         this.signalManager = signalManager;
         this.gson = new Gson();
-        this.userRepository = userRepository;
+        this.playerRepository = playerRepository;
         this.connectedPlayers = new HashMap<>();
     }
 
@@ -41,7 +40,7 @@ public class ClientConnection {
             System.out.println("Package: " + pack.toString());
             player.setUid(pack.data.getAsString());
 
-            User player1 = userRepository.findById(player.getUid());
+            User player1 = playerRepository.findById(player.getUid());
             player.setUsername(player1.getUsername());
             player.setImage(player1.getImage());
             player.setPoints(0);

@@ -71,10 +71,10 @@ public class FriendshipRepository {
     }
 
     /**
-     * Retrieves all Friendship entities from the database for a given user ID.
+     * Retrieves all Friendship entities from the database for a given Player ID.
      *
-     * @param userId The user ID for which to retrieve the Friendship entities.
-     * @return A list of Friendship entities associated with the given user ID.
+     * @param userId The Player ID for which to retrieve the Friendship entities.
+     * @return A list of Friendship entities associated with the given Player ID.
      */
     public List<Friendship> findByUserId(String userId) {
         return entityManager.createQuery("SELECT f FROM Friendship f WHERE f.sender = :userId", Friendship.class)
@@ -83,11 +83,11 @@ public class FriendshipRepository {
     }
 
     /**
-     * Retrieves a friendship for a given pair of user IDs.
+     * Retrieves a friendship for a given pair of Player IDs.
      *
-     * @param userId1 The first user ID.
-     * @param userId2 The second user ID.
-     * @return A friendship associated with the given pair of user IDs.
+     * @param userId1 The first Player ID.
+     * @param userId2 The second Player ID.
+     * @return A friendship associated with the given pair of Player IDs.
      */
     public Friendship findByUsersId(String userId1, String userId2) {
         List<Friendship> friendships =  entityManager.createQuery("SELECT f FROM Friendship f WHERE " +
