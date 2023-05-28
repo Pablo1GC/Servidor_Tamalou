@@ -169,10 +169,8 @@ VALUES ('francoernestocollins@gmail.com', 'johndoe', '0gNvZ6L6DnP1LNoiPCQ6mlpom0
 -- INSERT INTO friendship table
 INSERT INTO friendship (sender, receiver, status)
 VALUES ('0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', 'zu9ZCxzhD7biz5dNqbo7EEJvR1q2', 'accepted'),
-       ('zu9ZCxzhD7biz5dNqbo7EEJvR1q2', '0gNvZ6L6DnP1LNoiPCQ6mlpom0j1', 'accepted'),
        ('zN3ZxWxwUCaAMeA1vEgTXURb4fF3', 'lFd6QrfZP9Wy6sILpARhvXhljXL2', 'pending'),
-       ('lFd6QrfZP9Wy6sILpARhvXhljXL2', 'pM788g1l9YWfVD8C7b3XpxgU33A3', 'rejected'),
-       ('pM788g1l9YWfVD8C7b3XpxgU33A3', 'lFd6QrfZP9Wy6sILpARhvXhljXL2', 'accepted');
+       ('lFd6QrfZP9Wy6sILpARhvXhljXL2', 'pM788g1l9YWfVD8C7b3XpxgU33A3', 'accepted'),
 
 -- INSERT INTO game table
 INSERT INTO game (name, num_rounds)

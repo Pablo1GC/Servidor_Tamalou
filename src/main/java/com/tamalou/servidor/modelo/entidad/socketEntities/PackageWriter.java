@@ -33,7 +33,7 @@ public class PackageWriter{
         write(new Package(signal));
     }
 
-    public void write(Package pack){
+    public synchronized void write(Package pack){
         System.out.println(pack);
         printStream.println(pack);
     }

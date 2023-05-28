@@ -66,6 +66,21 @@ public class FriendshipController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+    /**
+     * HTTP GET method for retrieving all pending friendship requests.
+     * @return A ResponseEntity with a list of Friendship objects representing pending friendship requests if successful,
+     * or an empty list with HttpStatus.OK if no pending requests are found.
+     */
+    @GetMapping(path = {"/{friendshipId}/friend-requests"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Friendship>> getPendingFriendshipRequests(@PathVariable String userUid) {
+
+        List<Friendship> pendingFriendships = friendshipRepository.findPendingFriendshipRequests(userUid);
+        if (pendingFriendships.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }else {
+            return new ResponseEntity<>(pendingFriendships, HttpStatus.OK);
+        }
+    }
 
     /**
      * HTTP POST method for creating a new Friendship.

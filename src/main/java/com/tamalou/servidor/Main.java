@@ -1,5 +1,6 @@
 package com.tamalou.servidor;
 
+import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
 import com.tamalou.servidor.modelo.persistencia.PlayerRepository;
 import com.tamalou.servidor.socket.ClientConnection;
 import com.tamalou.servidor.socket.SignalManager;
@@ -26,12 +27,14 @@ public class Main {
         // Spring
         context = SpringApplication.run(Main.class, args);
         PlayerRepository playerRepository = context.getBean("playerRepository", PlayerRepository.class);
-        GameManager manejadorTorneos = new GameManager();
-        SignalManager signalManager = new SignalManager(manejadorTorneos);
-        ClientConnection clientConnection = new ClientConnection(manejadorTorneos, signalManager, playerRepository);
+        FriendshipRepository friendshipRepository = context.getBean("friendshipRepository", FriendshipRepository.class);
+        GameManager gameManager = new GameManager();
+        SignalManager signalManager = new SignalManager(gameManager, friendshipRepository, playerRepository);
+        ClientConnection clientConnection = new ClientConnection(gameManager, signalManager, playerRepository);
         Socket socketAlCliente = null;
         InetSocketAddress direccion = new InetSocketAddress(PUERTO);
-        //clientConnection.handleConnectedPlayers();
+        clientConnection.handleConnectedPlayers();
+        signalManager.setClientConnection(clientConnection);
         try (ServerSocket serverSocket = new ServerSocket()){
             serverSocket.bind(direccion);
             do {

@@ -4,10 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Game;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
+import com.tamalou.servidor.modelo.entidad.socketEntities.JsonField;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Match;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
 import com.tamalou.servidor.modelo.entidad.socketEntities.PackageWriter;
+import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
 import com.tamalou.servidor.modelo.persistencia.PlayerRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,11 +28,16 @@ public class SignalManager {
     // @Autowired
     private final Gson gson;
 
+    private FriendshipRepository friendshipRepository;
     private PlayerRepository playerRepository;
 
-    public SignalManager(GameManager manager) {
+    private ClientConnection clientConnection;
+
+    public SignalManager(GameManager manager, FriendshipRepository friendshipRepository, PlayerRepository playerRepository) {
         this.gameManager = manager;
         this.gson = new Gson();
+        this.friendshipRepository = friendshipRepository;
+        this.playerRepository = playerRepository;
     }
 
 
@@ -51,7 +59,8 @@ public class SignalManager {
                         case Signal.UNIRSE_TORNEO_PUBLICO,
                                 Signal.UNIRSE_TORNEO_PRIVADO -> manageJoinGame(player, pack.data.getAsJsonObject());
                         case Signal.SOLICITAR_LISTA_TORNEOS            -> manageGameList(player.writter);
-                        case Signal.INVITE_PLAYER                      -> manageInvitePlayer(player.writter, pack.data.getAsString());
+                        case Signal.INVITE_PLAYER                      -> manageInvitePlayer(player.writter, pack.data.getAsJsonObject());
+                        case Signal.REQUEST_FRIENDS_STATUS             -> manageRequestFriendsStatus(player);
                         default -> false;
 
                     };
@@ -99,7 +108,9 @@ public class SignalManager {
         System.out.println("Result: " + resultSignal);
 
         if(resultSignal == Signal.UNION_EXITOSA_TORNEO)
-            player.writter.packAndWrite(Signal.UNION_EXITOSA_TORNEO, gameManager.listGames(key).getGameName());
+            player.writter.packAndWrite(Signal.UNION_EXITOSA_TORNEO,
+                    new JsonField("game_name", gameManager.listGames(key).getGameName()),
+                    new JsonField("game_uid", key));
         else
             player.writter.packAndWrite(resultSignal);
 
@@ -119,21 +130,49 @@ public class SignalManager {
 
         System.out.println(maxRounds);
 
-        if(isPrivate){
-            player.writter.packAndWrite(Signal.CLAVE_TORNEO, key);
-        }
-
-        player.writter.packAndWrite(Signal.SUCCESSFUL_MATCH_CREATION);
+        player.writter.packAndWrite(Signal.SUCCESSFUL_MATCH_CREATION, key);
 
         return false;
     }
 
-    private boolean manageInvitePlayer(PackageWriter writer, String uid){
+    private boolean manageInvitePlayer(PackageWriter writer, JsonObject invitation){
 
-        Player player = playerRepository.findById(uid);
+        String sender_uid = invitation.get("sender_uid").getAsString();
 
+        String sender_username = this.playerRepository.findById(sender_uid).getUsername();
+
+        String friend_uid = invitation.get("receiver_uid").getAsString();
+        String game_uid = invitation.get("game_uid").getAsString();
+
+        Player friend = clientConnection.getConnectedPlayers().get(friend_uid);
+
+        if (friend != null){
+            friend.writter.packAndWrite(Signal.INVITATION_RECEIVED,
+                    new JsonField("game_uid", game_uid),
+                    new JsonField("sender_username", sender_username));
+        }
 
 
         return true;
     }
+
+    private boolean manageRequestFriendsStatus(Player player){
+        List<Player> friends = friendshipRepository.findByUserId(player.getUid()).stream().map(friendship ->
+                // Get user friends. (the friend uid, not the player's)
+                friendship.getReceiver().getUid().equals(player.getUid())
+                        ? friendship.getSender() : friendship.getReceiver()
+        ).toList();
+
+        friends.forEach((friend) -> {
+            if (clientConnection.getConnectedPlayers().containsKey(friend.getUid())){
+                friend.setConnected(true);
+            }
+        });
+
+        player.writter.packAndWrite(Signal.FRIENDS_STATUS, friends);
+
+        return true;
+    }
+
+    public void setClientConnection(ClientConnection clientConnection){this.clientConnection = clientConnection;}
 }

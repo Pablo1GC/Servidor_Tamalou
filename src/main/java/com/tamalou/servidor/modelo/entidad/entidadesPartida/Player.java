@@ -1,8 +1,12 @@
 package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.tamalou.servidor.modelo.entidad.entidadesExtra.Utilidades;
+import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
 import com.tamalou.servidor.modelo.entidad.socketEntities.PackageReader;
 import com.tamalou.servidor.modelo.entidad.socketEntities.PackageWriter;
+import com.tamalou.servidor.socket.Signal;
 import jakarta.persistence.*;
 
 import java.io.IOException;
@@ -37,13 +41,20 @@ public class Player {
     @Transient
     private int points;
     @Transient
+    @JsonIgnore
     transient private List<Card> cards;
     @Transient
+    @JsonIgnore
     transient public Socket socket;
     @Transient
+    @JsonIgnore
     transient public PackageReader reader;
     @Transient
+    @JsonIgnore
     transient public PackageWriter writter;
+
+    @Transient
+    transient private boolean isConnected;
 
 
     public Player() {
@@ -60,6 +71,7 @@ public class Player {
         this.writter = new PackageWriter(socket.getOutputStream());
         this.points = 0;
         this.cards = new ArrayList<>();
+        this.isConnected = false;
     }
 
 
@@ -125,5 +137,20 @@ public class Player {
 
     public void takeCard(Card card) {
         cards.add(card);
+    }
+
+    @JsonIgnore
+    public boolean isConnected() {
+        this.writter.packAndWrite(Signal.ASK_CONNECTED);
+        Package p = this.reader.readPackage();
+
+        if (p == null)
+            return false;
+
+        return isConnected = p.signal == Signal.SI;
+    }
+
+    public void setConnected(boolean connected) {
+        isConnected = connected;
     }
 }

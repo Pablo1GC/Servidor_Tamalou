@@ -18,12 +18,12 @@ public class Friendship {
     @EmbeddedId
     private FriendshipId id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("sender")
     @JoinColumn(name = "sender", referencedColumnName = "uid")
     private Player sender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("receiver")
     @JoinColumn(name = "receiver", referencedColumnName = "uid")
     private Player receiver;

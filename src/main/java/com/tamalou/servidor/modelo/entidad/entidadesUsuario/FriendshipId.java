@@ -16,34 +16,34 @@ import jakarta.persistence.Embeddable;
 public class FriendshipId implements Serializable {
 
     @Column(name = "sender")
-    private Long senderId;
+    private String senderId;
 
     @Column(name = "receiver")
-    private Long receiverId;
+    private String receiverId;
 
     // Constructors, getters, setters, and overridden methods like equals and hashCode
 
     public FriendshipId() {
     }
 
-    public FriendshipId(Long senderId, Long receiverId) {
+    public FriendshipId(String senderId, String receiverId) {
         this.senderId = senderId;
         this.receiverId = receiverId;
     }
 
-    public Long getSenderId() {
+    public String getSenderId() {
         return senderId;
     }
 
-    public void setSenderId(Long senderId) {
+    public void setSenderId(String senderId) {
         this.senderId = senderId;
     }
 
-    public Long getReceiverId() {
+    public String getReceiverId() {
         return receiverId;
     }
 
-    public void setReceiverId(Long receiverId) {
+    public void setReceiverId(String receiverId) {
         this.receiverId = receiverId;
     }
 

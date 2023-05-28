@@ -1,5 +1,6 @@
 package com.tamalou.servidor.modelo.entidad.entidadesUsuario;
 
+import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import jakarta.persistence.*;
 
 /**
@@ -21,7 +22,7 @@ public class GamePlayer {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId") // Maps the "userId" field of the composite primary key to the "id_user" column in the database
     @JoinColumn(name = "id_user") // Specifies the foreign key column name in the "game_player" table
-    private User user; // The user associated with the GamePlayer
+    private Player user; // The user associated with the GamePlayer
 
     @Column(name = "score")
     private Integer score; // The score of the player in the game
@@ -47,11 +48,11 @@ public class GamePlayer {
         this.game = game;
     }
 
-    public User getUser() {
+    public Player getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(Player user) {
         this.user = user;
     }
 

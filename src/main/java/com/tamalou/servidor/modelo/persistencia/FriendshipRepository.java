@@ -7,8 +7,10 @@
  */
 package com.tamalou.servidor.modelo.persistencia;
 
+import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Friendship;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.FriendshipId;
+import com.tamalou.servidor.modelo.entidad.entidadesUsuario.FriendshipStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -43,6 +45,19 @@ public class FriendshipRepository {
     }
 
     /**
+     *
+     * Retrieves all pending friendship requests where the user is the receiver.
+     * @param userUid the UID of the user who is the receiver of the friendship requests
+     * @return a list of Friendship objects representing pending friendship requests
+     */
+    public List<Friendship> findPendingFriendshipRequests(String userUid) {
+        String query = "SELECT f FROM Friendship f WHERE f.receiver = :userUid AND f.status = 'PENDING'";
+        return entityManager.createQuery(query, Friendship.class)
+                .setParameter("userUid", userUid)
+                .getResultList();
+    }
+
+    /**
      * Retrieves all Friendship entities from the database.
      *
      * @return A list of all Friendship entities in the database.
@@ -71,14 +86,15 @@ public class FriendshipRepository {
     }
 
     /**
-     * Retrieves all Friendship entities from the database for a given Player ID.
+     * Retrieves all Friendship entities from the database for a given sender or receiver UID.
      *
-     * @param userId The Player ID for which to retrieve the Friendship entities.
-     * @return A list of Friendship entities associated with the given Player ID.
+     * @param uid The UID (sender or receiver) for which to retrieve the Friendship entities.
+     * @return A list of Friendship entities associated with the given UID.
      */
-    public List<Friendship> findByUserId(String userId) {
-        return entityManager.createQuery("SELECT f FROM Friendship f WHERE f.sender = :userId", Friendship.class)
-                .setParameter("userId", userId)
+    public List<Friendship> findByUserId(String uid) {
+        return entityManager.createQuery("SELECT f FROM Friendship f WHERE " +
+                                        "f.sender.uid = :uid OR f.receiver.uid = :uid", Friendship.class)
+                .setParameter("uid", uid)
                 .getResultList();
     }
 

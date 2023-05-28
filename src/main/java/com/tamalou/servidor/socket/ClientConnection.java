@@ -2,7 +2,6 @@ package com.tamalou.servidor.socket;
 
 import com.google.gson.Gson;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
-import com.tamalou.servidor.modelo.entidad.entidadesUsuario.User;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
 import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
 import com.tamalou.servidor.modelo.persistencia.PlayerRepository;
@@ -10,13 +9,16 @@ import com.tamalou.servidor.modelo.persistencia.PlayerRepository;
 import java.io.*;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientConnection {
 
     private GameManager gameManager;
     private SignalManager signalManager;
-    private final HashMap<String, Player> connectedPlayers;
+    private final ConcurrentHashMap<String, Player> connectedPlayers;
 
     // @Autowired
     private Gson gson;
@@ -29,7 +31,7 @@ public class ClientConnection {
         this.signalManager = signalManager;
         this.gson = new Gson();
         this.playerRepository = playerRepository;
-        this.connectedPlayers = new HashMap<>();
+        this.connectedPlayers = new ConcurrentHashMap<>();
     }
 
     public void connectClient(Socket clientSocket) {
@@ -40,7 +42,7 @@ public class ClientConnection {
             System.out.println("Package: " + pack.toString());
             player.setUid(pack.data.getAsString());
 
-            User player1 = playerRepository.findById(player.getUid());
+            Player player1 = playerRepository.findById(player.getUid());
             player.setUsername(player1.getUsername());
             player.setImage(player1.getImage());
             player.setPoints(0);
@@ -56,7 +58,8 @@ public class ClientConnection {
             }
 
             System.out.println("SERVER: Player with IP " + player.socket.getInetAddress().getHostName() + " has connected.");
-            connectedPlayers.put(player.getUid(), player);
+            getConnectedPlayers().put(player.getUid(), player);
+
             signalManager.manage(player);
 
         } catch (IOException e) {
@@ -76,27 +79,20 @@ public class ClientConnection {
                 try {
                     synchronized (this) {
 
-                        synchronized (connectedPlayers) {
-
-                            connectedPlayers.forEach((uid, player) -> {
-                                if (player.socket.isClosed() || player.socket.isConnected()) {
-                                    connectedPlayers.remove(uid);
-                                } else{
-//                                    friendshipRepository.findByUserId(player.getUid()).stream().map(friendship ->
-//                                        // Get the user with different uid from the friendship (the friend uid, not the player's)
-//                                        friendship.getReceiver().getUid().equals(player.getUid())
-//                                                ? friendship.getSender() : friendship.getReceiver()
-//                                    ).toList().forEach((friend) -> {
-//                                        friend.
-//                                    });
-                                }
-                            });
-
+                        for (var iterator = connectedPlayers.entrySet().iterator(); iterator.hasNext(); ){
+                            var player = iterator.next().getValue();
+                            if (player.socket.isClosed() || !player.socket.isConnected()) {
+                                iterator.remove();
+                                System.out.println("Removed disconnected player: " + player.getUsername());
+                            }
                         }
-                        wait(5000);
+
+                        wait(1000);
                     }
                 } catch (InterruptedException ignored) {}
             }
         }).start();
     }
+
+    public synchronized ConcurrentHashMap<String, Player> getConnectedPlayers(){ return this.connectedPlayers;}
 }

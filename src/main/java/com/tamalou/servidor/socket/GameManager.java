@@ -5,14 +5,15 @@ import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class GameManager {
 
-    private HashMap<String, Game> gameHashMap;
+    private ConcurrentHashMap<String, Game> gameHashMap;
 
     public GameManager() {
-        gameHashMap = new HashMap<>();
+        gameHashMap = new ConcurrentHashMap<>();
     }
 
     public String addGame(Player owner, Game game) {

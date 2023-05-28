@@ -1,43 +1,73 @@
 package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
 
+import com.tamalou.servidor.modelo.entidad.socketEntities.JsonField;
 import com.tamalou.servidor.socket.Signal;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Es la clase encargada de gestionar una partida
  */
 public class Game extends Thread {
-    private Thread gameThread;
+    private Thread disconnectedPlayersThread;
 
     public final int MAX_PLAYERS = 4;
-    private boolean privateGame;
+    private final boolean privateGame;
     private String gameName;
 
-    private int maxRounds;
-    private List<Player> playerList;
+    private final int maxRounds;
+    private final CopyOnWriteArrayList<Player> playerList;
     private int actualRound;
     private boolean gameEnded;
     private Player winner;
 
-    /**
-     * Cuando se crea el objeto crea una partida basado en los parámetros que recibe
-     */
     public Game(boolean isPrivate, String gameName, int maxRounds) {
-        gameThread = new Thread(this);
         this.maxRounds = maxRounds;
         this.actualRound = 0;
         this.gameEnded = false;
         this.privateGame = isPrivate;
         this.gameName = gameName;
-        this.playerList = new ArrayList<>();
+        this.playerList = new CopyOnWriteArrayList<>();
+        this.checkForDisconnectedPlayers();
     }
 
     @Override
     public void run() {
         startGame();
+    }
+
+    public void checkForDisconnectedPlayers(){
+//        disconnectedPlayersThread = new Thread(() -> {
+//            synchronized (this) {
+//                try {
+//                    List<Player> playersToDelete = new LinkedList<>();
+//                    while (!gameEnded) {
+//
+//                        for (Player p : playerList) {
+//                            if (!p.isConnected()) {
+//                                playersToDelete.add(p);
+//                            }
+//                        }
+//
+//                        playersToDelete.forEach((p) -> {
+//                            playerList.remove(p);
+//                            playerList.forEach((player -> {
+//                                player.writter.packAndWrite(Signal.PLAYER_DISCONNECTED,
+//                                        new JsonField("player_uid", p.getUid()),
+//                                        new JsonField("n_of_players", playerList.size()));
+//                            }));
+//                        });
+//                        playersToDelete.clear();
+//                        wait(1_000);
+//                    }
+//                } catch (InterruptedException ignored){} // Game gets deleted
+//            }
+//        });
+//        disconnectedPlayersThread.start();
     }
 
     /**
@@ -72,7 +102,7 @@ public class Game extends Thread {
      * @return the winner of the game
      */
     private Player returnWinner() {
-        Player winner = null;
+        Player winner = playerList.get(0);
         for (int i = 1; i < playerList.size(); i++) {
             Player player = playerList.get(i);
             if (player.getPoints() < winner.getPoints()) {
@@ -110,12 +140,8 @@ public class Game extends Thread {
 
     // GETTERS AND SETTERS
 
-    public List<Player> getPlayersList() {
+    public CopyOnWriteArrayList<Player> getPlayersList() {
         return playerList;
-    }
-
-    public void setPlayersList(List<Player> playersList) {
-        this.playerList = playersList;
     }
 
     public String getGameName() {

@@ -5,6 +5,7 @@ import org.springframework.lang.NonNull;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class PackageReader {
@@ -17,11 +18,13 @@ public class PackageReader {
         this.reader = reader;
     }
 
-    public Package readPackage(){
+    public synchronized Package readPackage(){
         String message = null;
         try {
             message = reader.nextLine();
             return gson.fromJson(message, Package.class);
+        } catch (NoSuchElementException e){
+            return null;
         } catch (Exception e){
             System.out.println("Invalid json package: " + message);
             throw e;
