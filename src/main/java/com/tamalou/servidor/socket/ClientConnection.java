@@ -35,42 +35,44 @@ public class ClientConnection {
     }
 
     public void connectClient(Socket clientSocket) {
-        try {
-            Player player = new Player(clientSocket);
+        new Thread(() -> {
+            try {
+                Player player = new Player(clientSocket);
 
-            Package pack = player.reader.readPackage();
-            System.out.println("Package: " + pack.toString());
-            player.setUid(pack.data.getAsString());
+                Package pack = player.reader.readPackage();
+                System.out.println("Package: " + pack.toString());
+                player.setUid(pack.data.getAsString());
 
-            Player player1 = playerRepository.findById(player.getUid());
-            player.setUsername(player1.getUsername());
-            player.setImage(player1.getImage());
-            player.setPoints(0);
+                Player player1 = playerRepository.findById(player.getUid());
+                player.setUsername(player1.getUsername());
+                player.setImage(player1.getImage());
+                player.setPoints(0);
 
 
-            System.out.println("Player uid: " + player.getUid());
-            int connectionSignal = pack.signal;
-            if (connectionSignal == Signal.CONECTARSE)
-                player.writter.packAndWrite(Signal.CONEXION_EXITOSA);
-            else {
-                clientSocket.close();
-                return;
+                System.out.println("Player uid: " + player.getUid());
+                int connectionSignal = pack.signal;
+                if (connectionSignal == Signal.CONECTARSE)
+                    player.writter.packAndWrite(Signal.CONEXION_EXITOSA);
+                else {
+                    clientSocket.close();
+                    return;
+                }
+
+                System.out.println("SERVER: Player with IP " + player.socket.getInetAddress().getHostName() + " has connected.");
+                getConnectedPlayers().put(player.getUid(), player);
+
+                signalManager.manage(player);
+
+            } catch (IOException e) {
+                System.err.println("SERVER: Input/Output Error");
+                e.printStackTrace();
+            } catch (NoSuchElementException e) {
+                System.out.println("SERVER: Client disconnected.");
+            } catch (Exception e) {
+                System.err.println("SERVER: Error -> " + e);
+                e.printStackTrace();
             }
-
-            System.out.println("SERVER: Player with IP " + player.socket.getInetAddress().getHostName() + " has connected.");
-            getConnectedPlayers().put(player.getUid(), player);
-
-            signalManager.manage(player);
-
-        } catch (IOException e) {
-            System.err.println("SERVER: Input/Output Error");
-            e.printStackTrace();
-        } catch (NoSuchElementException e){
-            System.out.println("SERVER: Client disconnected.");
-        } catch (Exception e) {
-            System.err.println("SERVER: Error -> " + e);
-            e.printStackTrace();
-        }
+        }).start();
     }
 
     public void handleConnectedPlayers(){

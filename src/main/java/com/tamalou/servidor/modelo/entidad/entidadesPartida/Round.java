@@ -13,7 +13,7 @@ public class Round {
     private final Deck deck;
     private final Stack<Card> discardedCardsDeck;
     private boolean endRound;
-    private int actualTurn;
+    private int turnNumber;
 
     private enum PlayOption {
         GRAB_CARD,
@@ -43,7 +43,7 @@ public class Round {
         this.playersList = playersList;
         this.deck = new Deck();
         this.discardedCardsDeck = new Stack<>();
-        this.actualTurn = 0;
+        this.turnNumber = 0;
         this.endRound = false;
     }
 
@@ -94,8 +94,8 @@ public class Round {
                 if (!discardedCardsDeck.isEmpty())
                     showLastCardInDiscardedDeck();
 
-                // If round is above 5, player can stand and end the round.
-                if (actualTurn > 5) {
+                // If turn is above 5, player can stand and end the round.
+                if (turnNumber > 5) {
                     boolean stand = askPlayerToStand(p);
                     if (stand) {
                         endRound = true;
@@ -103,7 +103,7 @@ public class Round {
                         playersList.stream().filter((player -> player != p)).forEach((player ->
                                 player.writter.packAndWrite(Signal.OTHER_PLAYER_STANDS, p.getUid())));
 
-                        p.writter.packAndWrite(Signal.END_ROUND);
+                        p.writter.packAndWrite(Signal.END_ROUND, turnNumber);
                         break;
                     }
                 }
@@ -126,23 +126,12 @@ public class Round {
                 }
 
 
-                // Creating a list with players that contain only uid and points
-                List<Player> tmpPlayersWithScore = new ArrayList<>(this.playersList.size());
+                for (Player player : playersList)
+                    player.writter.packAndWrite(Signal.END_TURN);
 
-                playersList.forEach((player -> {
-                    Player addingPlayer = new Player();
-
-                    addingPlayer.setUid(player.getUid());
-                    addingPlayer.setPoints(player.getPoints());
-
-                    tmpPlayersWithScore.add(addingPlayer);
-                }));
-
-                for (Player player : playersList){
-                    player.writter.packAndWrite(Signal.PLAYERS_POINTS, tmpPlayersWithScore);
-                }
+                sendPointsToAllPlayers();
             }
-            actualTurn++;
+            turnNumber++;
         }
         for(Player p : playersList){
             for (Card card: p.getCards()){
@@ -152,8 +141,26 @@ public class Round {
             }
         }
 
+        sendPointsToAllPlayers();
     }
 
+    private void sendPointsToAllPlayers(){
+        // Creating a list with players that contain only uid and points
+        List<Player> tmpPlayersWithScore = new ArrayList<>(this.playersList.size());
+
+        playersList.forEach((player -> {
+            Player addingPlayer = new Player();
+
+            addingPlayer.setUid(player.getUid());
+            addingPlayer.setPoints(player.getPoints());
+
+            tmpPlayersWithScore.add(addingPlayer);
+        }));
+
+        for (Player player : playersList){
+            player.writter.packAndWrite(Signal.PLAYERS_POINTS, tmpPlayersWithScore);
+        }
+    }
     /**
      * This method send´s all the cards from the discarded deck to the deck.
      * Shuffle´s the deck
