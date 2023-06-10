@@ -1,6 +1,6 @@
 package com.tamalou.servidor.controlador;
 
-import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Game;
+import com.tamalou.servidor.modelo.entidad.entidadesPartida.Game;
 import com.tamalou.servidor.modelo.persistencia.GameRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

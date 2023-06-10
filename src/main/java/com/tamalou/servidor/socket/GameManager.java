@@ -2,6 +2,8 @@ package com.tamalou.servidor.socket;
 
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Game;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
+import com.tamalou.servidor.modelo.persistencia.GameRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.Map;

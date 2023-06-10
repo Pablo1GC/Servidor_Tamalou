@@ -1,13 +1,6 @@
-/**
- * Repository class for managing Game entities in the database.
- *
- * This class is responsible for performing CRUD (Create, Read, Update, Delete)
- * operations on Game entities, such as saving, retrieving, updating, and deleting
- * games in the database.
- */
 package com.tamalou.servidor.modelo.persistencia;
 
-import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Game;
+import com.tamalou.servidor.modelo.entidad.entidadesPartida.Game;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -21,6 +14,21 @@ public class GameRepository {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    // Singleton instance
+    private static final GameRepository INSTANCE = new GameRepository();
+
+    // Private constructor to prevent external instantiation
+    private GameRepository() {}
+
+    /**
+     * Returns the singleton instance of GameRepository.
+     *
+     * @return The singleton instance.
+     */
+    public static GameRepository getInstance() {
+        return INSTANCE;
+    }
 
     /**
      * Saves a Game entity to the database.

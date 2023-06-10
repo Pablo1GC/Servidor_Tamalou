@@ -1,28 +1,49 @@
 package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
 
-import com.tamalou.servidor.modelo.entidad.socketEntities.JsonField;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tamalou.servidor.modelo.persistencia.GameRepository;
 import com.tamalou.servidor.socket.Signal;
+import jakarta.persistence.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Es la clase encargada de gestionar una partida
+ * Represents a finished game entity in the application.
+ * <p>
+ * This class is an entity mapped to the "game" table in the database.
+ * It contains information about a game, such as its unique identifier,
+ * number of rounds, and associated players.
  */
+@Entity
+@Table(name = "game")
 public class Game extends Thread {
-    private Thread disconnectedPlayersThread;
+    //private Thread disconnectedPlayersThread;
 
-    public final int MAX_PLAYERS = 4;
-    private final boolean privateGame;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_game")
+    private long id;
+
+    @Column(name = "name")
     private String gameName;
 
-    private final int maxRounds;
-    private final CopyOnWriteArrayList<Player> playerList;
+    @Column(name = "num_rounds")
+    private int maxRounds;
+
+    @Transient
+    public final int MAX_PLAYERS = 4;
+    @Transient
+    private boolean privateGame;
+    @Transient
+    private CopyOnWriteArrayList<Player> playerList;
+    @Transient
     private int actualRound;
+    @Transient
+    @JsonIgnore
     private boolean gameEnded;
+    @Transient
     private Player winner;
 
     public Game(boolean isPrivate, String gameName, int maxRounds) {
@@ -35,12 +56,17 @@ public class Game extends Thread {
         this.checkForDisconnectedPlayers();
     }
 
+    public Game() {
+
+    }
+
+
     @Override
     public void run() {
         startGame();
     }
 
-    public void checkForDisconnectedPlayers(){
+    public void checkForDisconnectedPlayers() {
 //        disconnectedPlayersThread = new Thread(() -> {
 //            synchronized (this) {
 //                try {
@@ -94,6 +120,9 @@ public class Game extends Thread {
         for (Player p2 : playerList) {
             p2.writter.packAndWrite(Signal.END_GAME, winner.getUid());
         }
+
+        GameRepository.getInstance().save(this);
+
     }
 
     /**
@@ -113,7 +142,6 @@ public class Game extends Thread {
     }
 
     /**
-     *
      * @return true if the game is private
      */
     public boolean isPrivate() {
@@ -139,6 +167,13 @@ public class Game extends Thread {
 
 
     // GETTERS AND SETTERS
+    public long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public CopyOnWriteArrayList<Player> getPlayersList() {
         return playerList;
