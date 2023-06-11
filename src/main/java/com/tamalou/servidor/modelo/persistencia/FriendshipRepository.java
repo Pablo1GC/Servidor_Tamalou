@@ -31,7 +31,7 @@ public class FriendshipRepository {
      * @param friendship The Friendship entity to be saved.
      */
     public void save(Friendship friendship) {
-        entityManager.persist(friendship);
+        entityManager.merge(friendship);
     }
 
     /**
@@ -50,7 +50,7 @@ public class FriendshipRepository {
      * @param userUid the UID of the user who is the receiver of the friendship requests
      * @return a list of Friendship objects representing pending friendship requests
      */
-    public List<Friendship> findPendingFriendshipRequests(String userUid) {
+    public List<Friendship> findPendingFriendshipRequests(Player userUid) {
         String query = "SELECT f FROM Friendship f WHERE f.receiver = :userUid AND f.status = 'PENDING'";
         return entityManager.createQuery(query, Friendship.class)
                 .setParameter("userUid", userUid)

@@ -1,7 +1,9 @@
 package com.tamalou.servidor.socket;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.internal.LinkedTreeMap;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Game;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import com.tamalou.servidor.modelo.entidad.socketEntities.JsonField;
@@ -61,6 +63,7 @@ public class SignalManager {
                         case Signal.SOLICITAR_LISTA_TORNEOS            -> manageGameList(player.writter);
                         case Signal.INVITE_PLAYER                      -> manageInvitePlayer(player.writter, pack.data.getAsJsonObject());
                         case Signal.REQUEST_FRIENDS_STATUS             -> manageRequestFriendsStatus(player);
+                        case Signal.SI                                 -> true; // keep managing if signal from isConnected is received
                         default -> false;
 
                     };
@@ -107,11 +110,14 @@ public class SignalManager {
         System.out.println("Key: " + key);
         System.out.println("Result: " + resultSignal);
 
-        if(resultSignal == Signal.UNION_EXITOSA_TORNEO)
+        if(resultSignal == Signal.UNION_EXITOSA_TORNEO){
+
+            Game game = gameManager.listGames(key);
             player.writter.packAndWrite(Signal.UNION_EXITOSA_TORNEO,
-                    new JsonField("game_name", gameManager.listGames(key).getGameName()),
-                    new JsonField("game_uid", key));
-        else
+                    new JsonField("game_name", game.getGameName()),
+                    new JsonField("game_uid", key),
+                    new JsonField("num_players", game.getPlayersList().size()));
+        } else
             player.writter.packAndWrite(resultSignal);
 
 
@@ -120,13 +126,11 @@ public class SignalManager {
 
 
     private boolean manageCreateGame(Player player, JsonObject match, boolean isPrivate) throws NoSuchElementException {
-
         String gameName = match.get("match_name").getAsString();
         int maxRounds = match.get("match_rounds").getAsInt();
 
-        Game game = new Game(isPrivate, gameName, maxRounds);
+        Game game = new Game(isPrivate, gameName, maxRounds, gameManager, player);
         String key = gameManager.addGame(player, game);
-        gameManager.joinPlayerToGame(player, key);
 
         System.out.println(maxRounds);
 

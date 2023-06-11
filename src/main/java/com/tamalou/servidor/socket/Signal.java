@@ -22,8 +22,8 @@ public class Signal {
 
     // ROUND SIGNALS
     public static final int END_ROUND                 = 131;
-    public static final int END_TURN                  = 7348;
     public static final int SHOW_CARD_GRABBED = 132;
+    public static final int SHOW_CARD_GRABBED_INDEX = 29329;
     public static final int SHOW_LAST_CARD_DISCARDED = 133;
     public static final int ASK_PLAYER_TO_STAND       = 137;
     public static final int PLAYER_STANDS             = 135;
@@ -37,7 +37,6 @@ public class Signal {
     public static final int ASK_PLAYER_SELECT_CARD    = 144;
     public static final int PLAYER_POINTS_PENALTY     = 2320;
     public static final int PLAYER_ONE_CARD_LESS      = 146;
-    public static final int PLAYER_TURN_ENDED         = 147;
     public static final int PLAYER_CARDS_EMPTY        = 148;
     public static final int OTHER_PLAYER_STANDS       = 149;
     public static final int PLAYER_SEES_OWN_CARD      = 150;

@@ -14,12 +14,12 @@ public class GamePlayer {
     @EmbeddedId
     private GamePlayerId id; // Embedded composite primary key for the GamePlayer entity
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("gameId") // Maps the "gameId" field of the composite primary key to the "id_game" column in the database
     @JoinColumn(name = "id_game") // Specifies the foreign key column name in the "game_player" table
     private Game game; // The game associated with the GamePlayer
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("userId") // Maps the "userId" field of the composite primary key to the "id_user" column in the database
     @JoinColumn(name = "id_user") // Specifies the foreign key column name in the "game_player" table
     private Player user; // The user associated with the GamePlayer

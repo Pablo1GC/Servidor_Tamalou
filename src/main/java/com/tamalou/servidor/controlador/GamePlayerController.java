@@ -25,27 +25,17 @@ public class GamePlayerController {
     private GamePlayerRepository gamePlayerRepository;
 
     /**
-
-     HTTP GET method for getting all game players.
-     @return List of GamePlayer objects with a HttpStatus.OK status.
-     */
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GamePlayer>> getAllGamePlayers() {
-        return new ResponseEntity<>(gamePlayerRepository.findAll(), HttpStatus.OK);
-    }
-    /**
-
      HTTP GET method for getting a specific game player by its game ID and user ID.
      @param gameId The ID of the game.
      @param userId The ID of the user.
-     @return GamePlayer object with a HttpStatus.FOUND status if found or a HttpStatus.NOT_FOUND if not found.
+     @return GamePlayer object with a HttpStatus.OK status if found or a HttpStatus.NOT_FOUND if not found.
      */
     @GetMapping(path = "/{gameId}/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GamePlayer> getGamePlayerById(@PathVariable long gameId, @PathVariable String userId) {
         GamePlayerId id = new GamePlayerId(gameId, userId);
         GamePlayer gamePlayer = gamePlayerRepository.findById(id);
         if (gamePlayer != null) {
-            return new ResponseEntity<>(gamePlayer, HttpStatus.FOUND);
+            return new ResponseEntity<>(gamePlayer, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -62,6 +52,7 @@ public class GamePlayerController {
             gamePlayerRepository.save(gamePlayer);
             return new ResponseEntity<>(gamePlayer, HttpStatus.CREATED);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }

@@ -2,9 +2,9 @@ package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
 
 import com.tamalou.servidor.modelo.entidad.socketEntities.JsonField;
+import com.tamalou.servidor.socket.GameManager;
 import com.tamalou.servidor.socket.Signal;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -14,6 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class Game extends Thread {
     private Thread disconnectedPlayersThread;
+    private Thread gameThread;
 
     public final int MAX_PLAYERS = 4;
     private final boolean privateGame;
@@ -24,59 +25,82 @@ public class Game extends Thread {
     private int actualRound;
     private boolean gameEnded;
     private Player winner;
+    private GameManager gameManager;
+    private String key;
+    private Player owner;
 
-    public Game(boolean isPrivate, String gameName, int maxRounds) {
+    public Game(boolean isPrivate, String gameName, int maxRounds, GameManager gameManager, Player owner) {
         this.maxRounds = maxRounds;
         this.actualRound = 0;
         this.gameEnded = false;
         this.privateGame = isPrivate;
         this.gameName = gameName;
         this.playerList = new CopyOnWriteArrayList<>();
-        this.checkForDisconnectedPlayers();
+        this.gameManager = gameManager;
+        this.owner = owner;
+        this.playerList.add(owner);
+        //this.checkForDisconnectedPlayers();
     }
 
     @Override
     public void run() {
-        startGame();
+        try{
+            this.gameThread = Thread.currentThread();
+            startGame();
+        } catch (InterruptedException e){
+            gameManager.removeGame(this.key);
+        }
     }
 
-    public void checkForDisconnectedPlayers(){
-//        disconnectedPlayersThread = new Thread(() -> {
-//            synchronized (this) {
-//                try {
-//                    List<Player> playersToDelete = new LinkedList<>();
-//                    while (!gameEnded) {
-//
-//                        for (Player p : playerList) {
-//                            if (!p.isConnected()) {
-//                                playersToDelete.add(p);
-//                            }
-//                        }
-//
-//                        playersToDelete.forEach((p) -> {
-//                            playerList.remove(p);
-//                            playerList.forEach((player -> {
-//                                player.writter.packAndWrite(Signal.PLAYER_DISCONNECTED,
-//                                        new JsonField("player_uid", p.getUid()),
-//                                        new JsonField("n_of_players", playerList.size()));
-//                            }));
-//                        });
-//                        playersToDelete.clear();
-//                        wait(1_000);
-//                    }
-//                } catch (InterruptedException ignored){} // Game gets deleted
-//            }
-//        });
-//        disconnectedPlayersThread.start();
+    public void checkForDisconnectedPlayers() {
+        disconnectedPlayersThread = new Thread(() -> {
+            synchronized (this) {
+                List<Player> playersToDelete = new LinkedList<>();
+
+                try {
+                    if (this.playerList.size() == 0){
+                        this.gameEnded = true;
+                        gameThread.interrupt();
+
+                    }
+
+                    while (!gameEnded) {
+
+                        for (Player p : playerList) {
+
+                            if (!p.isConnected()) {
+                                playersToDelete.add(p);
+                            }
+                        }
+
+                        playersToDelete.forEach((p) -> {
+                            playerList.remove(p);
+                            playerList.forEach((player -> {
+                                player.writter.packAndWrite(Signal.PLAYER_DISCONNECTED,
+                                        new JsonField("player_uid", p.getUid()),
+                                        new JsonField("n_of_players", playerList.size()));
+                            }));
+                            gameManager.getSignalManager().manage(p);
+                        });
+                        playersToDelete.clear();
+                        wait(1_000);
+                    }
+                } catch (InterruptedException ignored){} // Game gets deleted
+
+            }
+        });
+        disconnectedPlayersThread.start();
     }
 
     /**
      * This method starts the game.
      * First, sends a signal to every player (Client).
      */
-    public void startGame() {
+    public void startGame() throws InterruptedException{
+
         for (Player p : playerList) {
             p.writter.packAndWrite(Signal.START_GAME, playerList);
+            p.setPoints(0);
         }
 
         while (!gameEnded) {
@@ -89,7 +113,7 @@ public class Game extends Thread {
             }
         }
 
-        winner = returnWinner();
+        winner = determineWinner();
         System.out.println("¡Game has ended! The winner is: " + winner.getUid());
         for (Player p2 : playerList) {
             p2.writter.packAndWrite(Signal.END_GAME, winner.getUid());
@@ -101,7 +125,7 @@ public class Game extends Thread {
      *
      * @return the winner of the game
      */
-    private Player returnWinner() {
+    private Player determineWinner() {
         Player winner = playerList.get(0);
         for (int i = 1; i < playerList.size(); i++) {
             Player player = playerList.get(i);
@@ -150,5 +174,13 @@ public class Game extends Thread {
 
     public void setGameName(String gameName) {
         this.gameName = gameName;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 }

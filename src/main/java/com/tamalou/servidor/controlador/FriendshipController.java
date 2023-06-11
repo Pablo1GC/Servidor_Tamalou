@@ -1,8 +1,15 @@
 package com.tamalou.servidor.controlador;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
+import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Friendship;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.FriendshipId;
+import com.tamalou.servidor.modelo.entidad.entidadesUsuario.FriendshipStatus;
+import com.tamalou.servidor.modelo.entidad.socketEntities.JsonField;
 import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
+import com.tamalou.servidor.modelo.persistencia.PlayerRepository;
 import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,15 +28,16 @@ public class FriendshipController {
 
     @Autowired
     private final FriendshipRepository friendshipRepository;
+    private final PlayerRepository playerRepository;
 
     /**
      * Constructor for the FriendshipController class.
      *
      * @param friendshipRepository The FriendshipRepository instance to use for data access.
      */
-    @Autowired
-    public FriendshipController(FriendshipRepository friendshipRepository) {
+    public FriendshipController(FriendshipRepository friendshipRepository, PlayerRepository playerRepository) {
         this.friendshipRepository = friendshipRepository;
+        this.playerRepository = playerRepository;
     }
 
     /**
@@ -71,29 +79,42 @@ public class FriendshipController {
      * @return A ResponseEntity with a list of Friendship objects representing pending friendship requests if successful,
      * or an empty list with HttpStatus.OK if no pending requests are found.
      */
-    @GetMapping(path = {"/{friendshipId}/friend-requests"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = {"/{userUid}/friend-requests"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Friendship>> getPendingFriendshipRequests(@PathVariable String userUid) {
+        Player player = playerRepository.findById(userUid);
+        List<Friendship> pendingFriendships = friendshipRepository.findPendingFriendshipRequests(player);
 
-        List<Friendship> pendingFriendships = friendshipRepository.findPendingFriendshipRequests(userUid);
-        if (pendingFriendships.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        }else {
-            return new ResponseEntity<>(pendingFriendships, HttpStatus.OK);
-        }
+        return new ResponseEntity<>(pendingFriendships, HttpStatus.OK);
+
     }
 
     /**
      * HTTP POST method for creating a new Friendship.
      *
-     * @param friendship The Friendship object to create.
-     * @return A ResponseEntity with HttpStatus.CREATED if successful, or HttpStatus.BAD_REQUEST if unsuccessful.
+     * @param senderID The sender id
+     * @param receiverID The Receiver id
+     * * @return A ResponseEntity with HttpStatus.CREATED if successful, or HttpStatus.BAD_REQUEST if unsuccessful.
      */
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Friendship> createFriendship(@RequestBody Friendship friendship) {
+    @PostMapping()
+    public ResponseEntity<Friendship> createFriendship(@RequestParam(value = "senderId") String senderID,
+                                                       @RequestParam(value = "receiverId") String receiverID) {
+        Player sender = playerRepository.findById(senderID);
+        Player receiver = playerRepository.findById(receiverID);
+
+        Friendship friendship = new Friendship();
+        FriendshipId friendshipId = new FriendshipId();
+        friendshipId.setReceiverId(receiverID);
+        friendshipId.setSenderId(senderID);
+        friendship.setId(friendshipId);
+        friendship.setSender(sender);
+        friendship.setReceiver(receiver);
+        friendship.setStatus(FriendshipStatus.PENDING);
+
         try {
             friendshipRepository.save(friendship);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -101,20 +122,24 @@ public class FriendshipController {
     /**
      * HTTP PUT method for updating an existing Friendship.
      *
-     * @param friendshipId The FriendshipId of the Friendship to update.
-     * @param friendship   The updated Friendship object.
+     * @param senderID The FriendshipId of the Friendship to update.
+     * @param receiverID   The updated Friendship object.
      * @return A ResponseEntity with HttpStatus.ACCEPTED if successful, or HttpStatus.NOT_FOUND if the Friendship to update was not found.
      */
-    @PutMapping(path = "/{friendshipId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> updateFriendship(@PathVariable FriendshipId friendshipId, @RequestBody Friendship friendship) {
-        Friendship existingFriendship = friendshipRepository.findById(friendshipId);
-        if (existingFriendship != null) {
-            friendship.setId(friendshipId);
-            friendshipRepository.update(friendship);
-            return new ResponseEntity<>(HttpStatus.ACCEPTED);
-        } else {
+    @PutMapping()
+    public ResponseEntity<Void> updateFriendship(@RequestParam(value = "senderId") String senderID,
+                                                 @RequestParam(value = "receiverId") String receiverID,
+                                                 @RequestBody() String decision) {
+        Friendship friendship = friendshipRepository.findByUsersId(senderID, receiverID);
+
+        if (friendship == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Gson gson = new Gson();
+
+        friendship.setStatus(FriendshipStatus.valueOf(gson.fromJson(decision, JsonObject.class).get("decision").getAsString()));
+        friendshipRepository.update(friendship);
+
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
 

@@ -1,6 +1,7 @@
 package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
 import com.tamalou.servidor.modelo.entidad.socketEntities.JsonField;
+import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
 import com.tamalou.servidor.socket.Signal;
 
 import java.util.ArrayList;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.Stack;
 
 public class Round {
-    private Thread roundThread;
     private final List<Player> playersList;
     private final Deck deck;
     private final Stack<Card> discardedCardsDeck;
@@ -119,23 +119,15 @@ public class Round {
                         p2.writter.packAndWrite(Signal.PLAYER_CARDS_EMPTY, p.getUid());
                         p2.writter.packAndWrite(Signal.END_ROUND);
                     }
-                } else {
-                    for (Player p2 : playersList) {
-                        p2.writter.packAndWrite(Signal.PLAYER_TURN_ENDED, p.getUid());
-                    }
                 }
-
-
-                for (Player player : playersList)
-                    player.writter.packAndWrite(Signal.END_TURN);
 
                 sendPointsToAllPlayers();
             }
             turnNumber++;
         }
         for(Player p : playersList){
+            int points = 0;
             for (Card card: p.getCards()){
-                int points = 0;
                 points += card.getValue();
                 p.setPoints(points + p.getPoints());
             }
@@ -196,9 +188,9 @@ public class Round {
             player.writter.packAndWrite(Signal.DISCARDED_DECK_IS_EMPTY);
 
         } else {
-            player.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_PLAY);
+            Package pack = player.sendPackageAndWaitForResponse(new Package(Signal.ASK_PLAYER_SELECT_PLAY));
 
-            option = PlayOption.values()[player.reader.readPackage().data.getAsInt()];
+            option = PlayOption.values()[pack.data.getAsInt()];
         }
         switch (option) {
             case GRAB_CARD -> {
@@ -208,9 +200,9 @@ public class Round {
 
                 System.out.println(card.toString());
 
-                player.writter.packAndWrite(Signal.ASK_PLAYER_CARD_OPTION, card);
+                Package pack = player.sendPackageAndWaitForResponse(new Package(Signal.ASK_PLAYER_CARD_OPTION, card));
 
-                PlayOption optionForSelectedCard = PlayOption.values()[player.reader.readPackage().data.getAsInt()];
+                PlayOption optionForSelectedCard = PlayOption.values()[pack.data.getAsInt()];
                 // Execute optionForSelectedCard
 
                 switch (optionForSelectedCard){
@@ -251,9 +243,9 @@ public class Round {
                             seeOpponentCard(player, opponent, opponentIndexCard);
 
                             // Ask player if he wants to switch the cards
-                            player.writter.packAndWrite(Signal.ASK_PLAYER_SWITCH_CARD);
+                            pack = player.sendPackageAndWaitForResponse(new Package(Signal.ASK_PLAYER_SWITCH_CARD));
 
-                            if (player.reader.readPackage().data.getAsBoolean()) {
+                            if (pack.data.getAsBoolean()) {
                                 switchCardWithOpponent(player, opponent, ownIndexCard, opponentIndexCard);
                                 playersList.stream().filter(p -> p != player).forEach(p -> {
                                     p.writter.packAndWrite(Signal.PLAYERS_SWITCHED_CARDS,
@@ -282,8 +274,8 @@ public class Round {
      * @return Returns the index of the card selected by the player
      */
     private int playerSelectCardOponent(Player player, Player opponent) {
-        player.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_OPONENT_CARD, opponent.getUid());
-        int indexSelected = player.reader.readPackage().data.getAsInt();
+        Package pack = player.sendPackageAndWaitForResponse(new Package(Signal.ASK_PLAYER_SELECT_OPONENT_CARD, opponent.getUid()));
+        int indexSelected = pack.data.getAsInt();
         return indexSelected;
     }
 
@@ -294,8 +286,8 @@ public class Round {
      * @return Returns the index of the card selected by the player
      */
     public int playerSelectCard(Player player) {
-        player.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
-        int indexSelected = player.reader.readPackage().data.getAsInt();
+        Package pack = player.sendPackageAndWaitForResponse(new Package(Signal.ASK_PLAYER_SELECT_CARD));
+        int indexSelected = pack.data.getAsInt();
         return indexSelected;
     }
 
@@ -307,8 +299,8 @@ public class Round {
      * @return The player chosen as an opponent
      */
     public Player selectOpponent(Player player) {
-        player.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_OPONENT);
-        String uidOponent = player.reader.readPackage().data.getAsString();
+        Package pack = player.sendPackageAndWaitForResponse(new Package(Signal.ASK_PLAYER_SELECT_OPONENT));
+        String uidOponent = pack.data.getAsString();
         Player opponent = playersList.stream().filter(p -> p.getUid().equals(uidOponent)).toList().get(0);
         return opponent;
     }
@@ -322,8 +314,8 @@ public class Round {
      * @param player The player who will discard the card
      */
     public void discardPlayerCard(Player player) {
-        player.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
-        int index = player.reader.readPackage().data.getAsInt();
+        Package pack = player.sendPackageAndWaitForResponse(new Package(Signal.ASK_PLAYER_SELECT_CARD));
+        int index = pack.data.getAsInt();
         Card card = player.getCards().get(index);
         if (card.getValue() == discardedCardsDeck.lastElement().getValue()) {
             player.getCards().remove(card);
@@ -334,7 +326,7 @@ public class Round {
                         new JsonField("card", card));
             }
         } else {
-            playersList.forEach(p -> p.writter.packAndWrite(Signal.SHOW_CARD_GRABBED,
+            playersList.forEach(p -> p.writter.packAndWrite(Signal.SHOW_CARD_GRABBED_INDEX,
                     new JsonField("card_index", index),
                     new JsonField("card", card)));
 
@@ -354,10 +346,10 @@ public class Round {
      * @return Returns true if the option is "Yes", false if is "No"
      */
     public boolean askPlayerToStand(Player player) {
-        player.writter.packAndWrite(Signal.ASK_PLAYER_TO_STAND);
         System.out.println("Do you want to stand? [Yes/No]");
 
-        return player.reader.readPackage().data.getAsBoolean();
+        Package pack = player.sendPackageAndWaitForResponse(new Package(Signal.ASK_PLAYER_TO_STAND));
+        return pack.data.getAsBoolean();
     }
 
     /**
@@ -366,11 +358,12 @@ public class Round {
      * @param player                  who is playing the turn
      * @param opponent           is the player with whom you want to exchange the cards
      * @param ownIndexCard       is the index of the card that will be exchanged with the opponent passed by parameter
-     * @param exchangedIndexCard is the index of the opponent's card that the player will receive
+     * @param opponentIndexCard is the index of the opponent's card that the player will receive
      */
-    public void switchCardWithOpponent(Player player, Player opponent, int ownIndexCard, int exchangedIndexCard) {
-        player.getCards().set(ownIndexCard, opponent.getCards().get(exchangedIndexCard));
-        opponent.getCards().set(exchangedIndexCard, player.getCards().get(ownIndexCard));
+    public void switchCardWithOpponent(Player player, Player opponent, int ownIndexCard, int opponentIndexCard) {
+        Card card = player.getCards().get(ownIndexCard);
+        player.getCards().set(ownIndexCard, opponent.getCards().get(opponentIndexCard));
+        opponent.getCards().set(opponentIndexCard, card);
 
     }
 
@@ -421,8 +414,8 @@ public class Round {
      * @param card is the card that the player wants to swap
      */
     public void swapCardsAndMovePlayersCardToDiscardedDeck(Player player, Card card) {
-        player.writter.packAndWrite(Signal.ASK_PLAYER_SELECT_CARD);
-        int cardIndex = player.reader.readPackage().data.getAsInt();
+        Package pack = player.sendPackageAndWaitForResponse(new Package(Signal.ASK_PLAYER_SELECT_CARD));
+        int cardIndex = pack.data.getAsInt();
         Card myCard = player.getCards().get(cardIndex);
         player.getCards().set(cardIndex, card);
 

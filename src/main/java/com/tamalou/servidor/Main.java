@@ -30,10 +30,11 @@ public class Main {
         FriendshipRepository friendshipRepository = context.getBean("friendshipRepository", FriendshipRepository.class);
         GameManager gameManager = new GameManager();
         SignalManager signalManager = new SignalManager(gameManager, friendshipRepository, playerRepository);
+        gameManager.setSignalManager(signalManager);
         ClientConnection clientConnection = new ClientConnection(gameManager, signalManager, playerRepository);
         Socket socketAlCliente = null;
         InetSocketAddress direccion = new InetSocketAddress(PUERTO);
-        clientConnection.handleConnectedPlayers();
+        //clientConnection.handleConnectedPlayers();
         signalManager.setClientConnection(clientConnection);
         try (ServerSocket serverSocket = new ServerSocket()){
             serverSocket.bind(direccion);

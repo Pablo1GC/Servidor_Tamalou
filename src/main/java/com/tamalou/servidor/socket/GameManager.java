@@ -12,6 +12,8 @@ public class GameManager {
 
     private ConcurrentHashMap<String, Game> gameHashMap;
 
+    private SignalManager signalManager;
+
     public GameManager() {
         gameHashMap = new ConcurrentHashMap<>();
     }
@@ -23,11 +25,16 @@ public class GameManager {
             gameKey = randomString(10);
             if (gameHashMap.get(gameKey) == null) {
                 gameHashMap.put(gameKey, game);
+                game.setKey(gameKey);
                 System.out.println("Tournament created, key: " + gameKey);
                 incorrect = false;
             }
         } while (incorrect);
         return gameKey;
+    }
+
+    public void removeGame(String key){
+        this.gameHashMap.remove(key);
     }
 
     public Game listGames(String gameKey) {
@@ -90,5 +97,6 @@ public class GameManager {
         return ThreadLocalRandom.current().nextInt(min, max + 1);
     }
 
-
+    public void setSignalManager(SignalManager signalManager){ this.signalManager = signalManager;}
+    public SignalManager getSignalManager(){ return signalManager;}
 }

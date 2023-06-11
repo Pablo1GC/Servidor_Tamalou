@@ -5,6 +5,7 @@ import org.springframework.lang.NonNull;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.SocketTimeoutException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 

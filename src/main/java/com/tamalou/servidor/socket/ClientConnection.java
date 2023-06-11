@@ -78,20 +78,16 @@ public class ClientConnection {
     public void handleConnectedPlayers(){
         new Thread(() -> {
             while (true) {
-                try {
-                    synchronized (this) {
+                synchronized (this) {
 
-                        for (var iterator = connectedPlayers.entrySet().iterator(); iterator.hasNext(); ){
-                            var player = iterator.next().getValue();
-                            if (player.socket.isClosed() || !player.socket.isConnected()) {
-                                iterator.remove();
-                                System.out.println("Removed disconnected player: " + player.getUsername());
-                            }
+                    for (var iterator = connectedPlayers.entrySet().iterator(); iterator.hasNext(); ){
+                        var player = iterator.next().getValue();
+                        if (!player.isConnected()) {
+                            iterator.remove();
+                            System.out.println("Removed disconnected player: " + player.getUsername());
                         }
-
-                        wait(1000);
                     }
-                } catch (InterruptedException ignored) {}
+                }
             }
         }).start();
     }

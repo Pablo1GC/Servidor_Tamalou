@@ -23,7 +23,7 @@ public class GamePlayerRepository {
      * @param gamePlayer The GamePlayer entity to be saved.
      */
     public void save(GamePlayer gamePlayer) {
-        entityManager.persist(gamePlayer);
+        entityManager.merge(gamePlayer);
     }
 
     /**
