@@ -39,13 +39,13 @@ public class Game extends Thread {
         this.gameManager = gameManager;
         this.owner = owner;
         this.playerList.add(owner);
-        //this.checkForDisconnectedPlayers();
+        this.checkForDisconnectedPlayers();
     }
 
     @Override
     public void run() {
         try{
-            this.gameThread = Thread.currentThread();
+            disconnectedPlayersThread.interrupt();
             startGame();
         } catch (InterruptedException e){
             gameManager.removeGame(this.key);
@@ -115,9 +115,13 @@ public class Game extends Thread {
 
         winner = determineWinner();
         System.out.println("¡Game has ended! The winner is: " + winner.getUid());
-        for (Player p2 : playerList) {
-            p2.writter.packAndWrite(Signal.END_GAME, winner.getUid());
+        for (Player p : playerList) {
+            p.writter.packAndWrite(Signal.END_GAME, winner.getUid());
+            gameManager.getSignalManager().manage(p);
         }
+
+
+        playerList.clear();
     }
 
     /**

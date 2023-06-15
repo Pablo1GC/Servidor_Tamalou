@@ -146,12 +146,15 @@ public class FriendshipController {
     /**
      * HTTP DELETE method for deleting a Friendship by ID.
      *
-     * @param friendshipId The FriendshipId of the Friendship to delete.
+     * @param uid1 The uid of the first player.
+     * @param uid2 The uid of the second player.
      * @return A ResponseEntity containing the deleted Friendship object if successful, or HttpStatus.CONFLICT if the Friendship to delete was not found.
      */
-    @DeleteMapping(path = "/{friendshipId}")
-    public ResponseEntity<Friendship> deleteFriendship(@PathVariable FriendshipId friendshipId) {
-        Friendship friendship = friendshipRepository.findById(friendshipId);
+    @DeleteMapping()
+    public ResponseEntity<Friendship> deleteFriendship(@RequestParam(value = "uid1") String uid1,
+                                                       @RequestParam(value = "uid2") String uid2) {
+        System.out.println("SI");
+        Friendship friendship = friendshipRepository.findByUsersId(uid1, uid2);
         if (friendship != null) {
             friendshipRepository.delete(friendship);
             return new ResponseEntity<>(friendship, HttpStatus.ACCEPTED);

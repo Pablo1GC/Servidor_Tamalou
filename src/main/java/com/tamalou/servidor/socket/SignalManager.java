@@ -11,6 +11,7 @@ import com.tamalou.servidor.modelo.entidad.socketEntities.Match;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
 import com.tamalou.servidor.modelo.entidad.socketEntities.PackageWriter;
 import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
+import com.tamalou.servidor.modelo.persistencia.GameRepository;
 import com.tamalou.servidor.modelo.persistencia.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -32,14 +33,16 @@ public class SignalManager {
 
     private FriendshipRepository friendshipRepository;
     private PlayerRepository playerRepository;
+    private GameRepository gameRepository;
 
     private ClientConnection clientConnection;
 
-    public SignalManager(GameManager manager, FriendshipRepository friendshipRepository, PlayerRepository playerRepository) {
+    public SignalManager(GameManager manager, FriendshipRepository friendshipRepository, PlayerRepository playerRepository, GameRepository gameRepository) {
         this.gameManager = manager;
         this.gson = new Gson();
         this.friendshipRepository = friendshipRepository;
         this.playerRepository = playerRepository;
+        this.gameRepository = gameRepository;
     }
 
 
@@ -179,4 +182,6 @@ public class SignalManager {
     }
 
     public void setClientConnection(ClientConnection clientConnection){this.clientConnection = clientConnection;}
+
+    public GameRepository getGameRepository() {return gameRepository;}
 }

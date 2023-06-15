@@ -2,6 +2,7 @@ package com.tamalou.servidor.controlador;
 
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.Friendship;
+import com.tamalou.servidor.modelo.entidad.entidadesUsuario.FriendshipStatus;
 import com.tamalou.servidor.modelo.entidad.entidadesUsuario.PlayerGameInfo;
 import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
 import com.tamalou.servidor.modelo.persistencia.PlayerRepository;
@@ -122,15 +123,19 @@ public class UserController {
      */
     @GetMapping(value = "/{uid}/friends", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Player>> getFriendsByUserId(@PathVariable String uid) {
-        List<Friendship> friendships = friendshipRepository.findBySenderUid(uid);
+        List<Friendship> friendships = friendshipRepository.findByUserUid(uid);
         List<Player> friends = new ArrayList<>();
         for (Friendship friendship : friendships) {
+            if (!friendship.getStatus().equals(FriendshipStatus.ACCEPTED))
+                continue;
+
             Player friend = friendship.getReceiver();
             if (friend.getUid().equals(uid)) {
                 friend = friendship.getSender();
             }
             friends.add(friend);
         }
+        System.out.println(friends.size());
         return new ResponseEntity<>(friends, HttpStatus.OK);
     }
 
