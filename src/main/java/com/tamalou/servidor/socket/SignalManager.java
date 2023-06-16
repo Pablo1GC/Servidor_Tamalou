@@ -1,9 +1,7 @@
 package com.tamalou.servidor.socket;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.internal.LinkedTreeMap;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Game;
 import com.tamalou.servidor.modelo.entidad.entidadesPartida.Player;
 import com.tamalou.servidor.modelo.entidad.socketEntities.JsonField;
@@ -13,7 +11,6 @@ import com.tamalou.servidor.modelo.entidad.socketEntities.PackageWriter;
 import com.tamalou.servidor.modelo.persistencia.FriendshipRepository;
 import com.tamalou.servidor.modelo.persistencia.GameRepository;
 import com.tamalou.servidor.modelo.persistencia.PlayerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +34,7 @@ public class SignalManager {
 
     private ClientConnection clientConnection;
 
+
     public SignalManager(GameManager manager, FriendshipRepository friendshipRepository, PlayerRepository playerRepository, GameRepository gameRepository) {
         this.gameManager = manager;
         this.gson = new Gson();
@@ -59,14 +57,14 @@ public class SignalManager {
 
 
                     continueManage = switch (signal) {
-                        case Signal.CREAR_TORNEO_PUBLICO               -> manageCreateGame(player, pack.data.getAsJsonObject(), false);
-                        case Signal.CREAR_TORNEO_PRIVADO               -> manageCreateGame(player, pack.data.getAsJsonObject(), true);
-                        case Signal.UNIRSE_TORNEO_PUBLICO,
-                                Signal.UNIRSE_TORNEO_PRIVADO -> manageJoinGame(player, pack.data.getAsJsonObject());
-                        case Signal.SOLICITAR_LISTA_TORNEOS            -> manageGameList(player.writter);
+                        case Signal.CREATE_PUBLIC_GAME                 -> manageCreateGame(player, pack.data.getAsJsonObject(), false);
+                        case Signal.CREATE_PRIVATE_GAME                -> manageCreateGame(player, pack.data.getAsJsonObject(), true);
+                        case Signal.JOIN_PUBLIC_GAME,
+                                Signal.JOIN_PRIVATE_GAME               -> manageJoinGame(player, pack.data.getAsJsonObject());
+                        case Signal.REQUEST_PUBLIC_GAME_LIST           -> manageGameList(player.writter);
                         case Signal.INVITE_PLAYER                      -> manageInvitePlayer(player.writter, pack.data.getAsJsonObject());
                         case Signal.REQUEST_FRIENDS_STATUS             -> manageRequestFriendsStatus(player);
-                        case Signal.SI                                 -> true; // keep managing if signal from isConnected is received
+                        case Signal.YES -> true; // keep managing if signal from isConnected is received
                         default -> false;
 
                     };

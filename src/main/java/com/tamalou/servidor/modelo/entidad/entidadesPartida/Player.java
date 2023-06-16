@@ -1,9 +1,7 @@
 package com.tamalou.servidor.modelo.entidad.entidadesPartida;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.gson.annotations.JsonAdapter;
-import com.tamalou.servidor.modelo.entidad.entidadesExtra.Utilidades;
 import com.tamalou.servidor.modelo.entidad.socketEntities.Package;
 import com.tamalou.servidor.modelo.entidad.socketEntities.PackageReader;
 import com.tamalou.servidor.modelo.entidad.socketEntities.PackageWriter;
@@ -12,10 +10,8 @@ import com.tamalou.servidor.socket.Signal;
 import jakarta.persistence.*;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -158,9 +154,9 @@ public class Player {
 
             this.socket.setSoTimeout(previousTimeout);
 
-            if (pack.signal != Signal.SI)
+            if (pack.signal != Signal.YES)
                 System.out.println();
-            return isConnected = pack.signal == Signal.SI;
+            return isConnected = pack.signal == Signal.YES;
         } catch (SocketException e){
             throw new RuntimeException(e);
         }

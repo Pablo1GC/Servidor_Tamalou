@@ -2,7 +2,7 @@ package com.tamalou.servidor.socket;
 
 public class Signal {
 
-    public static final int SI = 1;
+    public static final int YES = 1;
     public static final int NO = 0;
 
     public static final int CONECTARSE = 299328;
@@ -40,7 +40,7 @@ public class Signal {
     public static final int PLAYER_CARDS_EMPTY        = 148;
     public static final int OTHER_PLAYER_STANDS       = 149;
     public static final int PLAYER_SEES_OWN_CARD      = 150;
-    public static final int PLAYER_SEES_OPONENT_CARD      = 150;
+    public static final int PLAYER_SEES_OPONENT_CARD      = 1502;
     public static final int ASK_PLAYER_SELECT_OPONENT_CARD      = 151;
     public static final int PLAYERS_SWITCHED_CARDS = 192391;
     public static final int OTHER_PLAYER_SEES_OPONENT_CARD = 2321;
@@ -92,11 +92,11 @@ public class Signal {
 
     // Señales que puede enviar el cliente
 
-    public static final int CREAR_TORNEO_PUBLICO            = 10001;
-    public static final int CREAR_TORNEO_PRIVADO            = 10002;
-    public static final int UNIRSE_TORNEO_PUBLICO           = 10003;
-    public static final int UNIRSE_TORNEO_PRIVADO           = 10004;
-    public static final int SOLICITAR_LISTA_TORNEOS         = 10005;
+    public static final int CREATE_PUBLIC_GAME = 10001;
+    public static final int CREATE_PRIVATE_GAME = 10002;
+    public static final int JOIN_PUBLIC_GAME = 10003;
+    public static final int JOIN_PRIVATE_GAME = 10004;
+    public static final int REQUEST_PUBLIC_GAME_LIST = 10005;
     public static final int LEAVE_GAME                      = 8071995;
     public static final int INVITE_PLAYER                   = 2020;
 

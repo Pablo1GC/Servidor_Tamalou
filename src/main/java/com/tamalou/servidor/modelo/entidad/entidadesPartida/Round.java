@@ -15,6 +15,8 @@ public class Round {
     private boolean endRound;
     private int turnNumber;
 
+    private final int roundNumber;
+
     private enum PlayOption {
         GRAB_CARD,
         DISCARD_CARD,
@@ -39,12 +41,13 @@ public class Round {
      *
      * @param playersList List of playerList in the round
      */
-    public Round(List<Player> playersList) {
+    public Round(List<Player> playersList, int roundNumber) {
         this.playersList = playersList;
         this.deck = new Deck();
         this.discardedCardsDeck = new Stack<>();
         this.turnNumber = 0;
         this.endRound = false;
+        this.roundNumber = roundNumber;
     }
 
     /**

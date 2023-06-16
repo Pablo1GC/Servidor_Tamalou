@@ -22,7 +22,7 @@ public class Game extends Thread {
 
     private final int maxRounds;
     private final CopyOnWriteArrayList<Player> playerList;
-    private int actualRound;
+    private int roundNumber;
     private boolean gameEnded;
     private Player winner;
     private GameManager gameManager;
@@ -31,7 +31,7 @@ public class Game extends Thread {
 
     public Game(boolean isPrivate, String gameName, int maxRounds, GameManager gameManager, Player owner) {
         this.maxRounds = maxRounds;
-        this.actualRound = 0;
+        this.roundNumber = 1;
         this.gameEnded = false;
         this.privateGame = isPrivate;
         this.gameName = gameName;
@@ -39,17 +39,16 @@ public class Game extends Thread {
         this.gameManager = gameManager;
         this.owner = owner;
         this.playerList.add(owner);
+        gameThread = Thread.currentThread();
         this.checkForDisconnectedPlayers();
     }
 
     @Override
     public void run() {
-        try{
-            disconnectedPlayersThread.interrupt();
-            startGame();
-        } catch (InterruptedException e){
-            gameManager.removeGame(this.key);
-        }
+        gameManager.removeGame(this.key);
+        gameThread = Thread.currentThread();
+        startGame();
+        disconnectedPlayersThread.interrupt();
     }
 
     public void checkForDisconnectedPlayers() {
@@ -58,13 +57,12 @@ public class Game extends Thread {
                 List<Player> playersToDelete = new LinkedList<>();
 
                 try {
-                    if (this.playerList.size() == 0){
-                        this.gameEnded = true;
-                        gameThread.interrupt();
-
-                    }
-
                     while (!gameEnded) {
+                        if (this.playerList.size() == 0){
+                            this.gameEnded = true;
+                            gameManager.removeGame(this.key);
+                            Thread.currentThread().interrupt();
+                        }
 
                         for (Player p : playerList) {
 
@@ -96,7 +94,7 @@ public class Game extends Thread {
      * This method starts the game.
      * First, sends a signal to every player (Client).
      */
-    public void startGame() throws InterruptedException{
+    public void startGame() {
 
         for (Player p : playerList) {
             p.writter.packAndWrite(Signal.START_GAME, playerList);
@@ -104,11 +102,11 @@ public class Game extends Thread {
         }
 
         while (!gameEnded) {
-            Round round = new Round(playerList);
+            Round round = new Round(playerList, roundNumber);
             round.playRound();
-            actualRound++;
+            roundNumber++;
 
-            if (actualRound >= maxRounds) {
+            if (roundNumber >= maxRounds) {
                 gameEnded = true;
             }
         }
